@@ -62,8 +62,6 @@
       </div>
     </div>
     <div class="map-container" :class="{'map-container--visible': cytoscapeLoaded}">
-<!--      <div class="map-container__prompt map-container__prompt&#45;&#45;origin" v-show="!selectedA && !selectedB">Select origin</div>-->
-<!--      <div class="map-container__prompt map-container__prompt&#45;&#45;destination" v-show="selectedA && !selectedB">Select destination</div>-->
       <div id="map" class="map" :class="{'path-selected' : pathSelected}"></div>
     </div>
   </div>
@@ -150,72 +148,80 @@ export default {
     },
     createFixedNodeConstraints: function () {
       const col = n => n * this.colDelta
-      const planetX = col(1)
-      const incPlanetY = this.incPlanetYDelta
-      const lOrbitX = col(2)
-      const captureX = col(3)
-      const transferX = col(6)
-      const moonTransferX = col(4)
+      const planetXL = col(-3)
+      const planetXR = col(3)
+      const incY = this.incPlanetYDelta
+      const lOrbitXL = col(-2)
+      const lOrbitXR = col(2)
+      const captureXL = col(-1)
+      const captureXR = col(1)
+      const transferX = col(0)
 
       const constraints = [] // position constrains
       const c = (nodeId, x, y) => { constraints.push({ nodeId, position: { x, y } }) }
-      c('Sun', planetX, this.planetY)
-      c('LSunO', lOrbitX, this.planetY)
-      c('SunT', transferX, this.planetY)
+      c('Sun', col(2), this.planetY)
+      c('LSunO', col(1), this.planetY)
+      c('SunT', col(0), this.planetY)
 
-      c('Merc', planetX, incPlanetY())
-      c('LMercO', lOrbitX, this.planetY)
-      c('MercCE', captureX, this.planetY)
+      c('Merc', planetXL, incY())
+      c('LMercO', lOrbitXL, this.planetY)
+      c('MercCE', captureXL, this.planetY)
       c('MercT', transferX, this.planetY)
 
-      c('Venus', planetX, incPlanetY())
-      c('LVenusO', lOrbitX, this.planetY)
-      c('VenusCE', captureX, this.planetY)
+      c('Venus', planetXR, incY())
+      c('LVenusO', lOrbitXR, this.planetY)
+      c('VenusCE', captureXR, this.planetY)
       c('VenusT', transferX, this.planetY)
 
-      const earthY = incPlanetY()
-      const moonY = incPlanetY(2 * this.planetYDelta)
-      c('Earth', planetX, earthY)
-      c('LEO', lOrbitX, earthY)
-      c('EarthCE', transferX, moonY)
-      c('GTO', col(4), earthY)
-      c('GEO', col(5), earthY)
+      const moonY = incY()
+      c('MoonT', col(-2), moonY)
+      c('EarthMoonL1', col(-3), moonY - this.planetYDelta)
+      c('EarthMoonL2', col(-3), moonY + this.planetYDelta)
+      c('Moon', col(-5), moonY)
+      c('LMoonO', col(-4), moonY)
+      c('MoonCE', col(-3), this.planetY)
 
-      c('MoonT', col(4), moonY)
-      c('EarthMoonL1', col(3), earthY + this.planetYDelta)
-      c('EarthMoonL2', col(3), moonY + this.planetYDelta)
-      c('Moon', planetX, moonY)
-      c('LMoonO', lOrbitX, moonY)
-      c('MoonCE', col(3), this.planetY)
+      const earthY = incY(2 * this.planetYDelta)
+      const earthX = col(-4)
+      const lowEarthOrbitX = col(-3)
+      c('Earth', earthX, earthY)
+      c('LEO', lowEarthOrbitX, earthY)
+      c('EarthCE', 0, moonY)
+      c('GTO', col(-2), earthY)
+      c('GEO', col(-1), earthY)
 
-      c('Deimos', planetX, incPlanetY(2 * this.planetYDelta))
-      c('MarsCE', col(5), this.planetY)
+      let marsSysY = incY(this.planetYDelta)
+      c('Deimos', col(5), marsSysY)
+      c('MarsCE', col(1), marsSysY)
       c('MarsT', transferX, this.planetY)
-      c('LDeimosO', lOrbitX, this.planetY)
-      c('DeimosCE', captureX, this.planetY)
-      c('DeimosT', moonTransferX, this.planetY)
+      c('LDeimosO', col(4), this.planetY)
+      c('DeimosCE', col(3), this.planetY)
+      c('DeimosT', col(2), this.planetY)
 
-      c('Phobos', planetX, incPlanetY())
-      c('LPhobosO', lOrbitX, this.planetY)
-      c('PhobosCE', captureX, this.planetY)
-      c('PhobosT', col(4), this.planetY)
+      marsSysY -= this.planetYDelta
+      c('Phobos', col(5), marsSysY)
+      c('LPhobosO', col(4), marsSysY)
+      c('PhobosCE', col(3), marsSysY)
+      c('PhobosT', col(2), marsSysY)
 
-      c('Mars', planetX, incPlanetY())
-      c('LMarsO', lOrbitX, this.planetY)
+      marsSysY -= this.planetYDelta
+      c('Mars', col(3), marsSysY)
+      c('LMarsO', col(2), marsSysY)
 
-      const vestaY = incPlanetY()
-      c('VestaT', col(6), vestaY)
-      c('VestaCE', col(3), vestaY)
-      c('LVestaO', col(2), vestaY)
-      c('Vesta', col(1), vestaY)
+      const vestaY = incY()
+      c('VestaT', 0, vestaY)
+      c('VestaCE', captureXL, vestaY)
+      c('LVestaO', lOrbitXL, vestaY)
+      c('Vesta', planetXL, vestaY)
 
-      const ceresY = incPlanetY()
-      c('CeresT', col(6), ceresY)
-      c('CeresCE', col(3), ceresY)
-      c('LCeresO', col(2), ceresY)
-      c('Ceres', col(1), ceresY)
+      const ceresY = incY()
+      c('CeresT', 0, ceresY)
+      c('CeresCE', captureXR, ceresY)
+      c('LCeresO', lOrbitXR, ceresY)
+      c('Ceres', planetXR, ceresY)
 
-      this.planetX = col(8)
+      incY()
+      this.planetXR = 0 // col(8)
       return constraints
     },
     getFixedNodeConstraints: function () { return this.fixedNodeConstraints },
@@ -236,7 +242,7 @@ export default {
       )
     },
     createOuterPlanetMoonSystem: function (
-      name, hasAtmosphere,
+      name, alignLeft, hasAtmosphere,
       predecessorTransferOrbitId, predecessorHasAtmosphere,
       outerPlanetTransferDV, outerPlanetCaptureDV,
       color, moonsArray,
@@ -252,6 +258,11 @@ export default {
       }
       const col = n => layoutStartX + (n * this.colDelta)
       let currentCol = 0
+      const dir = (alignLeft) ? -1 : 1
+      const updateCurrentCol = (i = 1) => {
+        currentCol += (dir * i)
+        return currentCol
+      }
 
       // create the outer planet system and the giant
       const thisSys = name + 'Sys'
@@ -299,16 +310,17 @@ export default {
           parent: thisSys
         }
       )
-      currentCol = ++currentCol + yOffsetInt
-      createConstraint(captureName, col(currentCol++), layoutStartY)
+
+      updateCurrentCol()
+      createConstraint(captureName, col(currentCol), layoutStartY)
       const outerPlanetCaptureDeltaObject = this.furnishedDeltaObject(
         transferName, captureName, outerPlanetCaptureDV, planetAB
       )
-
+      updateCurrentCol()
       const moonTransferY = layoutStartY
-      const moonCaptureY = moonTransferY + this.planetYDelta
-      const moonLowOrbitY = moonCaptureY + this.planetYDelta
-      const moonSurfaceY = moonLowOrbitY + this.planetYDelta
+      const moonCaptureY = moonTransferY + (-dir * this.planetYDelta)
+      const moonLowOrbitY = moonCaptureY + (-dir * this.planetYDelta)
+      const moonSurfaceY = moonLowOrbitY + (-dir * this.planetYDelta)
 
       let prevSource = outerPlanetCaptureEscape
       let transferDelta = outerPlanetCaptureDV
@@ -322,7 +334,7 @@ export default {
         const moonCapture = this.furnishedOrbitObject({ id: moonName + 'CE', label: moonName + ' Capture/Escape', nodeType: 'orbit-capture-escape', parent: thisSys })
         const moonCaptureDelta = this.furnishedDeltaObject(moonLowTransfer.data.id, moonCapture.data.id, m[2], ab)
         createConstraint(moonCapture.data.id, col(currentCol), moonCaptureY)
-        const moonLowOrbit = this.furnishedOrbitObject({ id: 'L' + moonName + 'O', label: moonName + ' Low Orbit', nodeType: 'orbit', parent: thisSys, altitude: m[4] })
+        const moonLowOrbit = this.furnishedOrbitObject({ id: 'L' + moonName + 'O', label: 'Low ' + moonName + ' Orbit', nodeType: 'orbit', parent: thisSys, altitude: m[4] })
         createConstraint(moonLowOrbit.data.id, col(currentCol), moonLowOrbitY)
         const moonLowDelta = this.furnishedDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
         const moonSurface = this.furnishedOrbitObject({ id: moonName, label: moonName, nodeType: 'surface', parent: thisSys, color: '#807E7F' })
@@ -330,7 +342,8 @@ export default {
         const moonSurfaceDelta = this.furnishedDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
         prevSource = moonHighTransfer
         transferDelta = m[0]
-        currentCol++
+
+        updateCurrentCol()
         return [
           moonHighTransfer,
           moonHighTransferDelta,
@@ -346,7 +359,7 @@ export default {
 
       const lowOrbitName = 'L' + name + 'O'
       createConstraint(lowOrbitName, col(currentCol), layoutStartY)
-      createConstraint(name, col(++currentCol), layoutStartY)
+      createConstraint(name, col(updateCurrentCol()), layoutStartY)
       const nodesAndEdges = [
         outerPlanetSystem,
         planetSurface,
@@ -356,7 +369,7 @@ export default {
         outerPlanetCaptureDeltaObject,
         ...[].concat(...moons),
         this.furnishedOrbitObject({
-          id: lowOrbitName, label: name + ' Low Orbit', nodeType: 'orbit', parent: thisSys, altitude: lowOrbitAltitude
+          id: lowOrbitName, label: 'Low ' + name + ' Orbit', nodeType: 'orbit', parent: thisSys, altitude: lowOrbitAltitude
         }),
         this.furnishedDeltaObject(prevSource.data.id, lowOrbitName, lowOrbitDV, planetAB),
         this.furnishedDeltaObject(lowOrbitName, name, surfaceDV, planetAB)

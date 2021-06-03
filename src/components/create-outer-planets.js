@@ -1,9 +1,10 @@
 export default function (deltaVMap) {
   console.log('data() creating jupiterSystem')
-  const jupiterX = deltaVMap.planetX
+  const jupiterX = deltaVMap.planetXR
   const jupiterY = deltaVMap.planetY
   deltaVMap.jupiterSystem = deltaVMap.createOuterPlanetMoonSystem(
     'Jupiter',
+    true,
     true,
     'CeresT',
     false,
@@ -24,9 +25,10 @@ export default function (deltaVMap) {
   deltaVMap.addFixedNodeConstraints(deltaVMap.jupiterSystem.positionConstraints)
 
   const saturnX = jupiterX
-  const saturnY = deltaVMap.planetY - (4 * deltaVMap.planetYDelta)
+  const saturnY = deltaVMap.planetY + (3 * deltaVMap.planetYDelta)
   deltaVMap.saturnSystem = deltaVMap.createOuterPlanetMoonSystem(
     'Saturn',
+    false,
     true,
     'JupiterT',
     true,
@@ -48,9 +50,11 @@ export default function (deltaVMap) {
   deltaVMap.addFixedNodeConstraints(deltaVMap.saturnSystem.positionConstraints)
 
   const uranusX = jupiterX
-  const uranusY = saturnY - (4 * deltaVMap.planetYDelta)
+  // const uranusY = saturnY + (4 * deltaVMap.planetYDelta)
+  const uranusY = saturnY + deltaVMap.planetYDelta
   deltaVMap.uranusSystem = deltaVMap.createOuterPlanetMoonSystem(
     'Uranus',
+    true,
     true,
     'SaturnT',
     true,
@@ -70,9 +74,10 @@ export default function (deltaVMap) {
   deltaVMap.addFixedNodeConstraints(deltaVMap.uranusSystem.positionConstraints)
 
   const neptuneX = jupiterX
-  const neptuneY = uranusY - (4 * deltaVMap.planetYDelta)
+  const neptuneY = uranusY + (3 * deltaVMap.planetYDelta)
   deltaVMap.neptuneSystem = deltaVMap.createOuterPlanetMoonSystem(
     'Neptune',
+    false,
     true,
     'UranusT',
     true,
@@ -90,9 +95,10 @@ export default function (deltaVMap) {
   deltaVMap.addFixedNodeConstraints(deltaVMap.neptuneSystem.positionConstraints)
 
   const plutoX = jupiterX
-  const plutoY = neptuneY - (4 * deltaVMap.planetYDelta)
+  const plutoY = neptuneY + deltaVMap.planetYDelta
   deltaVMap.plutoSystem = deltaVMap.createOuterPlanetMoonSystem(
     'Pluto',
+    true,
     false,
     'NeptuneT',
     true,
@@ -108,9 +114,10 @@ export default function (deltaVMap) {
   deltaVMap.addFixedNodeConstraints(deltaVMap.plutoSystem.positionConstraints)
 
   const haumeaX = jupiterX
-  const haumeaY = plutoY - deltaVMap.planetYDelta
+  const haumeaY = plutoY + deltaVMap.planetYDelta
   deltaVMap.haumeaSystem = deltaVMap.createOuterPlanetMoonSystem(
     'Haumea',
+    false,
     false,
     'PlutoT',
     false,
@@ -124,9 +131,10 @@ export default function (deltaVMap) {
   deltaVMap.addFixedNodeConstraints(deltaVMap.haumeaSystem.positionConstraints)
 
   const makemakeX = jupiterX
-  const makemakeY = haumeaY - deltaVMap.planetYDelta
+  const makemakeY = haumeaY + deltaVMap.planetYDelta
   deltaVMap.makemakeSystem = deltaVMap.createOuterPlanetMoonSystem(
     'Makemake',
+    false,
     false,
     'HaumeaT',
     false,
