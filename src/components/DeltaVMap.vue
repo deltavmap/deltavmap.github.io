@@ -473,7 +473,6 @@ export default {
       CreateOuterPlanets(this)
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
-      console.log('handleBothTerminalsAlreadySelected')
       this.clearSelectedNodes()
       this.selectedA = nodeData
       this.selectedB = null
@@ -483,7 +482,6 @@ export default {
       node.addClass('origin-node')
     },
     handleReceivedOriginTerminal: function (nodeData) {
-      console.log('handleReceivedOriginTerminal')
       this.selectedA = nodeData
       const node = this.cy.$('#' + nodeData.id)
       node.addClass('node-on-path')
@@ -505,7 +503,6 @@ export default {
       }
     },
     handleReceivedDestinationTerminal: function (nodeData) {
-      console.log('handleReceivedDestinationTerminal')
       const self = this
       self.aeroBrakingAvailable = false
       self.pathSelected = true
@@ -563,17 +560,13 @@ export default {
       // }, 10)
       self.cy.batch(function () {
         const allEdges = self.cy.$('edge')
-        console.log('all edges length', allEdges.length)
         const edgesOnPath = self.cy.$('.edge-on-path')
-        console.log('edges on path length', edgesOnPath.length)
         const edgesNotOnPath = allEdges.difference(edgesOnPath)
-        console.log('edges not on path length', edgesNotOnPath.length)
         edgesNotOnPath.css('opacity', self.opacityLevel)
       })
       self.deltaV = dijkstra.distanceTo(`#${self.selectedB.id}`)
     },
     nodeSelected: function (target) {
-      console.log('nodeSelected')
       const nodeData = target._private.data
 
       if (nodeData.nodeType === 'system') {
