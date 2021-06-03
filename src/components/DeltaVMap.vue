@@ -15,7 +15,7 @@
     <!--        to see the total delta-v requirement.</p>-->
     <!--      </div>-->
     <!--    </v-container>-->
-    <h1 class="site-title">delta v map</h1>
+    <h1 class="site-title"><span class="site-icon" style="">Delta V Map</span></h1>
     <div class="controls text-left">
       <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !selectedA">
         <label class="controls__label">origin</label>
@@ -703,6 +703,7 @@ $color-destination: orange
 .site-title
   @extend .light-box-shadow
   background-color: $color-light
+  position: relative
   text-transform: uppercase
   z-index: 3
   @media #{map-get($display-breakpoints, 'sm-and-down')}
@@ -719,6 +720,20 @@ $color-destination: orange
     padding: 1rem 0
     text-align: center
     width: $controls-width
+
+.site-icon
+  display: inline-block
+  position: relative
+  &:before
+    content: ''
+    display: inline-block
+    position: absolute
+    left: -1.35em
+    width: 1.4em
+    height: 1.4em
+    background-image: url(/img/icons/mstile-70x70.png)
+    background-position: center
+    background-size: cover
 
 .controls
   @extend .light-box-shadow
