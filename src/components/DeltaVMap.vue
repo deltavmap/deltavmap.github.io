@@ -55,7 +55,7 @@
   </div>
 </template>
 <script>
-import cytoscape from 'cytoscape'
+import cytoscape from 'cytoscape/dist/cytoscape.esm.min.js'
 import cytoscapeFcose from 'cytoscape-fcose'
 
 import OrbitsArray from './nodes'
