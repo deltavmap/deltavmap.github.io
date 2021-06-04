@@ -37,11 +37,14 @@
           A <a href="">Hohmann transfer orbit</a>
           is normally the most practical and efficient way to get from A to B
         </p>
-        <p>Press <span class="button">reverse</span> to swap the original and destination.
+        <p>
+          Press <span class="button">reverse</span> to swap the origin and destination.
           This may affect whether <a href="https://en.wikipedia.org/wiki/Aerobraking">aerobraking</a>
-          is available
+          is available.
         </p>
-        <p>Press <span class="button">clear</span> to reset the app</p>
+        <p>
+          Press <span class="button">clear</span> to reset the app.
+        </p>
 
         <div>
           <h3>Issues</h3>
