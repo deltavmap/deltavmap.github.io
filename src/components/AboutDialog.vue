@@ -55,6 +55,7 @@
               Github
             </a>.
           </p>
+          <p>Latest changes are <a href="https://github.com/deltavmap/deltavmap.github.io/commits/main">here</a> (commits log).</p>
         </div>
         <div>
           <h3>Credits</h3>
@@ -79,7 +80,6 @@
             </a>
           </p>
         </div>
-
       </v-container>
       <v-divider></v-divider>
 
