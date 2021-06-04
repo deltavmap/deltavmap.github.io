@@ -1,20 +1,5 @@
 <template>
   <div id="page-container">
-    <!--    <v-container>-->
-    <!--      <h2 class="text-uppercase my-8">delta v map</h2>-->
-    <!--      <div class="intro text&#45;&#45;left mx-auto">-->
-    <!--        <p>The following can be used to roughly calculate the-->
-    <!--          <a href="https://en.wikipedia.org/wiki/Delta-v">delta-v</a>-->
-    <!--          (change of velocity) requirements,-->
-    <!--        to move from one orbit to another.-->
-    <!--          </p>-->
-    <!--        <p>-->
-    <!--          <a href="">Hohmann transfer orbits</a> are used, which are-->
-    <!--          normally the most efficient way to get from A to B.</p>-->
-    <!--        <p>First click on the place of origin orbit and the destination orbit-->
-    <!--        to see the total delta-v requirement.</p>-->
-    <!--      </div>-->
-    <!--    </v-container>-->
     <h1 class="site-title"><span class="site-icon" style="">Delta V Map</span></h1>
     <div class="controls text-left">
       <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !selectedA">
@@ -59,6 +44,9 @@
                     color="grey lighten-1"
                     :disabled="!selectedA && !selectedB"
                     @click="clearSelectedNodes">clear</v-btn></div>
+        <div>
+          <about-dialog />
+        </div>
       </div>
     </div>
     <div class="map-container" :class="{'map-container--visible': cytoscapeLoaded}">
@@ -67,16 +55,6 @@
   </div>
 </template>
 <script>
-// https://learnvue.co/2020/09/how-to-deploy-your-vue-app-to-github-pages/
-// https://www.reddit.com/r/space/comments/1ktjfi/deltav_map_of_the_solar_system/
-// https://dash.plotly.com/cytoscape
-// https://imgur.com/a/ordID
-// https://launchercalculator.com/
-
-// delta v calculators
-// https://space.geometrian.com/calcs/opt-multi-stage.php
-// https://www.desmos.com/calculator/hib7psndtb
-
 import cytoscape from 'cytoscape'
 import cytoscapeFcose from 'cytoscape-fcose'
 
@@ -84,6 +62,7 @@ import OrbitsArray from './nodes'
 import DeltasArray from './edges'
 import CreateOuterPlanets from './create-outer-planets'
 import CreateCytoscapeStyles from './create-cytoscape-styles'
+import AboutDialog from './AboutDialog'
 
 cytoscape.use(cytoscapeFcose)
 
@@ -94,6 +73,7 @@ const colors = {
 }
 
 export default {
+  components: { AboutDialog },
   data () {
     return {
       svg: null,
@@ -655,7 +635,7 @@ export default {
   }
 }
 </script>
-<style lang="sass" scoped>
+<style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
 
 $padding: 1rem
@@ -725,15 +705,22 @@ $color-destination: orange
   display: inline-block
   position: relative
   &:before
-    content: ''
-    display: inline-block
-    position: absolute
-    left: -1.35em
+    content: ' '
     width: 1.4em
     height: 1.4em
     background-image: url(/img/icons/mstile-70x70.png)
     background-position: center
     background-size: cover
+    display: block
+    float: left
+    position: relative
+    top: .15em
+
+    @media #{map-get($display-breakpoints, 'md-and-up')}
+      top: 0
+      display: inline-block
+      position: absolute
+      left: -1.4em
 
 .controls
   @extend .light-box-shadow
