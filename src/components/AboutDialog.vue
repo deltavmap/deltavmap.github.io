@@ -85,7 +85,7 @@
         <v-btn
           color="primary"
           text
-          @click="dialog = false"
+          @click="dialogOpen = false"
         >
           close
         </v-btn>
