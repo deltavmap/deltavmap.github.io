@@ -53,15 +53,15 @@
             on
             <a href="https://github.com/deltavmap/deltavmap.github.io/issues">
               Github
-            </a>
+            </a>.
           </p>
         </div>
         <div>
           <h3>Credits</h3>
           <p>The values used in this app are based on the values from this map:
-            <a href="https://imgur.com/a/6bb3a">KSP Delta-v map for Real Solar System</a>
+            <a href="https://imgur.com/a/6bb3a">KSP Delta-v map for Real Solar System</a>.
           </p>
-          <p>This app was made with
+          <p>This app was made with the following software libraries:
             <ul>
               <li><a href="https://vuejs.org/">Vue</a></li>
               <li><a href="https://vuetifyjs.com/en/">Vuetify</a></li>
