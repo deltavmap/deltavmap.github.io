@@ -1,0 +1,21 @@
+.u-button
+  border-radius: .3em
+  font-weight: 500
+  letter-spacing: .1em
+  padding: .45em 1em
+  text-transform: uppercase
+  background-color: #ccc
+  &--small
+    font-size: .75em
+
+button.u-button
+  box-shadow: 0px 1px 2px 0px rgba(0,0,0,.5)
+  transition: all .15s ease
+  &:hover
+    filter: brightness(.95)
+  &[disabled=disabled]
+    filter: brightness(.9)
+    opacity: .5
+    box-shadow: none
+    &:hover
+      box-shadow: none

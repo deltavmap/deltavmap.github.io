@@ -640,14 +640,7 @@ export default {
 </script>
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
-
-$padding: 1rem
-$color-offwhite: #eee
-$color-light: #ccc
-$color-dark: #333
-$controls-width: 300px
-$color-origin: lightskyblue
-$color-destination: orange
+@import '@/sass/variables'
 
 .light-box-shadow
   box-shadow: 0 1px 20px 0 #666
