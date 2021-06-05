@@ -1,5 +1,4 @@
 export default function (deltaVMap) {
-  console.log('data() creating jupiterSystem')
   const jupiterX = deltaVMap.planetXR
   const jupiterY = deltaVMap.planetY
   deltaVMap.jupiterSystem = deltaVMap.createOuterPlanetMoonSystem(

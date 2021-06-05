@@ -1,4 +1,4 @@
-export default [
+const arr = [
   { id: 'Sun', label: 'Sun', nodeType: 'surface', parent: 'SunSys', color: 'yellow' },
   { id: 'LSunO', label: 'Low Sun Orbit', nodeType: 'orbit', parent: 'SunSys', altitude: '10000' },
   { id: 'SunT', label: 'Sun Transfer', nodeType: 'orbit-transfer', parent: 'SunSys' },
@@ -51,3 +51,11 @@ export default [
   { id: 'CeresCE', label: 'Ceres Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'CeresSys' },
   { id: 'CeresT', label: 'Ceres Transfer', nodeType: 'orbit-transfer', parent: 'SunSys' }
 ]
+
+// convert array to object
+const orbitsObject = {}
+arr.map(node => {
+  orbitsObject[node.id] = node
+})
+
+export default orbitsObject

@@ -52,19 +52,17 @@
     <div class="map-container" :class="{'map-container--visible': cytoscapeLoaded}">
       <div id="map" class="map" :class="{'path-selected' : pathSelected}"></div>
     </div>
+    <div id="bottom-scroll-marker"></div>
   </div>
 </template>
 <script>
 import cytoscape from 'cytoscape/dist/cytoscape.esm.min.js'
-import cytoscapeFcose from 'cytoscape-fcose'
 
-import OrbitsArray from './nodes'
+import OrbitsObject from './nodes'
 import DeltasArray from './edges'
 import CreateOuterPlanets from './create-outer-planets'
 import CreateCytoscapeStyles from './create-cytoscape-styles'
 import AboutDialog from './AboutDialog'
-
-cytoscape.use(cytoscapeFcose)
 
 const colors = {
   pathColor: 'mediumpurple', // 'lightskyblue' // 'lightgreen'
@@ -97,23 +95,6 @@ export default {
     }
   },
   computed: {
-    formattedData: function () {
-      const systemData = this.formatSystems(this.systems)
-      const orbitData = this.formatOrbits(this.orbits)
-      const deltaData = this.formatDeltas(this.deltas)
-      return [
-        ...systemData,
-        ...orbitData,
-        ...deltaData,
-        ...this.jupiterSystem.nodesAndEdges,
-        ...this.saturnSystem.nodesAndEdges,
-        ...this.uranusSystem.nodesAndEdges,
-        ...this.neptuneSystem.nodesAndEdges,
-        ...this.plutoSystem.nodesAndEdges,
-        ...this.haumeaSystem.nodesAndEdges,
-        ...this.makemakeSystem.nodesAndEdges
-      ]
-    },
     selectedAText: function () { return (this.selectedA) ? this.selectedA.label : '' },
     selectedBText: function () { return (this.selectedB) ? this.selectedB.label : '' },
     deltaVText: function () { return (this.deltaV) ? this.deltaV.toFixed(2) + ' km/s' : '' }
@@ -126,7 +107,7 @@ export default {
     incPlanetYDelta: function (amount = this.planetYDelta) {
       this.setPlanetY(this.planetY + amount); return this.planetY
     },
-    createFixedNodeConstraints: function () {
+    applyPositionDataToOrbits: function (orbits) {
       const col = n => n * this.colDelta
       const planetXL = col(-3)
       const planetXR = col(3)
@@ -138,7 +119,10 @@ export default {
       const transferX = col(0)
 
       const constraints = [] // position constrains
-      const c = (nodeId, x, y) => { constraints.push({ nodeId, position: { x, y } }) }
+      const c = (nodeId, x, y) => {
+        const orbit = orbits[nodeId]
+        orbit.position = { x, y }
+      }
       c('Sun', col(2), this.planetY)
       c('LSunO', col(1), this.planetY)
       c('SunT', col(0), this.planetY)
@@ -233,8 +217,8 @@ export default {
       yOffsetInt
     ) {
       const positionConstraints = []
-      const createConstraint = (nodeId, x, y) => {
-        positionConstraints.push({ nodeId, position: { x, y } })
+      const addPositionData = (node, x, y) => {
+        node.position = { x, y }
       }
       const col = n => layoutStartX + (n * this.colDelta)
       let currentCol = 0
@@ -260,7 +244,7 @@ export default {
       const outerPlanetTransfer = this.furnishedOrbitObject(
         { id: transferName, label: name + ' Transfer', nodeType: 'orbit-transfer', parent: 'SunSys' }
       )
-      createConstraint(transferName, col(0), layoutStartY)
+      addPositionData(outerPlanetTransfer, col(0), layoutStartY)
       let predecessorTransferAB
       if (predecessorHasAtmosphere) {
         if (hasAtmosphere) {
@@ -292,7 +276,7 @@ export default {
       )
 
       updateCurrentCol()
-      createConstraint(captureName, col(currentCol), layoutStartY)
+      addPositionData(outerPlanetCaptureEscape, col(currentCol), layoutStartY)
       const outerPlanetCaptureDeltaObject = this.furnishedDeltaObject(
         transferName, captureName, outerPlanetCaptureDV, planetAB
       )
@@ -309,16 +293,16 @@ export default {
         const ab = (typeof m[6] !== 'undefined') ? m[6] : false // moon aeroBraking availability
         const moonHighTransfer = this.furnishedOrbitObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: thisSys })
         const moonHighTransferDelta = this.furnishedDeltaObject(prevSource.data.id, moonHighTransfer.data.id, transferDelta, planetAB)
-        createConstraint(moonHighTransfer.data.id, col(currentCol), moonTransferY)
+        addPositionData(moonHighTransfer, col(currentCol), moonTransferY)
         const moonLowTransfer = this.furnishedOrbitObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: thisSys })
         const moonCapture = this.furnishedOrbitObject({ id: moonName + 'CE', label: moonName + ' Capture/Escape', nodeType: 'orbit-capture-escape', parent: thisSys })
         const moonCaptureDelta = this.furnishedDeltaObject(moonLowTransfer.data.id, moonCapture.data.id, m[2], ab)
-        createConstraint(moonCapture.data.id, col(currentCol), moonCaptureY)
+        addPositionData(moonCapture, col(currentCol), moonCaptureY)
         const moonLowOrbit = this.furnishedOrbitObject({ id: 'L' + moonName + 'O', label: 'Low ' + moonName + ' Orbit', nodeType: 'orbit', parent: thisSys, altitude: m[4] })
-        createConstraint(moonLowOrbit.data.id, col(currentCol), moonLowOrbitY)
+        addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
         const moonLowDelta = this.furnishedDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
         const moonSurface = this.furnishedOrbitObject({ id: moonName, label: moonName, nodeType: 'surface', parent: thisSys, color: '#807E7F' })
-        createConstraint(moonSurface.data.id, col(currentCol), moonSurfaceY)
+        addPositionData(moonSurface, col(currentCol), moonSurfaceY)
         const moonSurfaceDelta = this.furnishedDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
         prevSource = moonHighTransfer
         transferDelta = m[0]
@@ -338,8 +322,11 @@ export default {
       })
 
       const lowOrbitName = 'L' + name + 'O'
-      createConstraint(lowOrbitName, col(currentCol), layoutStartY)
-      createConstraint(name, col(updateCurrentCol()), layoutStartY)
+      const lowOrbit = this.furnishedOrbitObject({
+        id: lowOrbitName, label: 'Low ' + name + ' Orbit', nodeType: 'orbit', parent: thisSys, altitude: lowOrbitAltitude
+      })
+      addPositionData(lowOrbit, col(currentCol), layoutStartY)
+      addPositionData(planetSurface, col(updateCurrentCol()), layoutStartY)
       const nodesAndEdges = [
         outerPlanetSystem,
         planetSurface,
@@ -348,9 +335,7 @@ export default {
         outerPlanetCaptureEscape,
         outerPlanetCaptureDeltaObject,
         ...[].concat(...moons),
-        this.furnishedOrbitObject({
-          id: lowOrbitName, label: 'Low ' + name + ' Orbit', nodeType: 'orbit', parent: thisSys, altitude: lowOrbitAltitude
-        }),
+        lowOrbit,
         this.furnishedDeltaObject(prevSource.data.id, lowOrbitName, lowOrbitDV, planetAB),
         this.furnishedDeltaObject(lowOrbitName, name, surfaceDV, planetAB)
       ]
@@ -393,15 +378,19 @@ export default {
       if (typeof o.data.altitude !== 'undefined') {
         o.data.label = o.data.label + ' (' + o.data.altitude + 'km)'
       }
+      o.position = o.data.position
       return o
     },
     furnishedOrbitObject: function (unformatedOrbitObject) {
       return this.furnishOrbitObject(this.formatData(unformatedOrbitObject))
     },
-    formatOrbits: function (unformatedOrbitArray) {
-      return unformatedOrbitArray.map(o => {
-        return this.furnishedOrbitObject(o)
+    formatOrbits: function (unformattedOrbitObject) {
+      const keys = Object.keys(unformattedOrbitObject)
+      const orbitArray = []
+      keys.map(k => {
+        orbitArray.push(this.furnishedOrbitObject(unformattedOrbitObject[k]))
       })
+      return orbitArray
     },
     createDeltaObject: function (source, target, dv, ab = 0) {
       switch (ab) {
@@ -447,10 +436,27 @@ export default {
         this.createSystem('VestaSys', 'Vesta System', 'SunSys'),
         this.createSystem('CeresSys', 'Ceres System', 'SunSys')
       ]
-      this.orbits = OrbitsArray
+      const systemData = this.formatSystems(this.systems)
+
+      this.applyPositionDataToOrbits(OrbitsObject)
+      const orbitsArray = this.formatOrbits(OrbitsObject)
+
       this.deltas = DeltasArray
-      this.fixedNodeConstraints = this.createFixedNodeConstraints()
       CreateOuterPlanets(this)
+
+      const deltaData = this.formatDeltas(this.deltas)
+      return [
+        ...systemData,
+        ...orbitsArray,
+        ...deltaData,
+        ...this.jupiterSystem.nodesAndEdges,
+        ...this.saturnSystem.nodesAndEdges,
+        ...this.uranusSystem.nodesAndEdges,
+        ...this.neptuneSystem.nodesAndEdges,
+        ...this.plutoSystem.nodesAndEdges,
+        ...this.haumeaSystem.nodesAndEdges,
+        ...this.makemakeSystem.nodesAndEdges
+      ]
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearSelectedNodes()
@@ -609,29 +615,26 @@ export default {
   },
   mounted () {
     const self = this
-    self.createData()
+    const formattedData = self.createData()
     const map = document.getElementById('map')
     const cy = cytoscape({
       container: map, // container to render in
-      elements: this.formattedData,
+      elements: formattedData,
       wheelSensitivity: 0.25, // TODO make this user configurable
-      style: CreateCytoscapeStyles(
-        this, colors),
-      layout: {
-        name: 'fcose',
-        quality: 'proof',
-        edgeElasticity: 0.1,
-        nodeRepulsion: 40000,
-        nodeSeparation: 200,
-        fixedNodeConstraint: this.getFixedNodeConstraints()
-      }
+      style: CreateCytoscapeStyles(this, colors),
+      layout: { name: 'preset' }
     })
     window.cy = cy
     self.cy = cy
     cy.on('mouseover', 'node', function () { map.style.cursor = 'pointer' })
     cy.on('mouseout', 'node', function () { map.style.cursor = 'default' })
     cy.on('tap', "node[type != 'system']", (e) => { self.nodeSelected(e.target) })
-    setTimeout(() => { this.cytoscapeLoaded = true }, 1000)
+    setTimeout(() => {
+      this.cytoscapeLoaded = true
+      // var scrollingElement = (document.scrollingElement || document.body)
+      // scrollingElement.scrollTop = scrollingElement.scrollHeight
+      // document.querySelector('#bottom-scroll-marker').scrollIntoView({ behavior: 'smooth' })
+    }, 1000)
   }
 }
 </script>
@@ -736,6 +739,8 @@ $color-destination: orange
     justify-content: center
     padding: .5rem 0
     width: 100%
+    position: fixed
+    bottom: 0
   @media #{map-get($display-breakpoints, 'md-and-up')}
     box-shadow: none
     display: flex
