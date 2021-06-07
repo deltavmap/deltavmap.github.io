@@ -4,7 +4,6 @@ import './registerServiceWorker'
 import vuetify from './plugins/vuetify'
 
 Vue.config.productionTip = false
-
 new Vue({
   vuetify,
   render: h => h(App)

@@ -7,5 +7,6 @@ module.exports = {
   ],
   configureWebpack: {
     plugins: [new BundleAnalyzerPlugin()]
-  }
+  },
+  lintOnSave: true
 }

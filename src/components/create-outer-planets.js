@@ -1,7 +1,26 @@
 export default function (deltaVMap) {
-  const jupiterX = deltaVMap.planetXR
+  const marsX = deltaVMap.planetXR
+  const marsY = deltaVMap.marsY
+  deltaVMap.createPlanetSystem(
+    'Mars',
+    false,
+    true,
+    'EarthCE',
+    true,
+    0.39,
+    0.67,
+    'orange',
+    [
+      [0.34, 'Deimos', 0.65, 0.002, 0.004],
+      [0.4, 'Phobos', 0.54, 0.003, 0.005]
+    ],
+    0.7, 200, 3.6,
+    marsX, marsY, 0
+  )
+
+  const jupiterX = marsX
   const jupiterY = deltaVMap.planetY
-  deltaVMap.jupiterSystem = deltaVMap.createOuterPlanetMoonSystem(
+  deltaVMap.jupiterSystem = deltaVMap.createPlanetSystem(
     'Jupiter',
     true,
     true,
@@ -21,11 +40,9 @@ export default function (deltaVMap) {
     8.02, 2000, 33,
     jupiterX, jupiterY, 1
   )
-  deltaVMap.addFixedNodeConstraints(deltaVMap.jupiterSystem.positionConstraints)
-
   const saturnX = jupiterX
-  const saturnY = deltaVMap.planetY + (3 * deltaVMap.planetYDelta)
-  deltaVMap.saturnSystem = deltaVMap.createOuterPlanetMoonSystem(
+  const saturnY = jupiterY + (1 * deltaVMap.planetYDelta)
+  deltaVMap.saturnSystem = deltaVMap.createPlanetSystem(
     'Saturn',
     false,
     true,
@@ -36,7 +53,7 @@ export default function (deltaVMap) {
     'burlywood',
     [
       [0.3, 'Iapetus', 2.16, 0.16, 50, 0.41],
-      [0.56, 'Titan', 2.2, 0.66, 1000, 7.6, 1],
+      [0.56, 'Titan', 2.2, 0.66, 1000, 7.6, 1, true],
       [1.04, 'Rhea', 4.01, 0.18, 50, 0.45],
       [0.67, 'Dione', 4.23, 0.14, 50, 0.36],
       [0.62, 'Tethys', 4.29, 0.11, 50, 0.27],
@@ -46,12 +63,9 @@ export default function (deltaVMap) {
     5.52, 2000, 19,
     saturnX, saturnY, 0
   )
-  deltaVMap.addFixedNodeConstraints(deltaVMap.saturnSystem.positionConstraints)
-
   const uranusX = jupiterX
-  // const uranusY = saturnY + (4 * deltaVMap.planetYDelta)
-  const uranusY = saturnY + deltaVMap.planetYDelta
-  deltaVMap.uranusSystem = deltaVMap.createOuterPlanetMoonSystem(
+  const uranusY = saturnY + (3 * deltaVMap.planetYDelta)
+  deltaVMap.uranusSystem = deltaVMap.createPlanetSystem(
     'Uranus',
     true,
     true,
@@ -70,11 +84,10 @@ export default function (deltaVMap) {
     4.26, 1000, 15,
     uranusX, uranusY, 2
   )
-  deltaVMap.addFixedNodeConstraints(deltaVMap.uranusSystem.positionConstraints)
 
   const neptuneX = jupiterX
-  const neptuneY = uranusY + (3 * deltaVMap.planetYDelta)
-  deltaVMap.neptuneSystem = deltaVMap.createOuterPlanetMoonSystem(
+  const neptuneY = uranusY + (1 * deltaVMap.planetYDelta)
+  deltaVMap.neptuneSystem = deltaVMap.createPlanetSystem(
     'Neptune',
     false,
     true,
@@ -91,11 +104,10 @@ export default function (deltaVMap) {
     4.58, 1000, 16,
     neptuneX, neptuneY, 4
   )
-  deltaVMap.addFixedNodeConstraints(deltaVMap.neptuneSystem.positionConstraints)
 
   const plutoX = jupiterX
-  const plutoY = neptuneY + deltaVMap.planetYDelta
-  deltaVMap.plutoSystem = deltaVMap.createOuterPlanetMoonSystem(
+  const plutoY = neptuneY + (3 * deltaVMap.planetYDelta)
+  deltaVMap.plutoSystem = deltaVMap.createPlanetSystem(
     'Pluto',
     true,
     false,
@@ -110,11 +122,10 @@ export default function (deltaVMap) {
     0.31, 100, 0.89,
     plutoX, plutoY, 6
   )
-  deltaVMap.addFixedNodeConstraints(deltaVMap.plutoSystem.positionConstraints)
 
   const haumeaX = jupiterX
   const haumeaY = plutoY + deltaVMap.planetYDelta
-  deltaVMap.haumeaSystem = deltaVMap.createOuterPlanetMoonSystem(
+  deltaVMap.haumeaSystem = deltaVMap.createPlanetSystem(
     'Haumea',
     false,
     false,
@@ -127,11 +138,10 @@ export default function (deltaVMap) {
     0.21, 50, 0.1,
     haumeaX, haumeaY, 7
   )
-  deltaVMap.addFixedNodeConstraints(deltaVMap.haumeaSystem.positionConstraints)
 
   const makemakeX = jupiterX
   const makemakeY = haumeaY + deltaVMap.planetYDelta
-  deltaVMap.makemakeSystem = deltaVMap.createOuterPlanetMoonSystem(
+  deltaVMap.makemakeSystem = deltaVMap.createPlanetSystem(
     'Makemake',
     false,
     false,
@@ -144,5 +154,4 @@ export default function (deltaVMap) {
     0.21, 50, 0.36,
     makemakeX, makemakeY, 7
   )
-  deltaVMap.addFixedNodeConstraints(deltaVMap.makemakeSystem.positionConstraints)
 }

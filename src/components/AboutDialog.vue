@@ -66,7 +66,7 @@
             <ul>
               <li><a href="https://vuejs.org/">Vue</a></li>
               <li><a href="https://vuetifyjs.com/en/">Vuetify</a></li>
-              <li><a href="https://js.cytoscape.org/">Cytoscape.js</a></li>
+              <li><a href="https://anvaka.github.io/panzoom/">panzoom.js</a></li>
             </ul>
           </p>
           <p>Icons made by
@@ -99,7 +99,8 @@
 <style lang="sass" scoped>
 @import '@/sass/variables'
 @import '@/sass/utils/button'
-
+.u-button
+  font-size: 12px
 </style>
 <script>
 export default {

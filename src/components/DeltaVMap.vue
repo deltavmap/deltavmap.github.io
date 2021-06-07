@@ -49,57 +49,197 @@
         </div>
       </div>
     </div>
-    <div class="map-container" :class="{'map-container--visible': cytoscapeLoaded}">
-      <div id="map" class="map" :class="{'path-selected' : pathSelected}"></div>
+
+    <div class="map-container" :class="{'map-container--visible': pageLoaded}">
+      <svg id="map"
+           class="map"
+           :class="{'path-selected' : pathSelected}"
+           viewBox="-3000 -100 3000 5000"
+      >
+        <defs>
+          <linearGradient id="gradient-shadow" gradientTransform="rotate(45)">
+            <stop offset="25%"  stop-color="rgba(255,255,255,.5)" />
+            <stop offset="75%" stop-color="rgba(0,0,0,.5)" />
+          </linearGradient>
+          <radialGradient id="gradient-atmosphere" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+            <stop offset="0%" style="stop-color:rgb(255,255,255); stop-opacity:1" />
+            <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0" />
+          </radialGradient>
+        </defs>
+        <g v-for="(edge, edgeIndex) in finalDeltasArray"
+           :key="'delta-' + edgeIndex"
+           :id="edge.sourceId + '-' + edge.targetId"
+           :class="['edge', 'edge--' + edge.sourceId + '-' + edge.targetId, 'edge--' + edge.targetId + '-' + edge.sourceId ]"
+        >
+          <line :x1="getXPosOfOrbit(edge.sourceId)"
+                :y1="getYPosOfOrbit(edge.sourceId)"
+                :x2="getXPosOfOrbit(edge.targetId)"
+                :y2="getYPosOfOrbit(edge.targetId)"
+                class="edge__line fadable"
+          ></line>
+          <foreignObject :x="getXMidPointOfDelta(edge) - 25"
+                         :y="getYMidPointOfDelta(edge) - 12"
+                         width="50" height="26"
+          >
+            <div class="underlay-html-container">
+              <p class="edge__label fadable" xmlns="http://www.w3.org/1999/xhtml">
+                {{ edge.dv }}
+              </p>
+            </div>
+          </foreignObject>
+        </g>
+        <g v-for="(orbit, orbitIndex) in finalOrbitsArray"
+           :key="orbitIndex"
+           class="orbit"
+           :id="orbit.data.id"
+           @click="nodeSelected(orbit)"
+           @tap="nodeSelected(orbit)"
+        >
+          <foreignObject :x="orbit.position.x - 75"
+                         :y="(orbit.position.y + 65)"
+                         width="150" height="64">
+            <div class="underlay-html-container">
+              <p class="orbit__label fadable" xmlns="http://www.w3.org/1999/xhtml">
+                {{ orbit.data.label }}
+              </p>
+            </div>
+          </foreignObject>
+          <circle class="orbit__icon-atmosphere fadable"
+                  :cx="orbit.position.x"
+                  :cy="orbit.position.y"
+                  v-if="orbit.data.atmosphere"
+                  fill="url('#gradient-atmosphere')"
+          />
+          <circle class="orbit__icon-background underlay"
+                  :cx="orbit.position.x"
+                  :cy="orbit.position.y"
+          />
+          <circle class="orbit__icon fadable"
+                  :cx="orbit.position.x"
+                  :cy="orbit.position.y"
+                  :fill="getNodeFill(orbit)"
+          />
+          <circle class="orbit__icon-surface-shadow fadable"
+                  v-if="nodeIsSurface(orbit)"
+                  :cx="orbit.position.x"
+                  :cy="orbit.position.y"
+                  :r="nodeRadius"
+                  stroke-width="0"
+                  fill="url('#gradient-shadow')"
+          />
+        </g>
+      </svg>
     </div>
     <div id="bottom-scroll-marker"></div>
   </div>
 </template>
 <script>
-import cytoscape from 'cytoscape/dist/cytoscape.esm.min.js'
 
-import OrbitsObject from './nodes'
-import DeltasArray from './edges'
+import panzoom from 'panzoom'
+import dijkstrajs from 'dijkstrajs'
+import Orbits from './nodes'
+import UnformattedDeltaArrays from './edges'
 import CreateOuterPlanets from './create-outer-planets'
-import CreateCytoscapeStyles from './create-cytoscape-styles'
 import AboutDialog from './AboutDialog'
-
-const colors = {
-  pathColor: 'mediumpurple', // 'lightskyblue' // 'lightgreen'
-  originColor: 'lightskyblue',
-  destinationColor: 'orange'
-}
 
 export default {
   components: { AboutDialog },
   data () {
     return {
-      svg: null,
-      width: 500,
+      mapSVG: null,
+      nodeRadius: 40,
       selectedA: null,
       selectedB: null,
       deltaV: null,
       fixedNodeConstraints: [],
-      orbits: [],
-      deltas: [],
-      jupiterSystem: [],
-      saturnSystem: [],
-      uranusSystem: [],
-      colDelta: 250, // layouts
+      systemsObject: {},
+      orbitsObject: {},
+      formattedDeltaObjectsArray: [],
+      finalOrbitsArray: [],
+      finalDeltasArray: [],
+      finalEdgeGraph: {},
+      colDelta: 250,
       planetY: 0,
       planetYDelta: 350,
       pathSelected: false,
       aeroBrakingAvailable: false,
-      opacityLevel: 0.1,
-      cytoscapeLoaded: false
+      pageLoaded: false
     }
   },
   computed: {
     selectedAText: function () { return (this.selectedA) ? this.selectedA.label : '' },
     selectedBText: function () { return (this.selectedB) ? this.selectedB.label : '' },
-    deltaVText: function () { return (this.deltaV) ? this.deltaV.toFixed(2) + ' km/s' : '' }
+    deltaVText: function () { return (this.deltaV) ? this.deltaV.toFixed(3) + ' km/s' : '' }
   },
   methods: {
+    getOrbitById: function (nodeId) {
+      return this.finalOrbitsObject[nodeId]
+    },
+    getPosOfOrbit: function (nodeId) {
+      return this.getOrbitById(nodeId).position
+    },
+    getXPosOfOrbit: function (nodeId) {
+      return this.getPosOfOrbit(nodeId).x
+    },
+    getYPosOfOrbit: function (nodeId) {
+      return this.getPosOfOrbit(nodeId).y
+    },
+    hasAtmosphere: function (nodeData) {
+      if (typeof nodeData !== 'undefined' && typeof nodeData.atmosphere !== 'undefined') {
+        return nodeData.atmosphere
+      } else {
+        return false
+      }
+    },
+    ancestorHasAtmosphere: function (nodeData) {
+      if (typeof this.finalOrbitsObject[nodeData.parent] === 'undefined') {
+        return false
+      } else {
+        const ancestor = this.finalOrbitsObject[nodeData.parent]
+        if (this.hasAtmosphere(ancestor.data)) {
+          return true
+        }
+      }
+    },
+    getXMidPointOfDelta: function (deltaObject) {
+      const sourceOrbit = this.getOrbitById(deltaObject.sourceId)
+      const targetOrbit = this.getOrbitById(deltaObject.targetId)
+      const sourceX = sourceOrbit.position.x
+      const targetX = targetOrbit.position.x
+      let xlow, xhigh
+      if (sourceX < targetX) {
+        xlow = sourceX
+        xhigh = targetX
+      } else {
+        xlow = targetX
+        xhigh = sourceX
+      }
+      return xlow + ((xhigh - xlow) / 2)
+    },
+    getYMidPointOfDelta: function (deltaObject) {
+      const sourceOrbit = this.getOrbitById(deltaObject.sourceId)
+      const targetOrbit = this.getOrbitById(deltaObject.targetId)
+      const sourceY = sourceOrbit.position.y
+      const targetY = targetOrbit.position.y
+      let ylow, yhigh
+      if (sourceY < targetY) {
+        ylow = sourceY
+        yhigh = targetY
+      } else {
+        ylow = targetY
+        yhigh = sourceY
+      }
+      return ylow + ((yhigh - ylow) / 2)
+    },
+    getNodeFill: function (node) {
+      switch (node.data.nodeType) {
+        case 'surface':
+          return node.data.color
+        default:
+          return '#888' // TODO add to sass
+      }
+    },
+    nodeIsSurface: function (node) { return (node.data.nodeType === 'surface') },
     setPlanetY: function (amount) {
       this.planetY = amount
       return this.planetY
@@ -123,9 +263,9 @@ export default {
         const orbit = orbits[nodeId]
         orbit.position = { x, y }
       }
-      c('Sun', col(2), this.planetY)
-      c('LSunO', col(1), this.planetY)
-      c('SunT', col(0), this.planetY)
+      c('Sun', col(0), this.planetY)
+      c('LSunO', col(0), incY())
+      c('SunT', col(0), incY())
 
       c('Merc', planetXL, incY())
       c('LMercO', lOrbitXL, this.planetY)
@@ -137,40 +277,23 @@ export default {
       c('VenusCE', captureXR, this.planetY)
       c('VenusT', transferX, this.planetY)
 
-      const moonY = incY()
-      c('MoonT', col(-2), moonY)
-      c('EarthMoonL1', col(-3), moonY - this.planetYDelta)
-      c('EarthMoonL2', col(-3), moonY + this.planetYDelta)
-      c('Moon', col(-5), moonY)
-      c('LMoonO', col(-4), moonY)
-      c('MoonCE', col(-3), this.planetY)
+      const moonX = col(-2)
+      const earthY = incY()
+      const moonLY = incY()
+      c('MoonT', moonX, earthY)
+      c('EarthMoonL1', col(-3), moonLY)
+      c('EarthMoonL2', col(-1), moonLY)
+      c('MoonCE', moonX, this.planetY)
+      c('LMoonO', moonX, incY())
+      c('Moon', moonX, incY())
 
-      const earthY = incY(2 * this.planetYDelta)
-      const earthX = col(-4)
-      const lowEarthOrbitX = col(-3)
-      c('Earth', earthX, earthY)
-      c('LEO', lowEarthOrbitX, earthY)
-      c('EarthCE', 0, moonY)
-      c('GTO', col(-2), earthY)
-      c('GEO', col(-1), earthY)
+      c('EarthCE', 0, earthY)
+      c('GEO', col(-3), earthY - this.planetYDelta)
+      c('GTO', col(-3), earthY)
+      c('LEO', col(-4), earthY)
+      c('Earth', col(-5), earthY)
 
-      let marsSysY = incY(this.planetYDelta)
-      c('Deimos', col(5), marsSysY)
-      c('MarsCE', col(1), marsSysY)
-      c('MarsT', transferX, this.planetY)
-      c('LDeimosO', col(4), this.planetY)
-      c('DeimosCE', col(3), this.planetY)
-      c('DeimosT', col(2), this.planetY)
-
-      marsSysY -= this.planetYDelta
-      c('Phobos', col(5), marsSysY)
-      c('LPhobosO', col(4), marsSysY)
-      c('PhobosCE', col(3), marsSysY)
-      c('PhobosT', col(2), marsSysY)
-
-      marsSysY -= this.planetYDelta
-      c('Mars', col(3), marsSysY)
-      c('LMarsO', col(2), marsSysY)
+      this.marsY = earthY + this.planetYDelta
 
       const vestaY = incY()
       c('VestaT', 0, vestaY)
@@ -205,8 +328,8 @@ export default {
         this.formatData(this.createSystem(id, label, parent))
       )
     },
-    createOuterPlanetMoonSystem: function (
-      name, alignLeft, hasAtmosphere,
+    createPlanetSystem: function (
+      planetName, alignLeft, hasAtmosphere,
       predecessorTransferOrbitId, predecessorHasAtmosphere,
       outerPlanetTransferDV, outerPlanetCaptureDV,
       color, moonsArray,
@@ -216,7 +339,6 @@ export default {
       layoutStartY,
       yOffsetInt
     ) {
-      const positionConstraints = []
       const addPositionData = (node, x, y) => {
         node.position = { x, y }
       }
@@ -228,23 +350,25 @@ export default {
         return currentCol
       }
 
-      // create the outer planet system and the giant
-      const thisSys = name + 'Sys'
-      const outerPlanetSystem = this.createFurnishedSystem(
-        thisSys, name + ' System', 'SunSys'
-      )
-
       // create outer planet
       const planetSurface = this.furnishedOrbitObject({
-        id: name, label: name, nodeType: 'surface', parent: thisSys, color
+        id: planetName, label: planetName, nodeType: 'surface', parent: 'Sun', color, atmosphere: hasAtmosphere
       })
+      this.addOrbit(planetSurface)
 
       // create the outer planet transfer orbit and delta
-      const transferName = name + 'T'
+      const transferName = planetName + 'T'
       const outerPlanetTransfer = this.furnishedOrbitObject(
-        { id: transferName, label: name + ' Transfer', nodeType: 'orbit-transfer', parent: 'SunSys' }
+        {
+          id: transferName,
+          label: planetName + ' Transfer',
+          nodeType: 'orbit-transfer',
+          parent: 'Sun'
+        }
       )
       addPositionData(outerPlanetTransfer, col(0), layoutStartY)
+      this.addOrbit(outerPlanetTransfer)
+
       let predecessorTransferAB
       if (predecessorHasAtmosphere) {
         if (hasAtmosphere) {
@@ -260,98 +384,83 @@ export default {
         }
       }
       const planetAB = (hasAtmosphere) ? 1 : 0
-      const outerPlanetTransferDeltaObject = this.furnishedDeltaObject(
+      const outerPlanetTransferDeltaObject = this.createDeltaObject(
         transferName, predecessorTransferOrbitId, outerPlanetTransferDV, predecessorTransferAB
       )
 
       // create outer planet capture orbit and delta
-      const captureName = name + 'CE'
+      const captureName = planetName + 'CE'
       const outerPlanetCaptureEscape = this.furnishedOrbitObject(
         {
           id: captureName,
-          label: name + ' Capture/Escape',
+          label: planetName + ' Capture/Escape',
           nodeType: 'orbit-capture-escape',
-          parent: thisSys
+          parent: planetName
         }
       )
 
       updateCurrentCol()
       addPositionData(outerPlanetCaptureEscape, col(currentCol), layoutStartY)
-      const outerPlanetCaptureDeltaObject = this.furnishedDeltaObject(
+      this.addOrbit(outerPlanetCaptureEscape)
+
+      const outerPlanetCaptureDeltaObject = this.createDeltaObject(
         transferName, captureName, outerPlanetCaptureDV, planetAB
       )
       updateCurrentCol()
-      const moonTransferY = layoutStartY
-      const moonCaptureY = moonTransferY + (-dir * this.planetYDelta)
-      const moonLowOrbitY = moonCaptureY + (-dir * this.planetYDelta)
-      const moonSurfaceY = moonLowOrbitY + (-dir * this.planetYDelta)
-
+      const moonHighTransferY = layoutStartY
+      // const modifier = -dir
+      const modifier = 1
+      const moonCaptureY = moonHighTransferY + (modifier * this.planetYDelta)
+      const moonLowOrbitY = moonCaptureY + (modifier * this.planetYDelta)
+      const moonSurfaceY = moonLowOrbitY + (modifier * this.planetYDelta)
       let prevSource = outerPlanetCaptureEscape
-      let transferDelta = outerPlanetCaptureDV
-      const moons = moonsArray.map(m => {
+
+      moonsArray.map(m => {
         const moonName = m[1]
         const ab = (typeof m[6] !== 'undefined') ? m[6] : false // moon aeroBraking availability
-        const moonHighTransfer = this.furnishedOrbitObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: thisSys })
-        const moonHighTransferDelta = this.furnishedDeltaObject(prevSource.data.id, moonHighTransfer.data.id, transferDelta, planetAB)
-        addPositionData(moonHighTransfer, col(currentCol), moonTransferY)
-        const moonLowTransfer = this.furnishedOrbitObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: thisSys })
-        const moonCapture = this.furnishedOrbitObject({ id: moonName + 'CE', label: moonName + ' Capture/Escape', nodeType: 'orbit-capture-escape', parent: thisSys })
-        const moonCaptureDelta = this.furnishedDeltaObject(moonLowTransfer.data.id, moonCapture.data.id, m[2], ab)
+        const moonHighTransfer = this.furnishedOrbitObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: planetName })
+        addPositionData(moonHighTransfer, col(currentCol), moonHighTransferY)
+        const moonHighTransferDelta = this.createDeltaObject(prevSource.data.id, moonHighTransfer.data.id, m[0], planetAB)
+        const moonCapture = this.furnishedOrbitObject({ id: moonName + 'CE', label: moonName + ' Capture/Escape', nodeType: 'orbit-capture-escape', parent: planetName })
         addPositionData(moonCapture, col(currentCol), moonCaptureY)
-        const moonLowOrbit = this.furnishedOrbitObject({ id: 'L' + moonName + 'O', label: 'Low ' + moonName + ' Orbit', nodeType: 'orbit', parent: thisSys, altitude: m[4] })
-        addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
-        const moonLowDelta = this.furnishedDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
-        const moonSurface = this.furnishedOrbitObject({ id: moonName, label: moonName, nodeType: 'surface', parent: thisSys, color: '#807E7F' })
-        addPositionData(moonSurface, col(currentCol), moonSurfaceY)
-        const moonSurfaceDelta = this.furnishedDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
-        prevSource = moonHighTransfer
-        transferDelta = m[0]
+        const moonCaptureDelta = this.createDeltaObject(moonHighTransfer.data.id, moonCapture.data.id, m[2], ab)
 
+        const moonLowOrbit = this.furnishedOrbitObject({ id: 'L' + moonName + 'O', label: 'Low ' + moonName + ' Orbit', nodeType: 'orbit', parent: planetName, altitude: m[4] })
+        addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
+        const moonLowDelta = this.createDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
+
+        const atmosphere = (typeof m[7] !== 'undefined' && m[7] === true)
+        const moonSurface = this.furnishedOrbitObject({ id: moonName, label: moonName, nodeType: 'surface', parent: planetName, color: '#807E7F', atmosphere })
+        addPositionData(moonSurface, col(currentCol), moonSurfaceY)
+        const moonSurfaceDelta = this.createDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
+
+        prevSource = moonHighTransfer
         updateCurrentCol()
-        return [
-          moonHighTransfer,
-          moonHighTransferDelta,
-          moonLowTransfer,
-          moonCaptureDelta,
-          moonCapture,
-          moonLowDelta,
-          moonLowOrbit,
-          moonSurface,
-          moonSurfaceDelta
-        ]
+
+        this.addOrbit(moonHighTransfer)
+        this.addFormattedDeltaObject(moonHighTransferDelta)
+        this.addFormattedDeltaObject(moonCaptureDelta)
+        this.addOrbit(moonCapture)
+        this.addFormattedDeltaObject(moonLowDelta)
+        this.addOrbit(moonLowOrbit)
+        this.addOrbit(moonSurface)
+        this.addFormattedDeltaObject(moonSurfaceDelta)
       })
 
-      const lowOrbitName = 'L' + name + 'O'
+      const lowOrbitName = 'L' + planetName + 'O'
       const lowOrbit = this.furnishedOrbitObject({
-        id: lowOrbitName, label: 'Low ' + name + ' Orbit', nodeType: 'orbit', parent: thisSys, altitude: lowOrbitAltitude
+        id: lowOrbitName, label: 'Low ' + planetName + ' Orbit', nodeType: 'orbit', parent: planetName, altitude: lowOrbitAltitude
       })
       addPositionData(lowOrbit, col(currentCol), layoutStartY)
       addPositionData(planetSurface, col(updateCurrentCol()), layoutStartY)
-      const nodesAndEdges = [
-        outerPlanetSystem,
-        planetSurface,
-        outerPlanetTransfer,
-        outerPlanetTransferDeltaObject,
-        outerPlanetCaptureEscape,
-        outerPlanetCaptureDeltaObject,
-        ...[].concat(...moons),
-        lowOrbit,
-        this.furnishedDeltaObject(prevSource.data.id, lowOrbitName, lowOrbitDV, planetAB),
-        this.furnishedDeltaObject(lowOrbitName, name, surfaceDV, planetAB)
-      ]
-
-      return {
-        nodesAndEdges,
-        positionConstraints
-      }
+      this.addFormattedDeltaObject(outerPlanetTransferDeltaObject)
+      this.addFormattedDeltaObject(outerPlanetCaptureDeltaObject)
+      this.addOrbit(lowOrbit)
+      this.addFormattedDeltaObject(this.createDeltaObject(prevSource.data.id, lowOrbitName, lowOrbitDV, planetAB))
+      this.addFormattedDeltaObject(this.createDeltaObject(lowOrbitName, planetName, surfaceDV, planetAB))
     },
     formatData: function (o) {
       return { data: o }
-    },
-    formatDataArray: function (arrayData) {
-      return arrayData.map(o => {
-        return this.formatData(o)
-      })
     },
     furnishSystemObject: function (formatedSystemObject) {
       const o = formatedSystemObject
@@ -384,176 +493,188 @@ export default {
     furnishedOrbitObject: function (unformatedOrbitObject) {
       return this.furnishOrbitObject(this.formatData(unformatedOrbitObject))
     },
-    formatOrbits: function (unformattedOrbitObject) {
-      const keys = Object.keys(unformattedOrbitObject)
-      const orbitArray = []
-      keys.map(k => {
-        orbitArray.push(this.furnishedOrbitObject(unformattedOrbitObject[k]))
+    formatOrbits: function (unformattedOrbitDataObject) {
+      Object.keys(unformattedOrbitDataObject).map((id) => {
+        const orbit = unformattedOrbitDataObject[id]
+        unformattedOrbitDataObject[id] = this.furnishedOrbitObject(orbit)
       })
-      return orbitArray
     },
-    createDeltaObject: function (source, target, dv, ab = 0) {
+    createDeltaObject: function (sourceId, targetId, dv, ab = 0) {
       switch (ab) {
         case 0: ab = 'false'; break
         case 1: ab = 'true'; break
         case 2: ab = 'both'; break
         case 3: ab = 'reverse'; break
       }
-      return { source, target, dv, ab }
+      return { sourceId, targetId, dv, ab }
     },
-    createDeltaDataObject: function (source, target, dv, ab = 0) {
-      return { data: this.createDeltaObject(source, target, dv, ab) }
+    createDeltaObjectFromArray: function (deltaArray) {
+      const a = deltaArray
+      return this.createDeltaObject(a[0], a[1], a[2], a[3])
     },
-    furnishDeltaObject: function (o) {
-      o.data.label = o.data.dv
-      o.selectable = false
+    furnishDeltaObject: function (unfurnishedDeltaObject) {
+      const o = unfurnishedDeltaObject
+      // TODO perhaps remove all 'furnishing'
       return o
     },
-    furnishedDeltaObject: function (source, target, dv, ab = 0) {
-      return this.furnishDeltaObject(
-        this.createDeltaDataObject(source, target, dv, ab)
-      )
-    },
-    formatDeltas: function (deltaArrays) {
+    formatDeltasArray: function (orbitsObject, deltaArrays) {
       // convert array to objects
-      const newDeltaArray = deltaArrays.map(d => {
-        return this.createDeltaObject(d[0], d[1], d[2], d[3])
-      })
-      return this.formatDataArray(newDeltaArray).map(o => {
+      return deltaArrays.map(o => {
         return this.furnishDeltaObject(o)
       })
     },
+    addOrbit: function (orbitData) {
+      this.orbitsObject[orbitData.data.id] = orbitData
+    },
+    addFormattedDeltaObject: function (formattedDeltaObject) {
+      this.formattedDeltaObjectsArray.push(formattedDeltaObject)
+    },
+    addUnformattedDeltaArray: function (unformattedDeltaArray) {
+      const deltaObject = this.createDeltaObjectFromArray(unformattedDeltaArray)
+      const formattedDeltaObject = this.furnishDeltaObject(deltaObject)
+      this.addFormattedDeltaObject(formattedDeltaObject)
+    },
     createData: function () {
-      this.systems = [
-        this.createSystem('SunSys', 'Sun System'),
-        this.createSystem('MercurySys', 'Mercury System', 'SunSys'),
-        this.createSystem('VenusSys', 'Venus System', 'SunSys'),
-        this.createSystem('EarthSys', 'Earth System', 'SunSys'),
-        this.createSystem('MoonSys', 'Moon System', 'EarthSys'),
-        this.createSystem('DeimosSys', 'Deimos System', 'MarsSys'),
-        this.createSystem('MarsSys', 'Mars System', 'SunSys'),
-        this.createSystem('PhobosSys', 'Phobos System', 'MarsSys'),
-        this.createSystem('VestaSys', 'Vesta System', 'SunSys'),
-        this.createSystem('CeresSys', 'Ceres System', 'SunSys')
-      ]
-      const systemData = this.formatSystems(this.systems)
+      this.orbitsObject = Orbits
+      this.applyPositionDataToOrbits(this.orbitsObject)
+      this.formatOrbits(this.orbitsObject)
 
-      this.applyPositionDataToOrbits(OrbitsObject)
-      const orbitsArray = this.formatOrbits(OrbitsObject)
-
-      this.deltas = DeltasArray
       CreateOuterPlanets(this)
 
-      const deltaData = this.formatDeltas(this.deltas)
-      return [
-        ...systemData,
-        ...orbitsArray,
-        ...deltaData,
-        ...this.jupiterSystem.nodesAndEdges,
-        ...this.saturnSystem.nodesAndEdges,
-        ...this.uranusSystem.nodesAndEdges,
-        ...this.neptuneSystem.nodesAndEdges,
-        ...this.plutoSystem.nodesAndEdges,
-        ...this.haumeaSystem.nodesAndEdges,
-        ...this.makemakeSystem.nodesAndEdges
-      ]
+      const finalOrbitsArray = Object.values(this.orbitsObject)
+
+      UnformattedDeltaArrays.map((arr) => {
+        this.addUnformattedDeltaArray(arr)
+      })
+      this.finalDeltasArray = this.formattedDeltaObjectsArray
+      const edgeGraph = {}
+      this.formattedDeltaObjectsArray.map(d => {
+        const source = d.sourceId
+        const target = d.targetId
+        const dv = d.dv
+        if (typeof edgeGraph[source] === 'undefined') {
+          edgeGraph[source] = {}
+        }
+        if (typeof edgeGraph[target] === 'undefined') {
+          edgeGraph[target] = {}
+        }
+        edgeGraph[source][target] = dv
+        edgeGraph[target][source] = dv
+      })
+
+      this.finalEdgeGraph = edgeGraph
+      this.finalOrbitsObject = this.orbitsObject
+      this.finalOrbitsArray = finalOrbitsArray
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearSelectedNodes()
       this.selectedA = nodeData
       this.selectedB = null
       this.deltaV = null
-      const node = this.cy.$('#' + nodeData.id)
-      node.addClass('node-on-path')
-      node.addClass('origin-node')
+      const node = this.mapSVG.querySelector('#' + nodeData.id)
+      node.classList.add('node-on-path')
+      node.classList.add('origin-node')
     },
     handleReceivedOriginTerminal: function (nodeData) {
       this.selectedA = nodeData
-      const node = this.cy.$('#' + nodeData.id)
-      node.addClass('node-on-path')
-      node.addClass('origin-node')
+      const node = this.mapSVG.querySelector('#' + nodeData.id)
+      node.classList.add('node-on-path')
+      node.classList.add('origin-node')
     },
     testIfAeroBrakingIsAvailable: function (edge, previousNode) {
       if (edge.ab === 'both') {
         this.aeroBrakingAvailable = true
       } else {
         // delta is going with the path direction
-        if (previousNode.id === edge.source && edge.ab === 'true') {
+        if (previousNode.id === edge.sourceId && edge.ab === 'true') {
           this.aeroBrakingAvailable = true
         }
 
         // delta is going against the path direction
-        if (previousNode.id === edge.target && edge.ab === 'reverse') {
+        if (previousNode.id === edge.targetId && edge.ab === 'reverse') {
           this.aeroBrakingAvailable = true
         }
       }
     },
     handleReceivedDestinationTerminal: function (nodeData) {
       const self = this
+      if (this.selectedA.id === nodeData.id) {
+        return
+      }
+
+      self.selectedB = nodeData
       self.aeroBrakingAvailable = false
       self.pathSelected = true
-      self.selectedB = nodeData
-      const dijkstra = self.cy.elements().dijkstra(
-        `#${self.selectedA.id}`,
-        function (el) {
-          return parseFloat(el._private.data.dv)
-        }, false
-      )
-      self.cy.$('#' + self.selectedB.id).addClass('destination-node')
-      self.cy.batch(function () {
-        self.cy.$('#SunSys').addClass('path-selected')
+
+      const originNodeData = self.selectedA
+      const originId = self.selectedA.id
+      const destinationNodeData = self.selectedB
+      const destinationId = self.selectedB.id
+
+      self.mapSVG.querySelector('#' + destinationId).classList.add('destination-node')
+      const shortestPath = dijkstrajs.find_path(this.finalEdgeGraph, originId, destinationId)
+
+      let previousNode = null
+      let delta = 0
+      let lastEdge
+      shortestPath.map(nodeId => {
+        // handle node
+        const node = self.finalOrbitsObject[nodeId]
+        self.mapSVG.querySelector('#' + nodeId)
+          .classList.add('node-on-path')
+
+        debugger
+        // handle edge
+        if (previousNode) {
+          // mark the edge SVGs that are on path with .edge-on-path class
+          const cssSelector = '.edge--' + previousNode.data.id + '-' + node.data.id
+          lastEdge = self.mapSVG.querySelector(cssSelector)
+          lastEdge.classList.add('edge-on-path')
+
+          // increase the delta v running total
+          delta += this.finalEdgeGraph[previousNode.data.id][node.data.id]
+        }
+
+        // keep a record the current node so the relevant edges can be identified
+        previousNode = node
       })
 
-      const pathToB = dijkstra.pathTo(`#${self.selectedB.id}`)
-      let previousNode = null
-      pathToB.map(el => {
-        const obj = el._private.data
-        const id = obj.id
-        const cyObj = self.cy.$('#' + id)
+      self.aeroBrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
+      debugger
+      self.deltaV = delta
+      setTimeout(_ => this.$forceUpdate(), 1000)
+    },
+    calculateIfAeroBrakingIsAvailable: function (originNodeData, destinationNodeData) {
+      const self = this
+      const destinationHasAtmosphere = self.hasAtmosphere(destinationNodeData)
 
-        // handle node
-        if (el._private.data.nodeType) {
-          cyObj.addClass('node-on-path')
-          previousNode = obj
+      // If landing on a surface with an atmosphere,
+      // then aerobraking is available
+      if (destinationNodeData.nodeType === 'surface' && destinationHasAtmosphere) {
+        return true
+      }
 
-          // handle edge
+      // If changing system ...
+      if (originNodeData.parent !== destinationNodeData.parent) {
+        // ... and the destination is in the orbit of the parent (eg: Earth to LEO)
+        if (originNodeData.id === destinationNodeData.parent) {
+          if (destinationHasAtmosphere) {
+            return true
+          } else {
+            return false
+          }
         } else {
-          cyObj.addClass('edge-on-path')
-
-          // don't check again if already found to be true once
-          if (self.aeroBrakingAvailable === false) {
-            const edge = el._private.data
-            self.testIfAeroBrakingIsAvailable(edge, previousNode)
+          // ... and the destination is not in the orbit of the parent
+          if (self.ancestorHasAtmosphere(destinationNodeData)) {
+            return true
+          } else {
+            return false
           }
         }
-      })
-      // let offset = 0
-      // const getOffset = function () {
-      //   offset++
-      //   return offset
-      // }
-      // self.interval = setInterval(function () {
-      //   self.cy.batch(function () {
-      //     self.cy.$('.edge-on-path').style({
-      //       'line-dash-offset': getOffset
-      //       // duration: 100000,
-      //       // step: function (thing) {
-      //       //   console.log('anim step', thing, offset)
-      //       //   offset++
-      //       // }
-      //     })
-      //   })
-      // }, 10)
-      self.cy.batch(function () {
-        const allEdges = self.cy.$('edge')
-        const edgesOnPath = self.cy.$('.edge-on-path')
-        const edgesNotOnPath = allEdges.difference(edgesOnPath)
-        edgesNotOnPath.css('opacity', self.opacityLevel)
-      })
-      self.deltaV = dijkstra.distanceTo(`#${self.selectedB.id}`)
+      }
     },
-    nodeSelected: function (target) {
-      const nodeData = target._private.data
+    nodeSelected: function (node) {
+      const nodeData = node.data
 
       if (nodeData.nodeType === 'system') {
         this.clearSelectedNodes()
@@ -573,13 +694,14 @@ export default {
       }
     },
     findById: function (id) {
-      return this.cy.$('#' + id)
+      return this.mapSVG.querySelector('#' + id)
     },
     findByClass: function (className) {
-      return this.cy.$('.' + className)
+      return document.querySelectorAll('.' + className)
     },
     findAndRemoveClass: function (className) {
-      this.findByClass(className).removeClass(className)
+      const els = this.findByClass(className)
+      els.forEach(el => { el.classList.remove(className) })
     },
     reverseSelectedNodes: function () {
       const originalA = this.selectedA
@@ -589,8 +711,8 @@ export default {
       // this.clearSelectedNodes()
       this.selectedA = originalB
       this.selectedB = originalA
-      this.findById(this.selectedA.id).addClass('origin-node')
-      this.findById(this.selectedB.id).addClass('destination-node')
+      this.findById(this.selectedA.id).classList.add('origin-node')
+      this.findById(this.selectedB.id).classList.add('destination-node')
       this.handleReceivedDestinationTerminal(this.selectedB)
     },
     clearSelectedNodes: function () {
@@ -600,40 +722,42 @@ export default {
       this.deltaV = null
       this.aeroBrakingAvailable = false
       clearInterval(this.interval)
-      const self = this
-      this.cy.batch(function () {
-        self.cy.$(':selected').unselect()
-        self.findAndRemoveClass('origin-node')
-        self.findAndRemoveClass('destination-node')
-        self.findAndRemoveClass('node-on-path')
-        self.findAndRemoveClass('edge-on-path')
-        self.findAndRemoveClass('path-selected')
-
-        self.cy.$('edge').css('opacity', 1)
-      })
+      this.findAndRemoveClass('origin-node')
+      this.findAndRemoveClass('destination-node')
+      this.findAndRemoveClass('node-on-path')
+      this.findAndRemoveClass('edge-on-path')
+      this.findAndRemoveClass('path-selected')
     }
   },
   mounted () {
     const self = this
-    const formattedData = self.createData()
-    const map = document.getElementById('map')
-    const cy = cytoscape({
-      container: map, // container to render in
-      elements: formattedData,
-      wheelSensitivity: 0.25, // TODO make this user configurable
-      style: CreateCytoscapeStyles(this, colors),
-      layout: { name: 'preset' }
-    })
-    window.cy = cy
-    self.cy = cy
-    cy.on('mouseover', 'node', function () { map.style.cursor = 'pointer' })
-    cy.on('mouseout', 'node', function () { map.style.cursor = 'default' })
-    cy.on('tap', "node[type != 'system']", (e) => { self.nodeSelected(e.target) })
+    self.createData()
+    this.mapSVG = document.getElementById('map')
+    this.map = this.mapSVG
+    const mapSVG = this.mapSVG
+    this.mapSVG = mapSVG
+    const mapBB = mapSVG.getBBox()
+    const zoomX = mapBB.x
+    const zoomY = mapBB.y
+    console.log('zoom', zoomX, zoomY)
+    panzoom(mapSVG, {
+      onTouch: function (e) {
+        if (e.target.classList.contains('orbit__icon')) {
+          return false
+        } else {
+          return true
+        }
+      },
+      onDoubleClick: function (e) {
+        if (self.pathSelected) {
+          if (e.target.classList.contains('orbit__icon')) {
+          } else {
+          }
+        }
+      }
+    }).zoomAbs(zoomX, zoomY, 0.5)
     setTimeout(() => {
-      this.cytoscapeLoaded = true
-      // var scrollingElement = (document.scrollingElement || document.body)
-      // scrollingElement.scrollTop = scrollingElement.scrollHeight
-      // document.querySelector('#bottom-scroll-marker').scrollIntoView({ behavior: 'smooth' })
+      this.pageLoaded = true
     }, 1000)
   }
 }
@@ -648,7 +772,8 @@ export default {
 *
   box-sizing: border-box
   font-family: "Roboto", sans-serif
-  transition: background-color .25s, color .25s, opacity .25s
+  transition: background-color .25s, color .25s, opacity .25s, stroke .25s
+  transition-timing-function: ease
 
 #page-container
   background-color: $color-light
@@ -864,11 +989,14 @@ export default {
     text-align: left
 
 .map-container
-  background-color: #888
+  background: #888
   opacity: 0
+  overflow: hidden
   position: relative
   z-index: 1
 
+  &:hover
+    cursor: hand
   &--visible
     opacity: 1
 
@@ -901,11 +1029,135 @@ export default {
   @media #{map-get($display-breakpoints, 'md-and-up')}
     grid-row-end: span 2
 
+$color-map-background: $color-grey
+$color-map-light: $color-white
+$color-map-dark: $color-dark
+$color-icon-border: $color-map-light
+$color-origin: $color-light-blue
+$color-destination: $color-orange
+$opacity: 0.2
 .map
-  height: 100%
+  background-color: $color-map-background
+  min-height: 100%
+  overflow: visible
   position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
   text-align: initial
-  width: 100%
+  min-width: 100%
   z-index: 1
+
+  .underlay-html-container
+    position: relative
+    &:before
+      background-color: $color-map-background
+      bottom: 0
+      content: ' '
+      left: 0
+      position: absolute
+      right: 0
+      top: 0
+      z-index: -1
+    & > *
+      z-index: 1
+
+  .underlay
+    fill: $color-map-background
+    z-index: 0
+
+  .orbit
+    $radius: 40
+    $background-radius: $radius - 2
+    stroke: $color-map-light
+    &:hover
+      cursor: pointer
+    &__label
+      background-color: #777
+      border-radius: 4px
+      color: $color-map-light
+      padding: .5em 1em
+      text-align: center
+
+    &__icon
+      stroke: whitesmoke
+      stroke-width: 4
+      r: $radius
+
+    &__icon-background
+      stroke: $color-map-background
+      stroke-width: 4
+      fill: $color-map-background
+      r: $radius
+
+    &__icon-atmosphere
+      r: $radius + 20
+      stroke-width: 0
+      z-index: -1
+
+    &__icon-surface-shadow
+      stroke-width: 0
+      r: $background-radius
+      pointer-events: none
+
+    &.origin-node
+      opacity: 1
+      .orbit__icon
+        stroke: $color-origin
+      .orbit__label
+        color: $color-map-dark
+        background-color: $color-origin
+
+    &.destination-node
+      opacity: 1
+      .orbit__icon
+        stroke: $color-destination
+      .orbit__label
+        color: $color-map-dark
+        background-color: $color-destination
+
+  .edge
+    &__line
+      stroke: whitesmoke
+      stroke-width: 4
+    &__label
+      background-color: $color-map-light
+      border-radius: 4px
+      color: $color-map-dark
+      font-size: 12px
+      margin-bottom: 0
+      padding: .25em
+      text-align: center
+
+.path-selected
+  .fadable
+    opacity: $opacity
+
+  .node-on-path
+    .orbit__icon
+      opacity: 1
+    .orbit__icon-surface-shadow
+      opacity: 1
+    .orbit__label
+      opacity: 1
+    .orbit__icon-atmosphere
+      opacity: 1
+  .node-on-path:not(.origin-node, .destination-node)
+    .orbit__icon
+      stroke: $color-map-dark
+    .orbit__label
+      background-color: $color-map-dark
+      color: $color-map-light
+
+  .edge-on-path
+    .edge
+      &__line
+        stroke: $color-map-dark
+        opacity: 1
+      &__label
+        color: $color-map-light
+        background-color: $color-map-dark
+        opacity: 1
 
 </style>
