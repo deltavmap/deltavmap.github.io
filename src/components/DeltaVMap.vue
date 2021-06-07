@@ -623,7 +623,6 @@ export default {
         self.mapSVG.querySelector('#' + nodeId)
           .classList.add('node-on-path')
 
-        debugger
         // handle edge
         if (previousNode) {
           // mark the edge SVGs that are on path with .edge-on-path class
@@ -640,7 +639,6 @@ export default {
       })
 
       self.aeroBrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
-      debugger
       self.deltaV = delta
       setTimeout(_ => this.$forceUpdate(), 1000)
     },
@@ -739,7 +737,6 @@ export default {
     const mapBB = mapSVG.getBBox()
     const zoomX = mapBB.x
     const zoomY = mapBB.y
-    console.log('zoom', zoomX, zoomY)
     panzoom(mapSVG, {
       onTouch: function (e) {
         if (e.target.classList.contains('orbit__icon')) {
