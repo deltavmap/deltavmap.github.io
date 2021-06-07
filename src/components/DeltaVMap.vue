@@ -107,17 +107,20 @@
           <circle class="orbit__icon-atmosphere fadable"
                   :cx="orbit.position.x"
                   :cy="orbit.position.y"
+                  r="60"
                   v-if="orbit.data.atmosphere"
                   fill="url('#gradient-atmosphere')"
           />
           <circle class="orbit__icon-background underlay"
                   :cx="orbit.position.x"
                   :cy="orbit.position.y"
+                  r="40"
           />
           <circle class="orbit__icon fadable"
                   :cx="orbit.position.x"
                   :cy="orbit.position.y"
                   :fill="getNodeFill(orbit)"
+                  r="40"
           />
           <circle class="orbit__icon-surface-shadow fadable"
                   v-if="nodeIsSurface(orbit)"
