@@ -19,23 +19,22 @@
     <v-card>
       <v-container class="px-8 py-8">
         <h2 class="mb-4">About <span class="text-uppercase">delta v map</span></h2>
-        <p>How to use this app:</p>
+        <p class="font-weight-medium">This app calculates the required speed to change orbits.
+        </p>
+        <p class="px-4 py-3 grey lighten-3">
+          The change in speed is known as <a href="https://en.wikipedia.org/wiki/Delta-v">delta v</a>
+          (change in velocity).
+          Specifically, this app will calculate the total delta v requirement for a
+          <a href="https://en.wikipedia.org/wiki/Hohmann_transfer_orbit">Hohmann transfer orbit</a>,
+          which is normally the most efficient route.
+        </p>
+        <h3>How to use this app</h3>
         <p>
           <ol>
-            <li>Click on the origin</li>
-            <li>Click on the destination</li>
+            <li>First click on the origin</li>
+            <li>Then click on the destination</li>
+            <li>The number shown is the delta v required for that route</li>
           </ol>
-        </p>
-        <p>
-          This will calculate the total delta-v requirement for a Hohman transfer for that particular journey.
-        </p>
-        <p class="px-4 py-3 grey lighten-3">
-          <a href="https://en.wikipedia.org/wiki/Delta-v">Delta-v</a>
-          is the change of velocity required to move from one orbit to another
-        </p>
-        <p class="px-4 py-3 grey lighten-3">
-          A <a href="">Hohmann transfer orbit</a>
-          is normally the most practical and efficient way to get from A to B
         </p>
         <p>
           Press <span class="u-button">reverse</span> to swap the origin and destination.
@@ -101,6 +100,12 @@
 @import '@/sass/utils/button'
 .u-button
   font-size: 12px
+
+.v-dialog
+  a
+    color: $color-purpley
+  .v-btn__content
+    color: $color-purpley !important
 </style>
 <script>
 export default {
