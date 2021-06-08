@@ -723,7 +723,8 @@ export default {
     this.mapSVG = mapSVG
     const mapBB = mapSVG.getBBox()
     const zoomX = mapBB.x
-    const zoomY = mapBB.y
+    // const zoomY = mapBB.y
+    const zoomY = 200
     panzoom(mapSVG, {
       onTouch: function (e) {
         if (e.target.classList.contains('orbit__icon')) {
