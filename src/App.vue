@@ -1,15 +1,15 @@
 <template>
   <v-app>
-    <DeltaVMap></DeltaVMap>
+    <DeltaVMapPage></DeltaVMapPage>
   </v-app>
 </template>
 <script>
-import DeltaVMap from './components/DeltaVMap'
+import DeltaVMapPage from './components/DeltaVMapPage'
 
 export default {
   name: 'App',
   components: {
-    DeltaVMap
+    DeltaVMapPage
   }
 }
 </script>

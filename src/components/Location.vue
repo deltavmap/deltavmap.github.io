@@ -1,0 +1,146 @@
+<template>
+  <g>
+    <foreignObject :x="xPos - 75"
+                   :y="(yPos + 65)"
+                   width="150" height="64">
+      <div class="underlay-html-container">
+        <p class="orbit__label fadable" xmlns="http://www.w3.org/1999/xhtml">
+          {{ label }}
+        </p>
+      </div>
+    </foreignObject>
+    <circle class="orbit__icon-atmosphere fadable"
+            :cx="xPos"
+            :cy="yPos"
+            r="60"
+            v-if="hasAtmosphere"
+            fill="url('#gradient-atmosphere')"
+    />
+    <circle class="orbit__icon-background underlay"
+            :cx="xPos"
+            :cy="yPos"
+            r="40"
+    />
+    <circle class="orbit__icon fadable"
+            :cx="xPos"
+            :cy="yPos"
+            :fill="fillColor"
+            r="40"
+    />
+    <circle class="orbit__icon-surface-shadow fadable"
+            v-if="locationIsSurface(orbitType)"
+            :cx="xPos"
+            :cy="yPos"
+            :r="radius"
+            stroke-width="0"
+            fill="url('#gradient-shadow')"
+    />
+  </g>
+</template>
+<script>
+export default {
+  props: [
+    'orbit',
+    'orbitType',
+    // 'orbitIsSurface',
+    'label',
+    'radius',
+    'fillColor',
+    'xPos',
+    'yPos',
+    'hasAtmosphere'
+  ],
+  methods: {
+    locationIsSurface: function (type) { return (type === 'surface') }
+  }
+}
+</script>
+<style lang="sass">
+@import '@/sass/variables'
+
+.underlay-html-container
+  position: relative
+  &:before
+    background-color: $color-map-background
+    bottom: 0
+    content: ' '
+    left: 0
+    position: absolute
+    right: 0
+    top: 0
+    z-index: -1
+  & > *
+    z-index: 1
+
+.underlay
+  fill: $color-map-background
+  z-index: 0
+
+.orbit
+  $radius: 40
+  $background-radius: $radius - 2
+  stroke: $color-map-light
+  &:hover
+    cursor: pointer
+  &__label
+    background-color: #777
+    border-radius: 4px
+    color: $color-map-light
+    padding: .5em 1em
+    text-align: center
+
+  &__icon
+    stroke: whitesmoke
+    stroke-width: 4
+    r: $radius
+
+  &__icon-background
+    stroke: $color-map-background
+    stroke-width: 4
+    fill: $color-map-background
+    r: $radius
+
+  &__icon-atmosphere
+    r: $radius + 20
+    stroke-width: 0
+    z-index: -1
+
+  &__icon-surface-shadow
+    stroke-width: 0
+    r: $background-radius
+    pointer-events: none
+
+  &.origin-node
+    opacity: 1
+    .orbit__icon
+      stroke: $color-origin
+    .orbit__label
+      color: $color-map-dark
+      background-color: $color-origin
+
+  &.destination-node
+    opacity: 1
+    .orbit__icon
+      stroke: $color-destination
+    .orbit__label
+      color: $color-map-dark
+      background-color: $color-destination
+
+.path-selected
+  .node-on-path
+    .orbit__icon
+      opacity: 1
+    .orbit__icon-surface-shadow
+      opacity: 1
+    .orbit__label
+      opacity: 1
+    .orbit__icon-atmosphere
+      opacity: 1
+  .node-on-path:not(.origin-node, .destination-node)
+    .orbit__icon
+      stroke: $color-map-dark
+    .orbit__label
+      background-color: $color-map-dark
+      color: $color-map-light
+
+</style>
