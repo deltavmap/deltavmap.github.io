@@ -69,7 +69,12 @@
         <g v-for="(edge, edgeIndex) in finalDeltasArray"
            :key="'delta-' + edgeIndex"
            :id="edge.sourceId + '-' + edge.targetId"
-           :class="['edge', 'edge--' + edge.sourceId + '-' + edge.targetId, 'edge--' + edge.targetId + '-' + edge.sourceId ]"
+           :class="[
+             'edge',
+             'edge--' + edge.sourceId + '-' + edge.targetId,
+             'edge--' + edge.targetId + '-' + edge.sourceId,
+             edgeOnPathGraph[edge.sourceId][edge.targetId] ? 'edge-on-path' : ''
+           ]"
         >
           <delta :deltaData="edge"
                  :source="getOrbitById(edge.sourceId)"
@@ -131,6 +136,8 @@ export default {
       finalOrbitsArray: [],
       finalDeltasArray: [],
       finalEdgeGraph: {},
+      edgeOnPathGraph: {},
+      edgeOnPathList: [],
       colDelta: 250,
       planetY: 0,
       planetYDelta: 350,
@@ -176,7 +183,7 @@ export default {
         case 'surface':
           return node.data.color
         default:
-          return '#888' // TODO add to sass
+          return 'rgba(0,0,0,0)' // TODO add to sass
       }
     },
     // nodeIsSurface: function (node) { return (node.data.nodeType === 'surface') },
@@ -488,21 +495,27 @@ export default {
       })
       this.finalDeltasArray = this.formattedDeltaObjectsArray
       const edgeGraph = {}
+      const edgeOnPathGraph = {}
       this.formattedDeltaObjectsArray.map(d => {
         const source = d.sourceId
         const target = d.targetId
         const dv = d.dv
         if (typeof edgeGraph[source] === 'undefined') {
           edgeGraph[source] = {}
+          edgeOnPathGraph[source] = {}
         }
         if (typeof edgeGraph[target] === 'undefined') {
           edgeGraph[target] = {}
+          edgeOnPathGraph[target] = {}
         }
         edgeGraph[source][target] = dv
         edgeGraph[target][source] = dv
+        edgeOnPathGraph[source][target] = false
+        edgeOnPathGraph[target][source] = false
       })
 
       this.finalEdgeGraph = edgeGraph
+      this.edgeOnPathGraph = edgeOnPathGraph
       this.finalOrbitsObject = this.orbitsObject
       this.finalOrbitsArray = finalOrbitsArray
     },
@@ -536,6 +549,19 @@ export default {
         }
       }
     },
+    markEdgeOnPath: function (sourceId, targetId) {
+      this.edgeOnPathGraph[sourceId][targetId] = true
+      this.edgeOnPathGraph[targetId][sourceId] = true
+      this.edgeOnPathList.push([sourceId, targetId])
+    },
+    demarkAllEdgesOnPath: function () {
+      this.edgeOnPathList.map(a => {
+        const sourceId = a[0]
+        const targetId = a[1]
+        this.edgeOnPathGraph[sourceId][targetId] = false
+        this.edgeOnPathGraph[targetId][sourceId] = false
+      })
+    },
     handleReceivedDestinationTerminal: function (nodeData) {
       const self = this
       if (this.selectedA.id === nodeData.id) {
@@ -556,7 +582,7 @@ export default {
 
       let previousNode = null
       let delta = 0
-      let lastEdge
+      // let lastEdge
       shortestPath.map(nodeId => {
         // handle node
         const node = self.finalOrbitsObject[nodeId]
@@ -566,9 +592,10 @@ export default {
         // handle edge
         if (previousNode) {
           // mark the edge SVGs that are on path with .edge-on-path class
-          const cssSelector = '.edge--' + previousNode.data.id + '-' + node.data.id
-          lastEdge = self.mapSVG.querySelector(cssSelector)
-          lastEdge.classList.add('edge-on-path')
+          // const cssSelector = '.edge--' + previousNode.data.id + '-' + node.data.id
+          // lastEdge = self.mapSVG.querySelector(cssSelector)
+          // lastEdge.classList.add('edge-on-path')
+          this.markEdgeOnPath(previousNode.data.id, node.data.id)
 
           // increase the delta v running total
           delta += this.finalEdgeGraph[previousNode.data.id][node.data.id]
@@ -663,7 +690,8 @@ export default {
       this.findAndRemoveClass('origin-node')
       this.findAndRemoveClass('destination-node')
       this.findAndRemoveClass('node-on-path')
-      this.findAndRemoveClass('edge-on-path')
+      // this.findAndRemoveClass('edge-on-path')
+      this.demarkAllEdgesOnPath()
       this.findAndRemoveClass('path-selected')
     }
   },
@@ -820,17 +848,17 @@ export default {
           &--active
             overflow: hidden
             position: relative
-            //&:before
-            //  content: ''
-            //  position: absolute
-            //  display: inline-block
-            //  width: 5px
-            //  left: 0
-            //  top: 0
-            //  bottom: 0
-            //  background-color: $color-dark
-            border-style: solid
-            border-width: 2px
+            &:before
+              content: ''
+              position: absolute
+              display: inline-block
+              width: 5px
+              left: 0
+              top: 0
+              bottom: 0
+              background-color: $color-dark
+            //border-style: solid
+            //border-width: 2px
           @media #{map-get($display-breakpoints, 'sm-and-down')}
             background-color: $color-dark
             border-radius: .5rem
@@ -848,25 +876,31 @@ export default {
 
       &--origin
         .controls__value
+          @media #{map-get($display-breakpoints, 'sm-and-down')}
+            border: 2px solid $color-origin
+            color: $color-white
           &--active
-            border-color: $color-origin
-            color: $color-origin
-            //&:before
-            //  background-color: $color-origin
+            //border-color: $color-origin
+            //color: $color-origin
+            &:before
+              background-color: $color-origin
           @media #{map-get($display-breakpoints, 'sm-and-down')}
             //&:before
             //  background-color: $color-origin
 
       &--destination
         .controls__value
-          &--active
-            border-color: $color-destination
-            color: $color-destination
-            //&:before
-            //  background-color: $color-destination
           @media #{map-get($display-breakpoints, 'sm-and-down')}
+            border: 2px solid $color-destination
+            color: $color-white
+          &--active
+            //border-color: $color-destination
+            //color: $color-destination
             &:before
               background-color: $color-destination
+          @media #{map-get($display-breakpoints, 'sm-and-down')}
+            //&:before
+            //  background-color: $color-destination
 
     &__label
       text-transform: capitalize
@@ -929,7 +963,7 @@ export default {
     text-align: left
 
 .map-container
-  background: #888
+  background: $color-map-background
   opacity: 0
   overflow: hidden
   position: relative

@@ -21,10 +21,9 @@
 <script>
 export default {
   props: [
-    // 'x1', 'x2', 'y1', 'y2',
-    // 'midPointX', 'midPointY',
     'deltaData',
-    'source', 'target'
+    'source',
+    'target'
   ],
   computed: {
     midPointX: function () { return this.getXMidPointOfDelta() },
