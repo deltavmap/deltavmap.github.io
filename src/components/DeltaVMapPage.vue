@@ -37,7 +37,7 @@
       >
         <div class="controls__value">
           <span class="controls__aerobraking_check">✓</span>
-          <span class="controls__aerobraking_label">Aero-breaking
+          <span class="controls__aerobraking_label">Aerobraking
             <span v-show="!aeroBrakingAvailable">un</span>available
           </span>
         </div>
