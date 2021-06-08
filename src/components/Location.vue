@@ -19,19 +19,19 @@
     <circle class="orbit__icon-background underlay"
             :cx="xPos"
             :cy="yPos"
-            r="40"
+            :r="formattedRadius"
     />
     <circle class="orbit__icon fadable"
             :cx="xPos"
             :cy="yPos"
             :fill="fillColor"
-            r="40"
+            :r="formattedRadius"
     />
     <circle class="orbit__icon-surface-shadow fadable"
             v-if="locationIsSurface(orbitType)"
             :cx="xPos"
             :cy="yPos"
-            :r="radius"
+            :r="formattedShadowRadius"
             stroke-width="0"
             fill="url('#gradient-shadow')"
     />
@@ -50,6 +50,10 @@ export default {
     'yPos',
     'hasAtmosphere'
   ],
+  computed: {
+    formattedRadius: function () { return this.radius + 'px' },
+    formattedShadowRadius: function () { return (this.radius - 2) + 'px' }
+  },
   methods: {
     locationIsSurface: function (type) { return (type === 'surface') }
   }
@@ -78,7 +82,6 @@ export default {
 
 .orbit
   $radius: 40
-  $background-radius: $radius - 2
   stroke: $color-map-light
   &:hover
     cursor: pointer
@@ -93,22 +96,18 @@ export default {
   &__icon
     stroke: whitesmoke
     stroke-width: 4
-    r: $radius
 
   &__icon-background
     stroke: $color-map-background
     stroke-width: 4
     fill: $color-map-background
-    r: $radius
 
   &__icon-atmosphere
-    r: $radius + 20
     stroke-width: 0
     z-index: -1
 
   &__icon-surface-shadow
     stroke-width: 0
-    r: $background-radius
     pointer-events: none
 
   &.origin-node
