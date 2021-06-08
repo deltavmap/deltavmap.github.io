@@ -201,9 +201,7 @@ export default {
         return false
       } else {
         const ancestor = this.finalOrbitsObject[nodeData.parent]
-        if (this.hasAtmosphere(ancestor.data)) {
-          return true
-        }
+        return this.hasAtmosphere(ancestor.data))
       }
     },
     getNodeFill: function (node) {
@@ -220,7 +218,7 @@ export default {
       return this.planetY
     },
     incPlanetYDelta: function (amount = this.planetYDelta) {
-      this.setPlanetY(this.planetY + amount); return this.planetY
+      return this.setPlanetY(this.planetY + amount)
     },
     applyPositionDataToOrbits: function (orbits) {
       const col = n => n * this.colDelta
@@ -288,7 +286,7 @@ export default {
     },
     getFixedNodeConstraints: function () { return this.fixedNodeConstraints },
     addFixedNodeConstraint: function (c) { this.fixedNodeConstraints.push(c) },
-    addFixedNodeConstraints: function (a) { a.map(c => this.addFixedNodeConstraint(c)) },
+    addFixedNodeConstraints: function (a) { a.forEach(c => this.addFixedNodeConstraint(c)) },
     createSystem: function (id, label, parent = null) {
       return {
         id,
@@ -450,9 +448,7 @@ export default {
       return this.furnishSystemObject(this.formatData(unformatedSystemObject))
     },
     formatSystems: function (unformatedSystemsArray) {
-      return unformatedSystemsArray.map(o => {
-        return this.furnishedSystemObject(o)
-      })
+      return unformatedSystemsArray.map(o => this.furnishedSystemObject(o)))
     },
     furnishOrbitObject: function (formatedObject) {
       const o = formatedObject
@@ -494,9 +490,7 @@ export default {
     },
     formatDeltasArray: function (orbitsObject, deltaArrays) {
       // convert array to objects
-      return deltaArrays.map(o => {
-        return this.furnishDeltaObject(o)
-      })
+      return deltaArrays.map(o => this.furnishDeltaObject(o)))
     },
     addOrbit: function (orbitData) {
       this.orbitsObject[orbitData.data.id] = orbitData
@@ -518,7 +512,7 @@ export default {
 
       const finalOrbitsArray = Object.values(this.orbitsObject)
 
-      UnformattedDeltaArrays.map((arr) => {
+      UnformattedDeltaArrays.forEach((arr) => {
         this.addUnformattedDeltaArray(arr)
       })
       this.finalDeltasArray = this.formattedDeltaObjectsArray
@@ -611,7 +605,7 @@ export default {
       let previousNode = null
       let delta = 0
       // let lastEdge
-      shortestPath.map(nodeId => {
+      shortestPath.forEach(nodeId => {
         // handle node
         const node = self.finalOrbitsObject[nodeId]
         self.mapSVG.querySelector('#' + nodeId)
@@ -651,18 +645,9 @@ export default {
       if (originNodeData.parent !== destinationNodeData.parent) {
         // ... and the destination is in the orbit of the parent (eg: Earth to LEO)
         if (originNodeData.id === destinationNodeData.parent) {
-          if (destinationHasAtmosphere) {
-            return true
-          } else {
-            return false
-          }
+          return destinationHasAtmosphere
         } else {
-          // ... and the destination is not in the orbit of the parent
-          if (self.ancestorHasAtmosphere(destinationNodeData)) {
-            return true
-          } else {
-            return false
-          }
+          return self.ancestorHasAtmosphere(destinationNodeData)
         }
       }
     },
