@@ -1,6 +1,7 @@
 <template>
   <div id="page-container">
     <h1 class="site-title"><span class="site-icon" style="">Delta V Map</span></h1>
+
     <div class="controls text-left">
       <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !selectedA">
         <label class="controls__label">origin</label>
@@ -51,6 +52,9 @@
     </div>
 <!--    <delta-v-map path-selected="pathSelected"></delta-v-map>-->
     <div class="map-container" :class="{'map-container--visible': pageLoaded}">
+      <map-snack>
+        Use this app to calculate the required speed to change orbits.
+      </map-snack>
       <svg id="map"
            class="map"
            :class="{'path-selected' : pathSelected}"
@@ -126,9 +130,11 @@ import CreateOuterPlanets from './create-outer-planets'
 import AboutDialog from './AboutDialog'
 import Location from './Location'
 import Delta from './Delta'
+import MapSnack from './MapSnack'
 
 export default {
   components: {
+    MapSnack,
     // DeltaVMap,
     AboutDialog,
     Delta,
@@ -136,6 +142,7 @@ export default {
   },
   data () {
     return {
+      mapSnack: true,
       mapSVG: null,
       nodeRadius: 40,
       selectedA: null,
@@ -155,7 +162,7 @@ export default {
       planetYDelta: 350,
       pathSelected: false,
       aeroBrakingAvailable: false,
-      pageLoaded: true
+      pageLoaded: false
     }
   },
   computed: {
@@ -1026,7 +1033,6 @@ export default {
   bottom: 0
   text-align: initial
   min-width: 100%
-  z-index: 1
 
 .path-selected
   .fadable
