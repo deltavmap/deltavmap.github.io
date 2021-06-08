@@ -25,6 +25,8 @@ const array = [
   { id: 'MoonCE', label: 'Moon Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Moon' },
   { id: 'EarthMoonL1', label: 'Earth Moon L1', nodeType: 'orbit', parent: 'Moon' },
   { id: 'EarthMoonL2', label: 'Earth Moon L2', nodeType: 'orbit', parent: 'Moon' },
+  { id: 'NRHOT', label: 'NRHO Transfer', nodeType: 'transfer', parent: 'Moon' },
+  { id: 'NRHO', label: 'Near Rectilinear Halo Orbit', nodeType: 'orbit', parent: 'Moon' },
 
   { id: 'Vesta', label: 'Vesta', nodeType: 'surface', parent: 'Sun', color: 'grey' },
   { id: 'LVestaO', label: 'Low Vesta Orbit', nodeType: 'orbit', parent: 'Vesta', altitude: 20 },

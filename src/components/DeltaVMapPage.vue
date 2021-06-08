@@ -260,6 +260,8 @@ export default {
       c('EarthMoonL2', col(-1), moonLY)
       c('MoonCE', moonX, this.planetY)
       c('LMoonO', moonX, incY())
+      c('NRHOT', col(-3), this.planetY)
+      c('NRHO', col(-4), this.planetY)
       c('Moon', moonX, incY())
 
       c('EarthCE', 0, earthY)
