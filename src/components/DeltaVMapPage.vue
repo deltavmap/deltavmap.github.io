@@ -6,7 +6,10 @@
       <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !selectedA">
         <label class="controls__label">origin</label>
         <div class="controls__value "
-             :class="{'controls__value--active': selectedA}">
+             :class="{
+               'controls__value--active': selectedA,
+               'controls__value--is-surface': selectedIsSurface(selectedA)
+             }">
           <span v-show="!selectedAText"
                 class="controls__placeholder controls__placeholder--origin">Select origin</span>
           &#8203;{{ selectedAText }}
@@ -15,7 +18,10 @@
       <div class="controls__section controls__section--destination" v-show="$vuetify.breakpoint.mdAndUp || (selectedA && !selectedB)">
         <label class="controls__label">destination</label>
         <div class="controls__value "
-             :class="{'controls__value--active': selectedB}">
+             :class="{
+               'controls__value--active': selectedB,
+               'controls__value--is-surface': selectedIsSurface(selectedB)
+             }">
           <span v-show="!selectedBText"
                 class="controls__placeholder controls__placeholder--destination">Select destination</span>
           &#8203;{{ selectedBText }}
@@ -680,6 +686,9 @@ export default {
         }
       }
     },
+    selectedIsSurface: function (nodeData) {
+      return (nodeData && typeof nodeData.nodeType !== 'undefined' && nodeData.nodeType === 'surface')
+    },
     findById: function (id) {
       return this.mapSVG.querySelector('#' + id)
     },
@@ -960,6 +969,9 @@ export default {
       &--active
         background-color: $color-dark
         color: $color-light
+      &--is-surface
+        text-transform: uppercase
+        letter-spacing: .2em
 
     &__placeholder
       opacity: 0.7
