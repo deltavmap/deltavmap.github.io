@@ -104,7 +104,7 @@ $border-radius: 4px
   &:hover
     cursor: pointer
   &__label
-    background-color: lighten($color-map-background, 5%)
+    background-color: darken($color-map-background, 5%)
     border-radius: $border-radius
     color: $color-map-light
     // filter: grayscale(20%)
