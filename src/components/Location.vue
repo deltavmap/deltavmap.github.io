@@ -1,5 +1,5 @@
 <template>
-  <g>
+  <g :class="{'location-is-surface': locationIsSurface}">
     <circle class="orbit__icon-atmosphere fadable"
             :cx="xPos"
             :cy="yPos"
@@ -35,7 +35,7 @@
             :r="formattedRadius"
     />
     <circle class="orbit__icon-surface-shadow fadable"
-            v-if="locationIsSurface(orbitType)"
+            v-if="locationIsSurface"
             :cx="xPos"
             :cy="yPos"
             :r="formattedShadowRadius"
@@ -68,10 +68,10 @@ export default {
         gradId += 'shadow-' + dir
       }
       return "url('" + gradId + "')"
+    },
+    locationIsSurface: function () {
+      return this.orbitType === 'surface'
     }
-  },
-  methods: {
-    locationIsSurface: function (type) { return (type === 'surface') }
   }
 }
 </script>
@@ -143,6 +143,11 @@ $border-radius: 4px
     .orbit__label
       color: $color-map-dark
       background-color: $color-destination
+
+.location-is-surface
+  .orbit__label
+    letter-spacing: .2em
+    text-transform: uppercase
 
 .path-selected
   .node-on-path

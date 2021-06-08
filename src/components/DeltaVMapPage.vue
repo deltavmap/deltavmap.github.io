@@ -1,8 +1,8 @@
 <template>
-  <div id="page-container">
-    <h1 class="site-title"><span class="site-icon" style="">Delta V Map</span></h1>
+  <div id="page-container" :class="{'page-loaded': pageLoaded}">
+    <h1 class="site-title fade-in"><span class="site-icon" style="">Delta V Map</span></h1>
 
-    <div class="controls text-left">
+    <div class="controls text-left fade-in">
       <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !selectedA">
         <label class="controls__label">origin</label>
         <div class="controls__value "
@@ -51,10 +51,11 @@
       </div>
     </div>
 <!--    <delta-v-map path-selected="pathSelected"></delta-v-map>-->
-    <div class="map-container" :class="{'map-container--visible': pageLoaded}">
-      <map-snack>
-        Use this app to calculate the required speed to change orbits.
-      </map-snack>
+    <banner class="fade-in">Use this app to calculate the required speed to change orbits.</banner>
+    <!-- :class="{'map-container--visible': pageLoaded}" -->
+    <div class="map-container fade-in">
+<!--      <map-snack>this app to calculate the required speed to change orbits.</map-snack>-->
+
       <svg id="map"
            class="map"
            :class="{'path-selected' : pathSelected}"
@@ -130,15 +131,17 @@ import CreateOuterPlanets from './create-outer-planets'
 import AboutDialog from './AboutDialog'
 import Location from './Location'
 import Delta from './Delta'
-import MapSnack from './MapSnack'
+// import MapSnack from './MapSnack'
+import Banner from './Banner'
 
 export default {
   components: {
-    MapSnack,
+    // MapSnack,
     // DeltaVMap,
     AboutDialog,
     Delta,
-    Location
+    Location,
+    Banner
   },
   data () {
     return {
@@ -761,7 +764,7 @@ export default {
   transition-timing-function: ease
 
 #page-container
-  background-color: $color-light
+  background-color: $color-map-background
   display: grid
   height: 100vh
   width: 100vw
@@ -789,9 +792,16 @@ export default {
 .site-title
   @extend .light-box-shadow
   color: rgba(0,0,0,.85)
+  background-color: $color-light
   position: relative
   text-transform: uppercase
   z-index: 2
+
+  @media #{map-get($display-breakpoints, 'sm-and-down')}
+    grid-row-start: 1
+    grid-row-end: 1
+    grid-column-start: 1
+    grid-column-end: 1
 
   &-container
     background-color: $color-light
@@ -994,11 +1004,20 @@ export default {
 
 .map-container
   background: $color-map-background
+  grid-row-start: 1
+  grid-row-end: 3
+  grid-column-start: 2
+  grid-column-end: 2
   opacity: 0
   overflow: hidden
   position: relative
   z-index: 1
 
+  @media #{map-get($display-breakpoints, 'sm-and-down')}
+    grid-column-start: 1
+    grid-column-end: 1
+    grid-row-start: 2
+    grid-row-end: 2
   &:hover
     cursor: hand
   &--visible
@@ -1049,4 +1068,9 @@ export default {
   .fadable
     opacity: $opacity
 
+.fade-in
+  opacity: 0
+.page-loaded
+  .fade-in
+    opacity: 1
 </style>
