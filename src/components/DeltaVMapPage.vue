@@ -766,7 +766,7 @@ export default {
 @import '@/sass/variables'
 
 .light-box-shadow
-  box-shadow: 0 1px 20px 0 #666
+  box-shadow: 0 1px 20px 0 rgba(0,0,0,.1)
 
 *
   box-sizing: border-box
@@ -780,6 +780,9 @@ export default {
   height: 100vh
   width: 100vw
 
+  &.page-loaded:before
+    opacity: 1
+
   &:before
     @extend .light-box-shadow
     bottom: 0
@@ -790,6 +793,7 @@ export default {
     top: 0
     width: $controls-width
     z-index: 2
+    opacity: 0
 
   @media #{map-get($display-breakpoints, 'sm-and-down')}
     grid-auto-rows: 50px minmax(0, 1fr) auto
