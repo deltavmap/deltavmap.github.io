@@ -49,7 +49,6 @@ export default {
   props: [
     'orbit',
     'orbitType',
-    // 'orbitIsSurface',
     'label',
     'radius',
     'fillColor',
@@ -78,11 +77,13 @@ export default {
 </script>
 <style lang="sass">
 @import '@/sass/variables'
+$border-radius: 4px
 
 .underlay-html-container
   position: relative
   &:before
     background-color: $color-map-background
+    border-radius: $border-radius
     bottom: 0
     content: ' '
     left: 0
@@ -104,7 +105,7 @@ export default {
     cursor: pointer
   &__label
     background-color: lighten($color-map-background, 5%)
-    border-radius: 4px
+    border-radius: $border-radius
     color: $color-map-light
     // filter: grayscale(20%)
     padding: .5em 1em

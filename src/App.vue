@@ -13,3 +13,7 @@ export default {
   }
 }
 </script>
+<style lang="sass">
+html
+  overflow: hidden
+</style>
