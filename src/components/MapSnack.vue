@@ -14,7 +14,6 @@ export default {
   data () {
     const snackTitle = 'snack-intro-hide'
     const introHide = localStorage.getItem(snackTitle)
-    console.log('introHide', introHide)
     return {
       snackTitle,
       fadeAway: false,
@@ -24,7 +23,6 @@ export default {
   methods: {
     handleClick: function () {
       this.fadeAway = true
-      debugger
       localStorage.setItem(this.snackTitle, 'true')
       setTimeout(_ => {
         this.display = false
