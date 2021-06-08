@@ -740,6 +740,9 @@ export default {
         }
       }
     }).zoomAbs(zoomX, zoomY, 0.5)
+    setTimeout(_ => {
+      this.pageLoaded = true
+    }, 1000)
   }
 }
 </script>
@@ -784,10 +787,17 @@ export default {
 
 .site-title
   @extend .light-box-shadow
-  background-color: $color-light
+  color: rgba(0,0,0,.85)
   position: relative
   text-transform: uppercase
-  z-index: 3
+  z-index: 2
+
+  &-container
+    background-color: $color-light
+    display: flex
+    align-items: center
+    justify-content: space-between
+    z-index: 3
   @media #{map-get($display-breakpoints, 'sm-and-down')}
     font-size: 1.25rem
     line-height: 2.25rem
