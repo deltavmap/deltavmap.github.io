@@ -11,8 +11,8 @@ export default function (deltaVMap) {
     0.67,
     'orange',
     [
-      [0.34, 'Deimos', 0.65, 0.002, 0.004],
-      [0.4, 'Phobos', 0.54, 0.003, 0.005]
+      [0.34, 'Deimos', 0.65, 0.002, 1, 0.004],
+      [0.4, 'Phobos', 0.54, 0.003, 1, 0.005]
     ],
     0.7, 200, 3.6,
     marsX, marsY, 0
