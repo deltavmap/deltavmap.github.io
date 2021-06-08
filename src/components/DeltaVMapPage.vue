@@ -57,13 +57,25 @@
            viewBox="-3000 -100 3000 5000"
       >
         <defs>
-          <linearGradient id="gradient-shadow" gradientTransform="rotate(45)">
-            <stop offset="25%"  stop-color="rgba(255,255,255,.5)" />
-            <stop offset="75%" stop-color="rgba(0,0,0,.5)" />
+          <linearGradient id="gradient-shadow-left" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"  stop-color="rgba(255,255,255,0.5)" />
+            <stop offset="75%" stop-color="rgba(0,0,0.5)" />
+          </linearGradient>
+          <linearGradient id="gradient-shadow-right" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"  stop-color="rgba(255,255,255,0.5)" />
+            <stop offset="75%" stop-color="rgba(0,0,0.5)" />
           </linearGradient>
           <radialGradient id="gradient-atmosphere" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
             <stop offset="0%" style="stop-color:rgb(255,255,255); stop-opacity:1" />
             <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0" />
+          </radialGradient>
+          <radialGradient id="gradient-sun" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+            <stop offset="0%" style="stop-color:rgb(255,255,255,0.1); stop-opacity:1" />
+            <stop offset="100%" style="stop-color:rgb(0,0,0,0.2);stop-opacity:1" />
+          </radialGradient>
+          <radialGradient id="gradient-sun-corona" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+            <stop offset="0%" style="stop-color:rgb(255,255,255,0.5); stop-opacity:1" />
+            <stop offset="100%" style="stop-color:rgb(255,255,255,0.5);stop-opacity:0" />
           </radialGradient>
         </defs>
         <g v-for="(edge, edgeIndex) in finalDeltasArray"

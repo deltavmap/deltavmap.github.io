@@ -1,5 +1,12 @@
 <template>
   <g>
+    <circle class="orbit__icon-atmosphere fadable"
+            :cx="xPos"
+            :cy="yPos"
+            r="180"
+            v-if="orbit.data.id === 'Sun'"
+            fill="url('#gradient-sun-corona')"
+    />
     <foreignObject :x="xPos - 75"
                    :y="(yPos + 65)"
                    width="150" height="64">
@@ -33,7 +40,7 @@
             :cy="yPos"
             :r="formattedShadowRadius"
             stroke-width="0"
-            fill="url('#gradient-shadow')"
+            :fill="shadowFill"
     />
   </g>
 </template>
@@ -52,7 +59,17 @@ export default {
   ],
   computed: {
     formattedRadius: function () { return this.radius + 'px' },
-    formattedShadowRadius: function () { return (this.radius - 2) + 'px' }
+    formattedShadowRadius: function () { return (this.radius - 2) + 'px' },
+    shadowFill: function () {
+      let gradId = '#gradient-'
+      if (this.orbit.data.id === 'Sun') {
+        gradId += 'sun'
+      } else {
+        const dir = (this.xPos > 0) ? 'right' : 'left'
+        gradId += 'shadow-' + dir
+      }
+      return "url('" + gradId + "')"
+    }
   },
   methods: {
     locationIsSurface: function (type) { return (type === 'surface') }
