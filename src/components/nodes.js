@@ -26,21 +26,6 @@ const array = [
   { id: 'EarthMoonL1', label: 'Earth Moon L1', nodeType: 'orbit', parent: 'Moon' },
   { id: 'EarthMoonL2', label: 'Earth Moon L2', nodeType: 'orbit', parent: 'Moon' },
 
-  { id: 'Mars', label: 'Mars', nodeType: 'surface', parent: 'Sun', color: '#BA8958', atmosphere: true },
-  { id: 'LMarsO', label: 'Low Mars Orbit', nodeType: 'orbit', parent: 'Mars', altitude: 200 },
-  { id: 'PhobosT', label: 'Phobos Transfer Orbit', nodeType: 'orbit-transfer', parent: 'Mars', altitude: 1 },
-  { id: 'DeimosT', label: 'Deimos Transfer Orbit', nodeType: 'orbit-transfer', parent: 'Mars', altitude: 1 },
-  { id: 'MarsCE', label: 'Mars Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Mars' },
-  { id: 'MarsT', label: 'Mars Transfer', nodeType: 'orbit-transfer', parent: 'Sun' },
-
-  { id: 'Deimos', label: 'Deimos', nodeType: 'surface', parent: 'Mars', color: 'grey' },
-  { id: 'LDeimosO', label: 'Low Deimos Orbit', nodeType: 'orbit', parent: 'Deimos' },
-  { id: 'DeimosCE', label: 'Deimos Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Deimos' },
-
-  { id: 'Phobos', label: 'Phobos', nodeType: 'surface', parent: 'Mars', color: 'grey' },
-  { id: 'LPhobosO', label: 'Low Phobos Orbit', nodeType: 'orbit', parent: 'Phobos' },
-  { id: 'PhobosCE', label: 'Phobos Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Phobos' },
-
   { id: 'Vesta', label: 'Vesta', nodeType: 'surface', parent: 'Sun', color: 'grey' },
   { id: 'LVestaO', label: 'Low Vesta Orbit', nodeType: 'orbit', parent: 'Vesta', altitude: 20 },
   { id: 'VestaCE', label: 'Vesta Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Vesta' },
