@@ -83,9 +83,10 @@ export default {
   &:hover
     cursor: pointer
   &__label
-    background-color: #777
+    background-color: lighten($color-map-background, 5%)
     border-radius: 4px
     color: $color-map-light
+    // filter: grayscale(20%)
     padding: .5em 1em
     text-align: center
 
