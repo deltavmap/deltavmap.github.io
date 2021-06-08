@@ -1,5 +1,5 @@
 const array = [
-  { id: 'Sun', label: 'Sun', nodeType: 'surface', parent: 'MilkyWay', color: 'yellow' },
+  { id: 'Sun', label: 'Sun', nodeType: 'surface', parent: 'MilkyWay', color: '#ffc' },
   { id: 'LSunO', label: 'Low Sun Orbit', nodeType: 'orbit', parent: 'Sun', altitude: '10000' },
   { id: 'SunT', label: 'Sun Transfer', nodeType: 'orbit-transfer', parent: 'Sun' },
 
