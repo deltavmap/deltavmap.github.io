@@ -3,7 +3,7 @@
     <circle class="orbit__icon-atmosphere fadable"
             :cx="xPos"
             :cy="yPos"
-            r="400"
+            r="300"
             v-if="orbit.data.id === 'Sun'"
             fill="url('#gradient-sun-corona')"
     />
