@@ -264,7 +264,7 @@ export default {
       c('NRHO', col(-4), this.planetY)
       c('Moon', moonX, incY())
 
-      c('EarthCE', 0, earthY)
+      c('EarthCE', col(-1), earthY)
       c('GEO', col(-3), earthY - this.planetYDelta)
       c('GTO', col(-3), earthY)
       c('LEO', col(-4), earthY)
