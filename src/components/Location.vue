@@ -20,18 +20,6 @@
         </div>
       </body>
     </foreignObject>
-<!--    <rectangle width="100"-->
-<!--               :x="xPos - 75"-->
-<!--               :y="(yPos + 65)">-->
-<!--    </rectangle>-->
-<!--    <text :x="xPos - 75"-->
-<!--          :y="(yPos + 65)"-->
-<!--          width="100"-->
-<!--          stroke="white"-->
-<!--          stroke-width="1px"-->
-<!--          fill="white"-->
-<!--    >{{ label }}</text>-->
-
     <circle class="orbit__icon-atmosphere fadable"
       :cx="xPos"
       :cy="yPos"
