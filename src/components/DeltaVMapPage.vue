@@ -64,8 +64,8 @@
       <p>
         See the ABOUT page for more information.
       </p>
-      <p>This is app is still in active development.
-        Currently it does not render well 💩 for certain combinations of Safari/iOS.
+      <p class="px-2 py-1 rounded" style="background-color: #444">⚠️This is app is still in active development.
+        Currently it does not render well 💩 for certain combinations of <span style="color: crimson">Safari/iOS.</span>
         Please try another browser/OS combination for now.
       </p>
     </banner>
