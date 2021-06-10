@@ -55,6 +55,15 @@
             </a>.
           </p>
           <p>Latest changes are <a href="https://github.com/deltavmap/deltavmap.github.io/commits/main">here</a> (commits log).</p>
+          <h4>Some known issues</h4>
+          <ul>
+            <li>Looks 💩 on Safari/iOS</li>
+            <li>Scrolling on mobile</li>
+            <li>Jumpy buttons on mobile</li>
+            <li>The high DeltaV for Venus is confusing.</li>
+            <li>The NRHO values are unsubstantiated</li>
+            <li>No Earth transfer orbit</li>
+          </ul>
         </div>
         <div>
           <h3>Credits</h3>
@@ -106,6 +115,10 @@
     color: $color-purpley
   .v-btn__content
     color: $color-purpley !important
+  p
+    margin-bottom: 1em
+  h2, h3, h4
+    margin: 1em 0 .5em
 </style>
 <script>
 export default {
