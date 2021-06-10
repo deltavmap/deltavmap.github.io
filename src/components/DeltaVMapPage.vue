@@ -749,9 +749,11 @@ export default {
     this.map = this.mapSVG
     const mapSVG = this.mapSVG
     this.mapSVG = mapSVG
-    // earthX = -500
-    // const zoomY = 500
-    panzoom(mapSVG, {
+    const zoomLevel = 0.3
+    const clientY = 200
+    let mapWidth = document.querySelector('.map-container').offsetWidth
+    mapWidth = 100 + mapWidth + mapWidth * zoomLevel
+    this.panzoom = panzoom(mapSVG, {
       maxZoom: 4,
       minZoom: 0.025,
       onTouch: function (e) {
@@ -769,9 +771,9 @@ export default {
         }
       }
     }).zoomAbs(
-      (window.innerWidth / 2) * 1.2,
-      200,
-      0.2
+      (mapWidth / 2),
+      clientY,
+      zoomLevel
     )
     setTimeout(_ => {
       this.pageLoaded = true
