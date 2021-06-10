@@ -5,34 +5,15 @@
   >
     <div class="map-banner">
       <slot></slot>
-<!--      <hr>-->
-<!--      <p>-->
-<!--        Is iPhone: {{ isIPhoneOs }}-->
-<!--      </p>-->
-<!--      <hr>-->
-<!--      <p>-->
-<!--        Is Safari: {{ isSafari }}-->
-<!--      </p>-->
-<!--      <hr>-->
-<!--      <p>-->
-<!--        {{ userOs }}-->
-<!--      </p>-->
-      <div v-if="notCompatible">This App is not compatible with Safari on iPhone OS</div>
-
       <p class="text-center pb-0 mb-0">
       <button type="button"
               @click="handleClose"
       >close</button>
       </p>
-
     </div>
   </div>
 </template>
 <script>
-/**
- * Firefox/Linux - Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0
- * Brave/Linux - Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36
- */
 export default {
   data () {
     const bannerTitle = 'banner-intro-hide'
@@ -40,20 +21,7 @@ export default {
     return {
       bannerTitle,
       fadeAway: false,
-      displayBanner: introHide !== 'true',
-      userOs: navigator.userAgent || 'no userAgent'
-    }
-  },
-  computed: {
-    isIPhoneOs: function () {
-      return (this.userOs.search('iPhone OS') >= 0)
-    },
-    isSafari: function () {
-      // return (this.userOs.search('Safari') >= 0)
-      return this.$browserDetect.isSafari
-    },
-    notCompatible: function () {
-      return (this.isIPhoneOs && this.isSafari)
+      displayBanner: introHide !== 'true'
     }
   },
   methods: {
