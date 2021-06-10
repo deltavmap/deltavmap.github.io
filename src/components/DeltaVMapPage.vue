@@ -72,11 +72,11 @@
     <!-- :class="{'map-container--visible': pageLoaded}" -->
     <div class="map-container fade-in">
 <!--      <map-snack>this app to calculate the required speed to change orbits.</map-snack>-->
-
+<!--      viewBox="-3000 -100 3000 4000"-->
       <svg id="map"
            class="map"
            :class="{'path-selected' : pathSelected}"
-           viewBox="-3000 -100 3000 5000"
+
       >
         <defs>
           <linearGradient id="gradient-shadow-left" x1="100%" y1="0%" x2="0%" y2="100%">
@@ -116,12 +116,14 @@
           >
           </delta>
         </g>
+<!--        :transform="'translate(' + orbit.position.x + ',' + orbit.position.y + ')'"-->
         <g v-for="(orbit, orbitIndex) in finalOrbitsArray"
            :key="orbitIndex"
            class="orbit"
            :id="orbit.data.id"
            @click="nodeSelected(orbit)"
            @tap="nodeSelected(orbit)"
+
         >
           <location :orbit="orbit"
                     :label="orbit.data.label"
@@ -746,11 +748,11 @@ export default {
     this.map = this.mapSVG
     const mapSVG = this.mapSVG
     this.mapSVG = mapSVG
-    const mapBB = mapSVG.getBBox()
-    const zoomX = mapBB.x
-    // const zoomY = mapBB.y
-    const zoomY = 200
+    // earthX = -500
+    // const zoomY = 500
     panzoom(mapSVG, {
+      maxZoom: 4,
+      minZoom: 0.025,
       onTouch: function (e) {
         if (e.target.classList.contains('orbit__icon')) {
           return false
@@ -765,7 +767,10 @@ export default {
           }
         }
       }
-    }).zoomAbs(zoomX, zoomY, 0.5)
+    }).zoomAbs(
+      2300, // (window.innerWidth / 2) * 1.1,
+      -2000,
+      0.6)
     setTimeout(_ => {
       this.pageLoaded = true
     }, 1000)
@@ -1084,14 +1089,9 @@ export default {
 .map
   background-color: $color-map-background
   min-height: 100%
+  width: 100%
   overflow: visible
-  position: absolute
-  top: 0
-  left: 0
-  right: 0
-  bottom: 0
   text-align: initial
-  min-width: 100%
 
 .path-selected
   .fadable

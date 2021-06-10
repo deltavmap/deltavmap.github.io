@@ -7,21 +7,37 @@
             v-if="orbit.data.id === 'Sun'"
             fill="url('#gradient-sun-corona')"
     />
+
     <foreignObject :x="xPos - 75"
                    :y="(yPos + 65)"
-                   width="150" height="64">
-      <div class="underlay-html-container">
-        <p class="orbit__label fadable" xmlns="http://www.w3.org/1999/xhtml">
-          {{ label }}
-        </p>
-      </div>
+                   width="150"
+                   height="64">
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="underlay-html-container">
+          <p class="orbit__label fadable" xmlns="http://www.w3.org/1999/xhtml">
+            {{ label }}
+          </p>
+        </div>
+      </body>
     </foreignObject>
+<!--    <rectangle width="100"-->
+<!--               :x="xPos - 75"-->
+<!--               :y="(yPos + 65)">-->
+<!--    </rectangle>-->
+<!--    <text :x="xPos - 75"-->
+<!--          :y="(yPos + 65)"-->
+<!--          width="100"-->
+<!--          stroke="white"-->
+<!--          stroke-width="1px"-->
+<!--          fill="white"-->
+<!--    >{{ label }}</text>-->
+
     <circle class="orbit__icon-atmosphere fadable"
-            :cx="xPos"
-            :cy="yPos"
-            r="60"
-            v-if="hasAtmosphere"
-            fill="url('#gradient-atmosphere')"
+      :cx="xPos"
+      :cy="yPos"
+      r="60"
+      v-if="hasAtmosphere"
+      fill="url('#gradient-atmosphere')"
     />
     <circle class="orbit__icon-background underlay"
             :cx="xPos"
@@ -71,6 +87,10 @@ export default {
     },
     locationIsSurface: function () {
       return this.orbitType === 'surface'
+    },
+    labelTransformValue: function () {
+      return 'translate(' + (this.xPos - 75) + ',' + (this.yPos + 65) + ')'
+      // return 'translate(100, 300)'
     }
   }
 }
@@ -78,6 +98,10 @@ export default {
 <style lang="sass">
 @import '@/sass/variables'
 $border-radius: 4px
+
+*
+  transform: none
+  transition: none
 
 .underlay-html-container
   position: relative
