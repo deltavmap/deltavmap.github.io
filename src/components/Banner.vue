@@ -36,17 +36,18 @@ export default {
 }
 </script>
 <style lang="sass">
-@import '@/sass/variables'
+@import '../sass/variables'
+@import '../sass/utils/shadow-box'
+
 .map-banner
+  @extend .u-shadow--medium
   background-color: $color-map-dark
   border-radius: .5em
   color: $color-map-light
-  max-width: 400px
+  max-width: 360px
   margin: 1rem
-  padding: .5em 1em
-
-  p,div
-    padding: 0 0 1rem
+  padding: 1em 1em
+  text-align: center
 
   button
     color: hotpink

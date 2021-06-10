@@ -58,15 +58,15 @@
     </div>
 <!--    <delta-v-map path-selected="pathSelected"></delta-v-map>-->
     <banner class="fade-in">
-      <p>
-        Use this app to <span class="font-weight-medium">calculate the speed required to change orbits</span>.
+      <p class="px-2 py-1 rounded" style="background-color: #444">
+        ⚠ This is app is still in active development.
       </p>
       <p>
-        See the ABOUT page for more information.
+        Use this app to: <br>
+        <span class="font-weight-medium">calculate the speed required to change orbits</span>.
       </p>
-      <p class="px-2 py-1 rounded" style="background-color: #444">⚠️This is app is still in active development.
-        Currently it does not render well 💩 for certain combinations of <span style="color: crimson">Safari/iOS.</span>
-        Please try another browser/OS combination for now.
+      <p>
+        Please view the ABOUT page for more information.
       </p>
     </banner>
     <!-- :class="{'map-container--visible': pageLoaded}" -->
@@ -780,9 +780,7 @@ export default {
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
 @import '@/sass/variables'
-
-.light-box-shadow
-  box-shadow: 0 1px 20px 0 rgba(0,0,0,.1)
+@import '@/sass/utils/shadow-box.sass'
 
 *
   box-sizing: border-box
@@ -800,7 +798,7 @@ export default {
     opacity: 1
 
   &:before
-    @extend .light-box-shadow
+    @extend .u-shadow
     bottom: 0
     content: ''
     left: 0
@@ -821,7 +819,7 @@ export default {
     grid-template-columns: $controls-width auto
 
 .site-title
-  @extend .light-box-shadow
+  @extend .u-shadow
   color: rgba(0,0,0,.85)
   background-color: $color-light
   position: relative
@@ -877,7 +875,7 @@ export default {
       left: -1.4em
 
 .controls
-  @extend .light-box-shadow
+  @extend .u-shadow
   $shadow: 2px
   background-color: $color-light
   color: $color-dark
@@ -1058,7 +1056,7 @@ export default {
     opacity: 1
 
   &__prompt
-    @extend .light-box-shadow
+    @extend .u-shadow
     background-color: $color-dark
     border-radius: .5rem
     border-left-width: 5px
