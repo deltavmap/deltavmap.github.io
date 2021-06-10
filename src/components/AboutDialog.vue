@@ -60,7 +60,7 @@
             <li>Looks 💩 on Safari/iOS</li>
             <li>Scrolling on mobile</li>
             <li>Jumpy buttons on mobile</li>
-            <li>The high DeltaV for Venus is confusing.</li>
+            <li>The high DeltaV for Venus is confusing</li>
             <li>The NRHO values are unsubstantiated</li>
             <li>No Earth transfer orbit</li>
           </ul>
