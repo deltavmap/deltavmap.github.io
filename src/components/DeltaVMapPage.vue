@@ -769,9 +769,10 @@ export default {
         }
       }
     }).zoomAbs(
-      2300, // (window.innerWidth / 2) * 1.1,
-      -2000,
-      0.6)
+      (window.innerWidth / 2) * 1.2,
+      200,
+      0.2
+    )
     setTimeout(_ => {
       this.pageLoaded = true
     }, 1000)
