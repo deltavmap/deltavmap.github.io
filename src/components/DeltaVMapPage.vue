@@ -821,7 +821,7 @@ export default {
 .site-title
   @extend .u-shadow
   color: rgba(0,0,0,.85)
-  background-color: $color-light
+  background-color: $color-panel-background
   position: relative
   text-transform: uppercase
   z-index: 2
@@ -877,7 +877,7 @@ export default {
 .controls
   @extend .u-shadow
   $shadow: 2px
-  background-color: $color-light
+  background-color: $color-panel-background
   color: $color-dark
   display: flex
   z-index: 2
