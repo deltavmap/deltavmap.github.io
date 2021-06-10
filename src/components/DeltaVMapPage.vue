@@ -92,12 +92,13 @@
             <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0" />
           </radialGradient>
           <radialGradient id="gradient-sun" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-            <stop offset="0%" style="stop-color:rgb(255,255,255,0.1); stop-opacity:1" />
-            <stop offset="100%" style="stop-color:rgb(0,0,0,0.2);stop-opacity:1" />
+            <stop offset="0%" style="stop-color:white; stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#bba; stop-opacity:1" />
           </radialGradient>
           <radialGradient id="gradient-sun-corona" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-            <stop offset="0%" style="stop-color:rgb(255,255,255,0.5); stop-opacity:1" />
-            <stop offset="100%" style="stop-color:rgb(255,255,255,0.5);stop-opacity:0" />
+            <stop offset="0%" style="stop-color:white; stop-opacity:1" />
+            <stop offset="10%" style="stop-color:white; stop-opacity:0.45" />
+            <stop offset="100%" style="stop-color:white; stop-opacity:0" />
           </radialGradient>
         </defs>
         <g v-for="(edge, edgeIndex) in finalDeltasArray"
