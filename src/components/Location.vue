@@ -8,18 +8,6 @@
             fill="url('#gradient-sun-corona')"
     />
 
-    <foreignObject :x="xPos - 75"
-                   :y="(yPos + 65)"
-                   width="150"
-                   height="64">
-      <body xmlns="http://www.w3.org/1999/xhtml">
-        <div class="underlay-html-container">
-          <p class="orbit__label fadable" xmlns="http://www.w3.org/1999/xhtml">
-            {{ label }}
-          </p>
-        </div>
-      </body>
-    </foreignObject>
     <circle class="orbit__icon-atmosphere fadable"
       :cx="xPos"
       :cy="yPos"
@@ -135,22 +123,28 @@ $border-radius: 4px
     padding: .5em 1em
     text-align: center
 
-  &__icon
-    stroke: whitesmoke
-    stroke-width: 4
+  &__icon-atmosphere
+    stroke-width: 0
+    z-index: -1
 
   &__icon-background
     stroke: $color-map-background
     stroke-width: 4
     fill: $color-map-background
+    z-index: 1
 
-  &__icon-atmosphere
+  &__icon
+    stroke: whitesmoke
+    stroke-width: 4
+    z-index: 2
+
+  &__icon-earth-indicator
     stroke-width: 0
-    z-index: -1
 
   &__icon-surface-shadow
     stroke-width: 0
     pointer-events: none
+    z-index: 2
 
   &.origin-node
     opacity: 1
