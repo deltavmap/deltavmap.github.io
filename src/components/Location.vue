@@ -46,6 +46,18 @@
             stroke-width="0"
             :fill="shadowFill"
     />
+    <foreignObject :x="xPos - 75"
+                   :y="(yPos + 65)"
+                   width="150"
+                   height="64">
+      <body xmlns="http://www.w3.org/1999/xhtml">
+      <div class="underlay-html-container">
+        <p class="orbit__label fadable" xmlns="http://www.w3.org/1999/xhtml">
+          {{ label }}
+        </p>
+      </div>
+      </body>
+    </foreignObject>
   </g>
 </template>
 <script>
