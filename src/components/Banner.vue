@@ -5,9 +5,11 @@
   >
     <div class="map-banner">
       <slot></slot>
-      <button type="button"
-              @click="handleClose"
-      >close</button>
+      <p class="text-center pb-0 mb-0">
+        <button type="button"
+                @click="handleClose"
+        >close</button>
+      </p>
     </div>
   </div>
 </template>
@@ -39,10 +41,12 @@ export default {
   background-color: $color-map-dark
   border-radius: .5em
   color: $color-map-light
-  display: flex
-  justify-content: space-between
   max-width: 400px
+  margin: 1rem
   padding: .5em 1em
+
+  p,div
+    padding: 0 0 1rem
 
   button
     color: hotpink
@@ -50,6 +54,7 @@ export default {
     letter-spacing: .12em
     margin-left: .5rem
     text-transform: uppercase
+    text-align: center
 
   &-container
     grid-column-start: 2
@@ -60,7 +65,7 @@ export default {
     margin: 0 auto
     position: relative
     height: 0
-    top: 1rem
+    top: 0
     z-index: 2
     opacity: 1
     transition: all .25s

@@ -57,7 +57,18 @@
       </div>
     </div>
 <!--    <delta-v-map path-selected="pathSelected"></delta-v-map>-->
-    <banner class="fade-in">Use this app to calculate the required speed to change orbits.</banner>
+    <banner class="fade-in">
+      <p>
+        Use this app to <span class="font-weight-medium">calculate the speed required to change orbits</span>.
+      </p>
+      <p>
+        See the ABOUT page for more information.
+      </p>
+      <p>This is app is still in active development.
+        Currently it does not render well 💩 for certain combinations of Safari/iOS.
+        Please try another browser/OS combination for now.
+      </p>
+    </banner>
     <!-- :class="{'map-container--visible': pageLoaded}" -->
     <div class="map-container fade-in">
 <!--      <map-snack>this app to calculate the required speed to change orbits.</map-snack>-->
