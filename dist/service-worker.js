@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.1ca182bfb4810b3d317dd2f18a876c2f.js"
+  "/precache-manifest.796aeb6709f4dadce0e9e4d981d4594e.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "deltavmap"});
