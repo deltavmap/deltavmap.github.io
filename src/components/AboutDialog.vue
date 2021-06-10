@@ -19,7 +19,7 @@
     <v-card>
       <v-container class="px-8 py-8">
         <h2 class="mb-4">About <span class="text-uppercase">delta v map</span></h2>
-        <p class="font-weight-medium">This app calculates the required speed to change orbits.
+        <p class="font-weight-medium">This app calculates the speed required to change orbits.
         </p>
         <p class="px-4 py-3 grey lighten-3">
           The change in speed is known as <a href="https://en.wikipedia.org/wiki/Delta-v">delta v</a>
