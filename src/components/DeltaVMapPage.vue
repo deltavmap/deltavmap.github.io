@@ -246,7 +246,7 @@ export default {
         return false
       } else {
         const ancestor = this.finalOrbitsObject[nodeData.parent]
-        return this.hasAtmosphere(ancestor.data))
+        return this.hasAtmosphere(ancestor.data)
       }
     },
     getNodeFill: function (node) {
@@ -495,7 +495,7 @@ export default {
       return this.furnishSystemObject(this.formatData(unformatedSystemObject))
     },
     formatSystems: function (unformatedSystemsArray) {
-      return unformatedSystemsArray.map(o => this.furnishedSystemObject(o)))
+      return unformatedSystemsArray.map(o => this.furnishedSystemObject(o))
     },
     furnishOrbitObject: function (formatedObject) {
       const o = formatedObject
@@ -537,7 +537,7 @@ export default {
     },
     formatDeltasArray: function (orbitsObject, deltaArrays) {
       // convert array to objects
-      return deltaArrays.map(o => this.furnishDeltaObject(o)))
+      return deltaArrays.map(o => this.furnishDeltaObject(o))
     },
     addOrbit: function (orbitData) {
       this.orbitsObject[orbitData.data.id] = orbitData
