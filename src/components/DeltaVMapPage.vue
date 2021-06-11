@@ -3,7 +3,7 @@
     <h1 class="site-title fade-in"><span class="site-icon" style="">Delta V Map</span></h1>
 
     <div class="controls text-left fade-in">
-      <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !selectedA">
+      <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !locationOrigin">
         <label class="controls__label">origin</label>
         <div class="controls__value "
              :class="{
