@@ -5,10 +5,10 @@
   >
     <div class="map-banner">
       <slot></slot>
-      <p class="text-center pb-0 mb-0">
-      <button type="button"
-              @click="handleClose"
-      >close</button>
+      <p class="text-center pb-0 mb-0" >
+        <button @click="handleClose" type="button">
+        close
+        </button>
       </p>
     </div>
   </div>
@@ -49,11 +49,15 @@ export default {
   padding: 1em 1em
   text-align: center
 
-  button
+  button[type=button]
+    @extend .u-shadow--medium
+    border-width: 1px
+    border-style: solid
+    border-radius: 1em
     color: hotpink
     font-size: .8em
     letter-spacing: .12em
-    margin-left: .5rem
+    padding: 1em 2em
     text-transform: uppercase
     text-align: center
 

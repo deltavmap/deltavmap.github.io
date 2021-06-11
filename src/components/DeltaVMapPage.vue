@@ -62,7 +62,7 @@
     </div>
 <!--    <delta-v-map path-selected="pathSelected"></delta-v-map>-->
     <banner class="fade-in">
-      <p class="px-2 py-1 rounded" style="background-color: #444">
+      <p class="px-2 py-2 rounded" style="background-color: #444">
         ⚠ This is app is still in active development.
       </p>
       <p>
