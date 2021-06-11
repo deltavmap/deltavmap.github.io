@@ -7,37 +7,37 @@
         <label class="controls__label">origin</label>
         <div class="controls__value "
              :class="{
-               'controls__value--active': selectedA,
-               'controls__value--is-surface': selectedIsSurface(selectedA)
+               'controls__value--active': locationOrigin,
+               'controls__value--is-surface': selectedIsSurface(locationOrigin)
              }"
              @click="handleOriginClick()"
         >
-          <span v-show="!selectedAText"
+          <span v-show="!locationOriginText"
                 class="controls__placeholder controls__placeholder--origin">Select origin</span>
-          &#8203;{{ selectedAText }}
+          &#8203;{{ locationOriginText }}
         </div>
       </div>
-      <div class="controls__section controls__section--destination" v-show="$vuetify.breakpoint.mdAndUp || (selectedA && !selectedB)">
+      <div class="controls__section controls__section--destination" v-show="$vuetify.breakpoint.mdAndUp || (locationOrigin && !locationDestination)">
         <label class="controls__label">destination</label>
         <div class="controls__value "
              :class="{
-               'controls__value--active': selectedB,
-               'controls__value--is-surface': selectedIsSurface(selectedB)
+               'controls__value--active': locationDestination,
+               'controls__value--is-surface': selectedIsSurface(locationDestination)
              }"
              @click="handleDestinationClick()"
         >
-          <span v-show="!selectedBText"
+          <span v-show="!locationDestinationText"
                 class="controls__placeholder controls__placeholder--destination">Select destination</span>
-          &#8203;{{ selectedBText }}
+          &#8203;{{ locationDestinationText }}
         </div>
       </div>
-      <div class="controls__section" v-show="$vuetify.breakpoint.mdAndUp || (selectedA && selectedB)">
+      <div class="controls__section" v-show="$vuetify.breakpoint.mdAndUp || (locationOrigin && locationDestination)">
         <label class="controls__label">delta v</label>
         <div class="controls__value" :class="{'controls__value--active': deltaV}" >&#8203;{{ deltaVText }}</div>
       </div>
       <div class="controls__section controls__aerobraking"
            :class="{'controls__aerobraking--active': aeroBrakingAvailable}"
-           v-show="$vuetify.breakpoint.mdAndUp || (selectedA && selectedB)"
+           v-show="$vuetify.breakpoint.mdAndUp || (locationOrigin && locationDestination)"
       >
         <div class="controls__value">
           <span class="controls__aerobraking_check">✓</span>
@@ -49,11 +49,11 @@
       <div class="controls__section controls__buttons d-flex justify-space-between">
         <div><v-btn small
                     color="grey lighten-1"
-                    :disabled="!selectedA || !selectedB"
+                    :disabled="!locationOrigin || !locationDestination"
                     @click="reverseSelectedNodes">reverse</v-btn></div>
         <div><v-btn small
                     color="grey lighten-1"
-                    :disabled="!selectedA && !selectedB"
+                    :disabled="!locationOrigin && !locationDestination"
                     @click="clearPath">clear</v-btn></div>
         <div>
           <about-dialog />
@@ -129,8 +129,8 @@
            @click="nodeSelected(orbit)"
            @tap="nodeSelected(orbit)"
            :class="{
-             'origin-node': orbit.data.id === selectedAId,
-             'destination-node': orbit.data.id === selectedBId,
+             'origin-node': orbit.data.id === locationOriginId,
+             'destination-node': orbit.data.id === locationDestinationId,
              'node-on-path': isNodeOnPath(orbit.data.id)
            }"
         >
@@ -176,8 +176,8 @@ export default {
       mapSnack: true,
       mapSVG: null,
       nodeRadius: 40,
-      selectedA: false,
-      selectedB: false,
+      locationOrigin: false,
+      locationDestination: false,
       deltaV: null,
       fixedNodeConstraints: [],
       systemsObject: {},
@@ -198,13 +198,13 @@ export default {
     }
   },
   computed: {
-    selectedAText: function () { return (this.selectedA) ? this.selectedA.label : '' },
-    selectedBText: function () { return (this.selectedB) ? this.selectedB.label : '' },
-    selectedAId: function () {
-      return (typeof this.selectedA === 'object') ? this.selectedA.id : ''
+    locationOriginText: function () { return (this.locationOrigin) ? this.locationOrigin.label : '' },
+    locationDestinationText: function () { return (this.locationDestination) ? this.locationDestination.label : '' },
+    locationOriginId: function () {
+      return (typeof this.locationOrigin === 'object') ? this.locationOrigin.id : ''
     },
-    selectedBId: function () {
-      return (typeof this.selectedB === 'object') ? this.selectedB.id : ''
+    locationDestinationId: function () {
+      return (typeof this.locationDestination === 'object') ? this.locationDestination.id : ''
     },
     deltaVText: function () { return (this.deltaV) ? this.deltaV.toFixed(3) + ' km/s' : '' }
   },
@@ -216,12 +216,12 @@ export default {
       return !this.isUndefined(thing)
     },
     handleOriginClick: function () {
-      if (this.selectedA) { // TODO necessary?
+      if (this.locationOrigin) { // TODO necessary?
         this.clearSelectedOrigin()
       }
     },
     handleDestinationClick: function () {
-      if (this.selectedB) { // TODO necessary?
+      if (this.locationDestination) { // TODO necessary?
         this.clearSelectedDestination()
       }
     },
@@ -596,14 +596,14 @@ export default {
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearPath()
-      this.selectedA = nodeData
-      this.selectedB = false
+      this.locationOrigin = nodeData
+      this.locationDestination = false
       this.deltaV = null
     },
     handleReceivedOriginTerminal: function (nodeData) {
-      this.selectedA = nodeData
+      this.locationOrigin = nodeData
 
-      if (this.selectedA && this.selectedB) {
+      if (this.locationOrigin && this.locationDestination) {
         this.computePath()
       }
     },
@@ -649,10 +649,10 @@ export default {
       self.aeroBrakingAvailable = false
       self.pathSelected = true
 
-      const originNodeData = self.selectedA
-      const originId = self.selectedA.id
-      const destinationNodeData = self.selectedB
-      const destinationId = self.selectedB.id
+      const originNodeData = self.locationOrigin
+      const originId = self.locationOrigin.id
+      const destinationNodeData = self.locationDestination
+      const destinationId = self.locationDestination.id
 
       const shortestPath = dijkstrajs.find_path(this.finalEdgeGraph, originId, destinationId)
 
@@ -681,8 +681,8 @@ export default {
       self.deltaV = delta
     },
     handleReceivedDestinationTerminal: function (nodeData) {
-      this.selectedB = nodeData
-      if (this.selectedA && this.selectedB) {
+      this.locationDestination = nodeData
+      if (this.locationOrigin && this.locationDestination) {
         this.computePath()
       }
     },
@@ -724,25 +724,25 @@ export default {
       }
 
       // unselecting origin
-      if (this.selectedA && nodeData.id === this.selectedA.id) {
+      if (this.locationOrigin && nodeData.id === this.locationOrigin.id) {
         this.clearSelectedOrigin()
         return
       }
 
       // unselecting destination
-      if (this.selectedB && nodeData.id === this.selectedB.id) {
+      if (this.locationDestination && nodeData.id === this.locationDestination.id) {
         this.clearSelectedDestination()
         return
       }
 
       // starting over with a new node
-      if (this.selectedA && this.selectedB) {
+      if (this.locationOrigin && this.locationDestination) {
         this.handleBothTerminalsAlreadySelected(nodeData)
         return
       }
 
       // already have the origin
-      if (this.selectedA) {
+      if (this.locationOrigin) {
         this.handleReceivedDestinationTerminal(nodeData)
         return
       }
@@ -753,12 +753,12 @@ export default {
       return (nodeData && this.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
     },
     reverseSelectedNodes: function () {
-      const originalA = this.selectedA
-      const originalB = this.selectedB
+      const originalA = this.locationOrigin
+      const originalB = this.locationDestination
       this.clearPath()
-      this.selectedA = originalB
-      this.selectedB = originalA
-      this.handleReceivedDestinationTerminal(this.selectedB)
+      this.locationOrigin = originalB
+      this.locationDestination = originalA
+      this.handleReceivedDestinationTerminal(this.locationDestination)
     },
     clearPathCommon: function (selected) {
       this.demarkAllEdgesOnPath()
@@ -767,23 +767,23 @@ export default {
       this.deltaV = null
       this.aeroBrakingAvailable = false
       switch (selected) {
-        case 'selectedA':
-          this.selectedA = false
+        case 'locationOrigin':
+          this.locationOrigin = false
           break
-        case 'selectedB':
-          this.selectedB = false
+        case 'locationDestination':
+          this.locationDestination = false
           break
         default:
-          this.selectedA = false
-          this.selectedB = false
+          this.locationOrigin = false
+          this.locationDestination = false
           break
       }
     },
     clearSelectedOrigin: function () {
-      this.clearPathCommon('selectedA')
+      this.clearPathCommon('locationOrigin')
     },
     clearSelectedDestination: function () {
-      this.clearPathCommon('selectedB')
+      this.clearPathCommon('locationDestination')
     },
     clearPath: function () {
       this.clearPathCommon()
