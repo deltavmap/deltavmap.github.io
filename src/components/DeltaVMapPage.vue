@@ -9,7 +9,9 @@
              :class="{
                'controls__value--active': selectedA,
                'controls__value--is-surface': selectedIsSurface(selectedA)
-             }">
+             }"
+             @click="handleOriginClick()"
+        >
           <span v-show="!selectedAText"
                 class="controls__placeholder controls__placeholder--origin">Select origin</span>
           &#8203;{{ selectedAText }}
@@ -21,7 +23,9 @@
              :class="{
                'controls__value--active': selectedB,
                'controls__value--is-surface': selectedIsSurface(selectedB)
-             }">
+             }"
+             @click="handleDestinationClick()"
+        >
           <span v-show="!selectedBText"
                 class="controls__placeholder controls__placeholder--destination">Select destination</span>
           &#8203;{{ selectedBText }}
@@ -50,7 +54,7 @@
         <div><v-btn small
                     color="grey lighten-1"
                     :disabled="!selectedA && !selectedB"
-                    @click="clearSelectedNodes">clear</v-btn></div>
+                    @click="clearPath">clear</v-btn></div>
         <div>
           <about-dialog />
         </div>
@@ -97,7 +101,7 @@
           </radialGradient>
           <radialGradient id="gradient-sun-corona" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
             <stop offset="0%" style="stop-color:white; stop-opacity:1" />
-            <stop offset="10%" style="stop-color:white; stop-opacity:0.45" />
+            <stop offset="5%" style="stop-color:white; stop-opacity:0.3" />
             <stop offset="100%" style="stop-color:white; stop-opacity:0" />
           </radialGradient>
         </defs>
@@ -124,7 +128,11 @@
            :id="orbit.data.id"
            @click="nodeSelected(orbit)"
            @tap="nodeSelected(orbit)"
-
+           :class="{
+             'origin-node': orbit.data.id === selectedAId,
+             'destination-node': orbit.data.id === selectedBId,
+             'node-on-path': isNodeOnPath(orbit.data.id)
+           }"
         >
           <location :orbit="orbit"
                     :label="orbit.data.label"
@@ -168,8 +176,8 @@ export default {
       mapSnack: true,
       mapSVG: null,
       nodeRadius: 40,
-      selectedA: null,
-      selectedB: null,
+      selectedA: false,
+      selectedB: false,
       deltaV: null,
       fixedNodeConstraints: [],
       systemsObject: {},
@@ -180,6 +188,7 @@ export default {
       finalEdgeGraph: {},
       edgeOnPathGraph: {},
       edgeOnPathList: [],
+      nodesOnPath: {},
       colDelta: 250,
       planetY: 0,
       planetYDelta: 350,
@@ -191,9 +200,31 @@ export default {
   computed: {
     selectedAText: function () { return (this.selectedA) ? this.selectedA.label : '' },
     selectedBText: function () { return (this.selectedB) ? this.selectedB.label : '' },
+    selectedAId: function () {
+      return (typeof this.selectedA === 'object') ? this.selectedA.id : ''
+    },
+    selectedBId: function () {
+      return (typeof this.selectedB === 'object') ? this.selectedB.id : ''
+    },
     deltaVText: function () { return (this.deltaV) ? this.deltaV.toFixed(3) + ' km/s' : '' }
   },
   methods: {
+    isUndefined: function (thing) {
+      return typeof thing === 'undefined'
+    },
+    isDefined: function (thing) {
+      return !this.isUndefined(thing)
+    },
+    handleOriginClick: function () {
+      if (this.selectedA) { // TODO necessary?
+        this.clearSelectedOrigin()
+      }
+    },
+    handleDestinationClick: function () {
+      if (this.selectedB) { // TODO necessary?
+        this.clearSelectedDestination()
+      }
+    },
     getOrbitById: function (nodeId) {
       return this.finalOrbitsObject[nodeId]
     },
@@ -204,14 +235,14 @@ export default {
       return this.getPosOfOrbit(nodeId).y
     },
     hasAtmosphere: function (nodeData) {
-      if (typeof nodeData !== 'undefined' && typeof nodeData.atmosphere !== 'undefined') {
+      if (this.isDefined(nodeData) && this.isDefined(nodeData.atmosphere)) {
         return nodeData.atmosphere
       } else {
         return false
       }
     },
     ancestorHasAtmosphere: function (nodeData) {
-      if (typeof this.finalOrbitsObject[nodeData.parent] === 'undefined') {
+      if (this.isUndefined(this.finalOrbitsObject[nodeData.parent])) {
         return false
       } else {
         const ancestor = this.finalOrbitsObject[nodeData.parent]
@@ -408,7 +439,7 @@ export default {
 
       moonsArray.map(m => {
         const moonName = m[1]
-        const ab = (typeof m[6] !== 'undefined') ? m[6] : false // moon aeroBraking availability
+        const ab = (this.isDefined(m[6])) ? m[6] : false // moon aeroBraking availability
         const moonHighTransfer = this.furnishedOrbitObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: planetName })
         addPositionData(moonHighTransfer, col(currentCol), moonHighTransferY)
         const moonHighTransferDelta = this.createDeltaObject(prevSource.data.id, moonHighTransfer.data.id, m[0], planetAB)
@@ -420,7 +451,7 @@ export default {
         addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
         const moonLowDelta = this.createDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
 
-        const atmosphere = (typeof m[7] !== 'undefined' && m[7] === true)
+        const atmosphere = (this.isDefined(m[7]) && m[7] === true)
         const moonSurface = this.furnishedOrbitObject({ id: moonName, label: moonName, nodeType: 'surface', parent: planetName, color: '#807E7F', atmosphere })
         addPositionData(moonSurface, col(currentCol), moonSurfaceY)
         const moonSurfaceDelta = this.createDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
@@ -475,7 +506,7 @@ export default {
       o.classes = 'top-center'
       o.grabbable = false
       o.selectable = false
-      if (typeof o.data.altitude !== 'undefined') {
+      if (this.isDefined(o.data.altitude)) {
         o.data.label = o.data.label + ' (' + o.data.altitude + 'km)'
       }
       o.position = o.data.position
@@ -544,11 +575,11 @@ export default {
         const source = d.sourceId
         const target = d.targetId
         const dv = d.dv
-        if (typeof edgeGraph[source] === 'undefined') {
+        if (this.isUndefined(edgeGraph[source])) {
           edgeGraph[source] = {}
           edgeOnPathGraph[source] = {}
         }
-        if (typeof edgeGraph[target] === 'undefined') {
+        if (this.isUndefined(edgeGraph[target])) {
           edgeGraph[target] = {}
           edgeOnPathGraph[target] = {}
         }
@@ -564,19 +595,17 @@ export default {
       this.finalOrbitsArray = finalOrbitsArray
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
-      this.clearSelectedNodes()
+      this.clearPath()
       this.selectedA = nodeData
-      this.selectedB = null
+      this.selectedB = false
       this.deltaV = null
-      const node = this.mapSVG.querySelector('#' + nodeData.id)
-      node.classList.add('node-on-path')
-      node.classList.add('origin-node')
     },
     handleReceivedOriginTerminal: function (nodeData) {
       this.selectedA = nodeData
-      const node = this.mapSVG.querySelector('#' + nodeData.id)
-      node.classList.add('node-on-path')
-      node.classList.add('origin-node')
+
+      if (this.selectedA && this.selectedB) {
+        this.computePath()
+      }
     },
     testIfAeroBrakingIsAvailable: function (edge, previousNode) {
       if (edge.ab === 'both') {
@@ -606,13 +635,17 @@ export default {
         this.edgeOnPathGraph[targetId][sourceId] = false
       })
     },
-    handleReceivedDestinationTerminal: function (nodeData) {
+    markNodeOnPath: function (nodeId) {
+      this.nodesOnPath[nodeId] = true
+    },
+    demarkAllNodesOnPath: function () {
+      Object.keys(this.nodesOnPath).map(k => { this.nodesOnPath[k] = false })
+    },
+    isNodeOnPath: function (nodeId) {
+      return (this.isDefined(this.nodesOnPath[nodeId]) && this.nodesOnPath[nodeId])
+    },
+    computePath: function () {
       const self = this
-      if (this.selectedA.id === nodeData.id) {
-        return
-      }
-
-      self.selectedB = nodeData
       self.aeroBrakingAvailable = false
       self.pathSelected = true
 
@@ -621,7 +654,6 @@ export default {
       const destinationNodeData = self.selectedB
       const destinationId = self.selectedB.id
 
-      self.mapSVG.querySelector('#' + destinationId).classList.add('destination-node')
       const shortestPath = dijkstrajs.find_path(this.finalEdgeGraph, originId, destinationId)
 
       let previousNode = null
@@ -630,15 +662,11 @@ export default {
       shortestPath.map(nodeId => {
         // handle node
         const node = self.finalOrbitsObject[nodeId]
-        self.mapSVG.querySelector('#' + nodeId)
-          .classList.add('node-on-path')
+        this.markNodeOnPath(nodeId)
 
         // handle edge
         if (previousNode) {
           // mark the edge SVGs that are on path with .edge-on-path class
-          // const cssSelector = '.edge--' + previousNode.data.id + '-' + node.data.id
-          // lastEdge = self.mapSVG.querySelector(cssSelector)
-          // lastEdge.classList.add('edge-on-path')
           this.markEdgeOnPath(previousNode.data.id, node.data.id)
 
           // increase the delta v running total
@@ -651,7 +679,12 @@ export default {
 
       self.aeroBrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
       self.deltaV = delta
-      setTimeout(_ => this.$forceUpdate(), 1000)
+    },
+    handleReceivedDestinationTerminal: function (nodeData) {
+      this.selectedB = nodeData
+      if (this.selectedA && this.selectedB) {
+        this.computePath()
+      }
     },
     calculateIfAeroBrakingIsAvailable: function (originNodeData, destinationNodeData) {
       const self = this
@@ -686,60 +719,74 @@ export default {
       const nodeData = node.data
 
       if (nodeData.nodeType === 'system') {
-        this.clearSelectedNodes()
+        this.clearPath()
         return
       }
 
-      // restarting again
+      // unselecting origin
+      if (this.selectedA && nodeData.id === this.selectedA.id) {
+        this.clearSelectedOrigin()
+        return
+      }
+
+      // unselecting destination
+      if (this.selectedB && nodeData.id === this.selectedB.id) {
+        this.clearSelectedDestination()
+        return
+      }
+
+      // starting over with a new node
       if (this.selectedA && this.selectedB) {
         this.handleBothTerminalsAlreadySelected(nodeData)
-      } else {
-        // already have the origin
-        if (this.selectedA) {
-          this.handleReceivedDestinationTerminal(nodeData)
-        } else {
-          this.handleReceivedOriginTerminal(nodeData)
-        }
+        return
       }
+
+      // already have the origin
+      if (this.selectedA) {
+        this.handleReceivedDestinationTerminal(nodeData)
+        return
+      }
+
+      this.handleReceivedOriginTerminal(nodeData)
     },
     selectedIsSurface: function (nodeData) {
-      return (nodeData && typeof nodeData.nodeType !== 'undefined' && nodeData.nodeType === 'surface')
-    },
-    findById: function (id) {
-      return this.mapSVG.querySelector('#' + id)
-    },
-    findByClass: function (className) {
-      return document.querySelectorAll('.' + className)
-    },
-    findAndRemoveClass: function (className) {
-      const els = this.findByClass(className)
-      els.forEach(el => { el.classList.remove(className) })
+      return (nodeData && this.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
     },
     reverseSelectedNodes: function () {
       const originalA = this.selectedA
       const originalB = this.selectedB
-      this.findAndRemoveClass('origin-node')
-      this.findAndRemoveClass('destination-node')
-      // this.clearSelectedNodes()
+      this.clearPath()
       this.selectedA = originalB
       this.selectedB = originalA
-      this.findById(this.selectedA.id).classList.add('origin-node')
-      this.findById(this.selectedB.id).classList.add('destination-node')
       this.handleReceivedDestinationTerminal(this.selectedB)
     },
-    clearSelectedNodes: function () {
+    clearPathCommon: function (selected) {
+      this.demarkAllEdgesOnPath()
+      this.demarkAllNodesOnPath()
       this.pathSelected = false
-      this.selectedA = null
-      this.selectedB = null
       this.deltaV = null
       this.aeroBrakingAvailable = false
-      clearInterval(this.interval)
-      this.findAndRemoveClass('origin-node')
-      this.findAndRemoveClass('destination-node')
-      this.findAndRemoveClass('node-on-path')
-      // this.findAndRemoveClass('edge-on-path')
-      this.demarkAllEdgesOnPath()
-      this.findAndRemoveClass('path-selected')
+      switch (selected) {
+        case 'selectedA':
+          this.selectedA = false
+          break
+        case 'selectedB':
+          this.selectedB = false
+          break
+        default:
+          this.selectedA = false
+          this.selectedB = false
+          break
+      }
+    },
+    clearSelectedOrigin: function () {
+      this.clearPathCommon('selectedA')
+    },
+    clearSelectedDestination: function () {
+      this.clearPathCommon('selectedB')
+    },
+    clearPath: function () {
+      this.clearPathCommon()
     }
   },
   mounted () {
