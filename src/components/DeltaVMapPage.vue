@@ -890,6 +890,7 @@ export default {
     width: $controls-width
 
 .site-icon
+  color: $color-dark-text
   display: inline-block
   position: relative
   &:before
@@ -917,7 +918,7 @@ export default {
   @extend .u-shadow
   $shadow: 2px
   background-color: $color-panel-background
-  color: $color-dark
+  color: $color-dark-text
   display: flex
   z-index: 2
   @media #{map-get($display-breakpoints, 'sm-and-down')}
@@ -1075,6 +1076,7 @@ export default {
 
 .map-container
   background: $color-map-background
+  background-image: linear-gradient(179deg, $color-map-background, darken($color-map-background, 10%))
   grid-row-start: 1
   grid-row-end: 3
   grid-column-start: 2
@@ -1124,7 +1126,6 @@ export default {
     grid-row-end: span 2
 
 .map
-  background-color: $color-map-background
   min-height: 100%
   width: 100%
   overflow: visible
