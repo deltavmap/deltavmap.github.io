@@ -904,6 +904,9 @@ export default {
     position: relative
     top: .15em
 
+    @media #{map-get($display-breakpoints, 'sm-and-down')}
+      margin-left: -0.4em
+
     @media #{map-get($display-breakpoints, 'md-and-up')}
       top: 0
       display: inline-block
