@@ -1,65 +1,20 @@
 <template>
   <div id="page-container" :class="{'page-loaded': pageLoaded}">
-    <h1 class="site-title fade-in"><span class="site-icon" style="">Delta V Map</span></h1>
-
-    <div class="controls text-left fade-in">
-      <div class="controls__section controls__section--origin" v-show="$vuetify.breakpoint.mdAndUp || !locationOrigin">
-        <label class="controls__label">origin</label>
-        <div class="controls__value "
-             :class="{
-               'controls__value--active': locationOrigin,
-               'controls__value--is-surface': selectedIsSurface(locationOrigin)
-             }"
-             @click="handleOriginClick()"
-        >
-          <span v-show="!locationOriginText"
-                class="controls__placeholder controls__placeholder--origin">Select origin</span>
-          &#8203;{{ locationOriginText }}
-        </div>
-      </div>
-      <div class="controls__section controls__section--destination" v-show="$vuetify.breakpoint.mdAndUp || (locationOrigin && !locationDestination)">
-        <label class="controls__label">destination</label>
-        <div class="controls__value "
-             :class="{
-               'controls__value--active': locationDestination,
-               'controls__value--is-surface': selectedIsSurface(locationDestination)
-             }"
-             @click="handleDestinationClick()"
-        >
-          <span v-show="!locationDestinationText"
-                class="controls__placeholder controls__placeholder--destination">Select destination</span>
-          &#8203;{{ locationDestinationText }}
-        </div>
-      </div>
-      <div class="controls__section" v-show="$vuetify.breakpoint.mdAndUp || (locationOrigin && locationDestination)">
-        <label class="controls__label">delta v</label>
-        <div class="controls__value" :class="{'controls__value--active': deltaV}" >&#8203;{{ deltaVText }}</div>
-      </div>
-      <div class="controls__section controls__aerobraking"
-           :class="{'controls__aerobraking--active': aeroBrakingAvailable}"
-           v-show="$vuetify.breakpoint.mdAndUp || (locationOrigin && locationDestination)"
-      >
-        <div class="controls__value">
-          <span class="controls__aerobraking_check">✓</span>
-          <span class="controls__aerobraking_label">Aerobraking
-            <span v-show="!aeroBrakingAvailable">un</span>available
-          </span>
-        </div>
-      </div>
-      <div class="controls__section controls__buttons d-flex justify-space-between">
-        <div><v-btn small
-                    color="grey lighten-1"
-                    :disabled="!locationOrigin || !locationDestination"
-                    @click="reverseSelectedNodes">reverse</v-btn></div>
-        <div><v-btn small
-                    color="grey lighten-1"
-                    :disabled="!locationOrigin && !locationDestination"
-                    @click="clearPath">clear</v-btn></div>
-        <div>
-          <about-dialog />
-        </div>
-      </div>
-    </div>
+    <site-title>Delta V Map</site-title>
+    <controls :aerobrakingAvailable="aerobrakingAvailable"
+              :deltaV="deltaV"
+              :deltaVText="deltaVText"
+              :origin="locationOrigin"
+              :originText="locationOriginText"
+              :originIsSurface="selectedIsSurface(locationOrigin)"
+              :destination="locationDestination"
+              :destinationText="locationDestinationText"
+              :destinationIsSurface="selectedIsSurface(locationDestination)"
+              v-on:controls-origin-click="handleOriginClick()"
+              v-on:controls-destination-click="handleDestinationClick()"
+              v-on:controls-reverse-selected-nodes="reverseSelectedNodes()"
+              v-on:controls-clear-path="clearPath()"
+    ></controls>
     <banner class="fade-in">
       <p class="px-2 py-2 rounded" style="background-color: #444">
         ⚠ This is app is still in active development.
@@ -72,14 +27,10 @@
         Please view the ABOUT page for more information.
       </p>
     </banner>
-    <!-- :class="{'map-container--visible': pageLoaded}" -->
     <div class="map-container fade-in">
-<!--      <map-snack>this app to calculate the required speed to change orbits.</map-snack>-->
-<!--      viewBox="-3000 -100 3000 4000"-->
       <svg id="map"
            class="map"
            :class="{'path-selected' : pathSelected}"
-
       >
         <defs>
           <linearGradient id="gradient-shadow-left" x1="100%" y1="0%" x2="0%" y2="100%">
@@ -155,24 +106,22 @@ import dijkstrajs from 'dijkstrajs'
 import Locations from './nodes'
 import UnformattedDeltaArrays from './edges'
 import CreateOuterPlanets from './create-outer-planets'
-import AboutDialog from './AboutDialog'
+import Controls from './Controls'
 import Location from './Location'
 import Delta from './Delta'
-// import MapSnack from './MapSnack'
+import SiteTitle from './SiteTitle'
 import Banner from './Banner'
 
 export default {
   components: {
-    // MapSnack,
-    // DeltaVMap,
-    AboutDialog,
+    Banner,
+    Controls,
     Delta,
     Location,
-    Banner
+    SiteTitle
   },
   data () {
     return {
-      mapSnack: true,
       mapSVG: null,
       nodeRadius: 40,
       locationOrigin: false,
@@ -192,7 +141,7 @@ export default {
       planetY: 0,
       planetYDelta: 350,
       pathSelected: false,
-      aeroBrakingAvailable: false,
+      aerobrakingAvailable: false,
       pageLoaded: false
     }
   },
@@ -602,16 +551,16 @@ export default {
     },
     testIfAeroBrakingIsAvailable: function (edge, previousNode) {
       if (edge.ab === 'both') {
-        this.aeroBrakingAvailable = true
+        this.aerobrakingAvailable = true
       } else {
         // delta is going with the path direction
         if (previousNode.id === edge.sourceId && edge.ab === 'true') {
-          this.aeroBrakingAvailable = true
+          this.aerobrakingAvailable = true
         }
 
         // delta is going against the path direction
         if (previousNode.id === edge.targetId && edge.ab === 'reverse') {
-          this.aeroBrakingAvailable = true
+          this.aerobrakingAvailable = true
         }
       }
     },
@@ -639,7 +588,7 @@ export default {
     },
     computePath: function () {
       const self = this
-      self.aeroBrakingAvailable = false
+      self.aerobrakingAvailable = false
       self.pathSelected = true
 
       const originNodeData = self.locationOrigin
@@ -670,7 +619,7 @@ export default {
         previousNode = node
       })
 
-      self.aeroBrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
+      self.aerobrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
       self.deltaV = delta
     },
     handleReceivedDestinationTerminal: function (nodeData) {
@@ -749,7 +698,7 @@ export default {
       this.demarkAllNodesOnPath()
       this.pathSelected = false
       this.deltaV = null
-      this.aeroBrakingAvailable = false
+      this.aerobrakingAvailable = false
       switch (selected) {
         case 'locationOrigin':
           this.locationOrigin = false
@@ -852,221 +801,6 @@ export default {
   @media #{map-get($display-breakpoints, 'md-and-up')}
     grid-auto-rows: auto minmax(0, 1fr)
     grid-template-columns: $controls-width auto
-
-.site-title
-  @extend .u-shadow
-  color: rgba(0,0,0,.85)
-  background-color: $color-panel-background
-  position: relative
-  text-transform: uppercase
-  z-index: 2
-
-  @media #{map-get($display-breakpoints, 'sm-and-down')}
-    grid-row-start: 1
-    grid-row-end: 1
-    grid-column-start: 1
-    grid-column-end: 1
-
-  &-container
-    background-color: $color-light
-    display: flex
-    align-items: center
-    justify-content: space-between
-    z-index: 3
-  @media #{map-get($display-breakpoints, 'sm-and-down')}
-    font-size: 1.25rem
-    line-height: 2.25rem
-    padding: .5rem 1rem
-    text-align: left
-
-  @media #{map-get($display-breakpoints, 'md-and-up')}
-    box-shadow: none
-    font-size: 1.5rem
-    grid-column-start: 1
-    grid-column-end: 1
-    padding: 1rem 0
-    text-align: center
-    width: $controls-width
-
-.site-icon
-  color: $color-dark-text
-  display: inline-block
-  position: relative
-  &:before
-    content: ' '
-    width: 1.4em
-    height: 1.4em
-    background-image: url(/img/icons/mstile-70x70.png)
-    background-position: center
-    background-size: cover
-    display: block
-    float: left
-    position: relative
-    top: .15em
-
-    @media #{map-get($display-breakpoints, 'sm-and-down')}
-      margin-left: -0.4em
-
-    @media #{map-get($display-breakpoints, 'md-and-up')}
-      top: 0
-      display: inline-block
-      position: absolute
-      left: -1.4em
-
-.controls
-  @extend .u-shadow
-  $shadow: 2px
-  background-color: $color-panel-background
-  color: $color-dark-text
-  display: flex
-  z-index: 2
-  @media #{map-get($display-breakpoints, 'sm-and-down')}
-    display: flex
-    flex-wrap: wrap
-    grid-row: 3
-    justify-content: center
-    padding: .5rem 0
-    width: 100%
-    position: fixed
-    bottom: 0
-  @media #{map-get($display-breakpoints, 'md-and-up')}
-    box-shadow: none
-    display: flex
-    flex-direction: column
-    grid-column: 1
-    grid-row: 2
-    padding: 0 1rem
-    width: $controls-width
-
-  .row
-    padding: .5rem
-
-  .controls
-    &__section
-      @media #{map-get($display-breakpoints, 'sm-and-down')}
-        align-items: center
-        display: flex
-        margin: .5rem 1rem
-
-      @media #{map-get($display-breakpoints, 'md-and-up')}
-        margin-top: .5rem
-
-      &--origin, &--destination
-        .controls__value
-          &--active
-            overflow: hidden
-            position: relative
-            &:before
-              content: ''
-              position: absolute
-              display: inline-block
-              width: 5px
-              left: 0
-              top: 0
-              bottom: 0
-              background-color: $color-dark
-            //border-style: solid
-            //border-width: 2px
-          @media #{map-get($display-breakpoints, 'sm-and-down')}
-            background-color: $color-dark
-            border-radius: .5rem
-            color: $color-light
-            padding-left: .75rem
-            position: relative
-            &:before
-              content: ''
-              position: absolute
-              display: inline-block
-              width: .25rem
-              left: 0
-              top: 0
-              bottom: 0
-
-      &--origin
-        .controls__value
-          @media #{map-get($display-breakpoints, 'sm-and-down')}
-            border: 2px solid $color-origin
-            color: $color-white
-          &--active
-            //border-color: $color-origin
-            //color: $color-origin
-            &:before
-              background-color: $color-origin
-          @media #{map-get($display-breakpoints, 'sm-and-down')}
-            //&:before
-            //  background-color: $color-origin
-
-      &--destination
-        .controls__value
-          @media #{map-get($display-breakpoints, 'sm-and-down')}
-            border: 2px solid $color-destination
-            color: $color-white
-          &--active
-            //border-color: $color-destination
-            //color: $color-destination
-            &:before
-              background-color: $color-destination
-          @media #{map-get($display-breakpoints, 'sm-and-down')}
-            //&:before
-            //  background-color: $color-destination
-
-    &__label
-      text-transform: capitalize
-      @media #{map-get($display-breakpoints, 'sm-and-down')}
-        display: none
-        margin-right: 1rem
-      @media #{map-get($display-breakpoints, 'md-and-up')}
-        min-width: 6rem
-
-    &__value
-      border: 1px solid #bbb
-      border-radius: .25rem
-      min-width: 8rem
-      overflow: hidden
-      padding: .25rem .5rem
-      text-align: center
-      &--active
-        background-color: $color-dark
-        color: $color-light
-      &--is-surface
-        text-transform: uppercase
-        letter-spacing: .2em
-
-    &__placeholder
-      opacity: 0.7
-      @media #{map-get($display-breakpoints, 'md-and-up')}
-        display: none
-
-    &__aerobraking
-      opacity: 0.5
-      text-align: left
-
-      .controls__value
-        border: 0
-        padding-left: 0
-        text-align: left
-
-      &_check
-        color: transparent
-        display: inline-block
-        margin-right: .5em
-        border: 2px solid $color-dark
-        border-radius: 2px
-        width: 20px
-        height: 20px
-        line-height: 17px
-        padding-left: 2px
-
-      &--active
-        opacity: 1
-        color: $color-dark
-        .controls__aerobraking_check
-          color: $color-dark
-
-    &__buttons
-      > *
-        @media #{map-get($display-breakpoints, 'sm-and-down')}
-          margin-right: 1rem
 
 .intro
   max-width: 500px
