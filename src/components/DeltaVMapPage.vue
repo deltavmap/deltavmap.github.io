@@ -60,7 +60,6 @@
         </div>
       </div>
     </div>
-<!--    <delta-v-map path-selected="pathSelected"></delta-v-map>-->
     <banner class="fade-in">
       <p class="px-2 py-2 rounded" style="background-color: #444">
         ⚠ This is app is still in active development.
@@ -116,32 +115,32 @@
            ]"
         >
           <delta :deltaData="edge"
-                 :source="getOrbitById(edge.sourceId)"
-                 :target="getOrbitById(edge.targetId)"
+                 :source="getLocationById(edge.sourceId)"
+                 :target="getLocationById(edge.targetId)"
           >
           </delta>
         </g>
 <!--        :transform="'translate(' + orbit.position.x + ',' + orbit.position.y + ')'"-->
-        <g v-for="(orbit, orbitIndex) in finalOrbitsArray"
-           :key="orbitIndex"
-           class="orbit"
-           :id="orbit.data.id"
-           @click="nodeSelected(orbit)"
-           @tap="nodeSelected(orbit)"
+        <g v-for="(location, locationIndex) in finalLocationsArray"
+           :key="locationIndex"
+           class="location"
+           :id="location.data.id"
+           @click="nodeSelected(location)"
+           @tap="nodeSelected(location)"
            :class="{
-             'origin-node': orbit.data.id === locationOriginId,
-             'destination-node': orbit.data.id === locationDestinationId,
-             'node-on-path': isNodeOnPath(orbit.data.id)
+             'origin-node': location.data.id === locationOriginId,
+             'destination-node': location.data.id === locationDestinationId,
+             'node-on-path': isNodeOnPath(location.data.id)
            }"
         >
-          <location :orbit="orbit"
-                    :label="orbit.data.label"
-                    :orbit-type="orbit.data.nodeType"
+          <location :location="location"
+                    :label="location.data.label"
+                    :location-type="location.data.nodeType"
                     :radius="nodeRadius"
-                    :fill-color="getNodeFill(orbit)"
-                    :x-pos="orbit.position.x"
-                    :y-pos="orbit.position.y"
-                    :has-atmosphere="orbit.data.atmosphere"
+                    :fill-color="getNodeFill(location)"
+                    :x-pos="location.position.x"
+                    :y-pos="location.position.y"
+                    :has-atmosphere="location.data.atmosphere"
           ></location>
         </g>
       </svg>
@@ -153,7 +152,7 @@
 // import DeltaVMap from './DeltaVMap'
 import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
-import Orbits from './nodes'
+import Locations from './nodes'
 import UnformattedDeltaArrays from './edges'
 import CreateOuterPlanets from './create-outer-planets'
 import AboutDialog from './AboutDialog'
@@ -181,9 +180,9 @@ export default {
       deltaV: null,
       fixedNodeConstraints: [],
       systemsObject: {},
-      orbitsObject: {},
+      locationsObject: {},
       formattedDeltaObjectsArray: [],
-      finalOrbitsArray: [],
+      finalLocationsArray: [],
       finalDeltasArray: [],
       finalEdgeGraph: {},
       edgeOnPathGraph: {},
@@ -225,14 +224,14 @@ export default {
         this.clearSelectedDestination()
       }
     },
-    getOrbitById: function (nodeId) {
-      return this.finalOrbitsObject[nodeId]
+    getLocationById: function (nodeId) {
+      return this.finalLocationsObject[nodeId]
     },
-    getPosOfOrbit: function (nodeId) {
-      return this.getOrbitById(nodeId).position
+    getPosOfLocation: function (nodeId) {
+      return this.getLocationById(nodeId).position
     },
-    getYPosOfOrbit: function (nodeId) {
-      return this.getPosOfOrbit(nodeId).y
+    getYPosOfLocation: function (nodeId) {
+      return this.getPosOfLocation(nodeId).y
     },
     hasAtmosphere: function (nodeData) {
       if (this.isDefined(nodeData) && this.isDefined(nodeData.atmosphere)) {
@@ -242,10 +241,10 @@ export default {
       }
     },
     ancestorHasAtmosphere: function (nodeData) {
-      if (this.isUndefined(this.finalOrbitsObject[nodeData.parent])) {
+      if (this.isUndefined(this.finalLocationsObject[nodeData.parent])) {
         return false
       } else {
-        const ancestor = this.finalOrbitsObject[nodeData.parent]
+        const ancestor = this.finalLocationsObject[nodeData.parent]
         return this.hasAtmosphere(ancestor.data)
       }
     },
@@ -265,7 +264,7 @@ export default {
     incPlanetYDelta: function (amount = this.planetYDelta) {
       return this.setPlanetY(this.planetY + amount)
     },
-    applyPositionDataToOrbits: function (orbits) {
+    applyPositionDataToLocations: function (locations) {
       const col = n => n * this.colDelta
       const planetXL = col(-3)
       const planetXR = col(3)
@@ -278,8 +277,8 @@ export default {
 
       const constraints = [] // position constrains
       const c = (nodeId, x, y) => {
-        const orbit = orbits[nodeId]
-        orbit.position = { x, y }
+        const location = locations[nodeId]
+        location.position = { x, y }
       }
       c('Sun', col(0), this.planetY)
       c('LSunO', col(0), incY())
@@ -371,14 +370,14 @@ export default {
       }
 
       // create outer planet
-      const planetSurface = this.furnishedOrbitObject({
+      const planetSurface = this.furnishedLocationObject({
         id: planetName, label: planetName, nodeType: 'surface', parent: 'Sun', color, atmosphere: hasAtmosphere
       })
-      this.addOrbit(planetSurface)
+      this.addLocation(planetSurface)
 
       // create the outer planet transfer orbit and delta
       const transferName = planetName + 'T'
-      const outerPlanetTransfer = this.furnishedOrbitObject(
+      const outerPlanetTransfer = this.furnishedLocationObject(
         {
           id: transferName,
           label: planetName + ' Transfer',
@@ -387,7 +386,7 @@ export default {
         }
       )
       addPositionData(outerPlanetTransfer, col(0), layoutStartY)
-      this.addOrbit(outerPlanetTransfer)
+      this.addLocation(outerPlanetTransfer)
 
       let predecessorTransferAB
       if (predecessorHasAtmosphere) {
@@ -410,7 +409,7 @@ export default {
 
       // create outer planet capture orbit and delta
       const captureName = planetName + 'CE'
-      const outerPlanetCaptureEscape = this.furnishedOrbitObject(
+      const outerPlanetCaptureEscape = this.furnishedLocationObject(
         {
           id: captureName,
           label: planetName + ' Capture/Escape',
@@ -421,7 +420,7 @@ export default {
 
       updateCurrentCol()
       addPositionData(outerPlanetCaptureEscape, col(currentCol), layoutStartY)
-      this.addOrbit(outerPlanetCaptureEscape)
+      this.addLocation(outerPlanetCaptureEscape)
 
       const outerPlanetCaptureDeltaObject = this.createDeltaObject(
         transferName, captureName, outerPlanetCaptureDV, planetAB
@@ -438,44 +437,44 @@ export default {
       moonsArray.map(m => {
         const moonName = m[1]
         const ab = (this.isDefined(m[6])) ? m[6] : false // moon aeroBraking availability
-        const moonHighTransfer = this.furnishedOrbitObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: planetName })
+        const moonHighTransfer = this.furnishedLocationObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: planetName })
         addPositionData(moonHighTransfer, col(currentCol), moonHighTransferY)
         const moonHighTransferDelta = this.createDeltaObject(prevSource.data.id, moonHighTransfer.data.id, m[0], planetAB)
-        const moonCapture = this.furnishedOrbitObject({ id: moonName + 'CE', label: moonName + ' Capture/Escape', nodeType: 'orbit-capture-escape', parent: planetName })
+        const moonCapture = this.furnishedLocationObject({ id: moonName + 'CE', label: moonName + ' Capture/Escape', nodeType: 'orbit-capture-escape', parent: planetName })
         addPositionData(moonCapture, col(currentCol), moonCaptureY)
         const moonCaptureDelta = this.createDeltaObject(moonHighTransfer.data.id, moonCapture.data.id, m[2], ab)
 
-        const moonLowOrbit = this.furnishedOrbitObject({ id: 'L' + moonName + 'O', label: 'Low ' + moonName + ' Orbit', nodeType: 'orbit', parent: planetName, altitude: m[4] })
+        const moonLowOrbit = this.furnishedLocationObject({ id: 'L' + moonName + 'O', label: 'Low ' + moonName + ' Orbit', nodeType: 'orbit', parent: planetName, altitude: m[4] })
         addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
         const moonLowDelta = this.createDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
 
         const atmosphere = (this.isDefined(m[7]) && m[7] === true)
-        const moonSurface = this.furnishedOrbitObject({ id: moonName, label: moonName, nodeType: 'surface', parent: planetName, color: '#807E7F', atmosphere })
+        const moonSurface = this.furnishedLocationObject({ id: moonName, label: moonName, nodeType: 'surface', parent: planetName, color: '#807E7F', atmosphere })
         addPositionData(moonSurface, col(currentCol), moonSurfaceY)
         const moonSurfaceDelta = this.createDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
 
         prevSource = moonHighTransfer
         updateCurrentCol()
 
-        this.addOrbit(moonHighTransfer)
+        this.addLocation(moonHighTransfer)
         this.addFormattedDeltaObject(moonHighTransferDelta)
         this.addFormattedDeltaObject(moonCaptureDelta)
-        this.addOrbit(moonCapture)
+        this.addLocation(moonCapture)
         this.addFormattedDeltaObject(moonLowDelta)
-        this.addOrbit(moonLowOrbit)
-        this.addOrbit(moonSurface)
+        this.addLocation(moonLowOrbit)
+        this.addLocation(moonSurface)
         this.addFormattedDeltaObject(moonSurfaceDelta)
       })
 
       const lowOrbitName = 'L' + planetName + 'O'
-      const lowOrbit = this.furnishedOrbitObject({
+      const lowOrbit = this.furnishedLocationObject({
         id: lowOrbitName, label: 'Low ' + planetName + ' Orbit', nodeType: 'orbit', parent: planetName, altitude: lowOrbitAltitude
       })
       addPositionData(lowOrbit, col(currentCol), layoutStartY)
       addPositionData(planetSurface, col(updateCurrentCol()), layoutStartY)
       this.addFormattedDeltaObject(outerPlanetTransferDeltaObject)
       this.addFormattedDeltaObject(outerPlanetCaptureDeltaObject)
-      this.addOrbit(lowOrbit)
+      this.addLocation(lowOrbit)
       this.addFormattedDeltaObject(this.createDeltaObject(prevSource.data.id, lowOrbitName, lowOrbitDV, planetAB))
       this.addFormattedDeltaObject(this.createDeltaObject(lowOrbitName, planetName, surfaceDV, planetAB))
     },
@@ -497,7 +496,7 @@ export default {
     formatSystems: function (unformatedSystemsArray) {
       return unformatedSystemsArray.map(o => this.furnishedSystemObject(o))
     },
-    furnishOrbitObject: function (formatedObject) {
+    furnishLocationObject: function (formatedObject) {
       const o = formatedObject
       o.classes = 'top-center'
       o.grabbable = false
@@ -508,13 +507,13 @@ export default {
       o.position = o.data.position
       return o
     },
-    furnishedOrbitObject: function (unformatedOrbitObject) {
-      return this.furnishOrbitObject(this.formatData(unformatedOrbitObject))
+    furnishedLocationObject: function (unformatedLocationObject) {
+      return this.furnishLocationObject(this.formatData(unformatedLocationObject))
     },
-    formatOrbits: function (unformattedOrbitDataObject) {
-      Object.keys(unformattedOrbitDataObject).map((id) => {
-        const orbit = unformattedOrbitDataObject[id]
-        unformattedOrbitDataObject[id] = this.furnishedOrbitObject(orbit)
+    formatLocations: function (unformattedLocationDataObject) {
+      Object.keys(unformattedLocationDataObject).map((id) => {
+        const location = unformattedLocationDataObject[id]
+        unformattedLocationDataObject[id] = this.furnishedLocationObject(location)
       })
     },
     createDeltaObject: function (sourceId, targetId, dv, ab = 0) {
@@ -535,12 +534,12 @@ export default {
       // TODO perhaps remove all 'furnishing'
       return o
     },
-    formatDeltasArray: function (orbitsObject, deltaArrays) {
+    formatDeltasArray: function (locationsObject, deltaArrays) {
       // convert array to objects
       return deltaArrays.map(o => this.furnishDeltaObject(o))
     },
-    addOrbit: function (orbitData) {
-      this.orbitsObject[orbitData.data.id] = orbitData
+    addLocation: function (locationData) {
+      this.locationsObject[locationData.data.id] = locationData
     },
     addFormattedDeltaObject: function (formattedDeltaObject) {
       this.formattedDeltaObjectsArray.push(formattedDeltaObject)
@@ -551,13 +550,13 @@ export default {
       this.addFormattedDeltaObject(formattedDeltaObject)
     },
     createData: function () {
-      this.orbitsObject = Orbits
-      this.applyPositionDataToOrbits(this.orbitsObject)
-      this.formatOrbits(this.orbitsObject)
+      this.locationsObject = Locations
+      this.applyPositionDataToLocations(this.locationsObject)
+      this.formatLocations(this.locationsObject)
 
       CreateOuterPlanets(this)
 
-      const finalOrbitsArray = Object.values(this.orbitsObject)
+      const finalLocationsArray = Object.values(this.locationsObject)
 
       UnformattedDeltaArrays.forEach((arr) => {
         this.addUnformattedDeltaArray(arr)
@@ -585,8 +584,8 @@ export default {
 
       this.finalEdgeGraph = edgeGraph
       this.edgeOnPathGraph = edgeOnPathGraph
-      this.finalOrbitsObject = this.orbitsObject
-      this.finalOrbitsArray = finalOrbitsArray
+      this.finalLocationsObject = this.locationsObject
+      this.finalLocationsArray = finalLocationsArray
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearPath()
@@ -655,7 +654,7 @@ export default {
       // let lastEdge
       shortestPath.forEach(nodeId => {
         // handle node
-        const node = self.finalOrbitsObject[nodeId]
+        const node = self.finalLocationsObject[nodeId]
         this.markNodeOnPath(nodeId)
 
         // handle edge
@@ -789,7 +788,7 @@ export default {
       maxZoom: 4,
       minZoom: 0.025,
       onTouch: function (e) {
-        if (e.target.classList.contains('orbit__icon')) {
+        if (e.target.classList.contains('location__icon')) {
           return false
         } else {
           return true
@@ -797,7 +796,7 @@ export default {
       },
       onDoubleClick: function (e) {
         if (self.pathSelected) {
-          if (e.target.classList.contains('orbit__icon')) {
+          if (e.target.classList.contains('location__icon')) {
           } else {
           }
         }

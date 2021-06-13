@@ -1,27 +1,27 @@
 <template>
   <g :class="{'location-is-surface': locationIsSurface}">
-    <circle class="orbit__icon-atmosphere fadable"
+    <circle class="location__icon-atmosphere fadable"
             :cx="xPos"
             :cy="yPos"
             r="400"
-            v-if="orbit.data.id === 'Sun'"
+            v-if="location.data.id === 'Sun'"
             fill="url('#gradient-sun-corona')"
     />
 
-    <circle class="orbit__icon-atmosphere fadable"
+    <circle class="location__icon-atmosphere fadable"
       :cx="xPos"
       :cy="yPos"
       r="60"
       v-if="hasAtmosphere"
       fill="url('#gradient-atmosphere')"
     />
-    <circle class="orbit__icon fadable"
+    <circle class="location__icon fadable"
             :cx="xPos"
             :cy="yPos"
             :fill="fillColor"
             :r="formattedRadius"
     />
-    <circle class="orbit__icon-surface-shadow fadable"
+    <circle class="location__icon-surface-shadow fadable"
             v-if="locationIsSurface"
             :cx="xPos"
             :cy="yPos"
@@ -36,7 +36,7 @@
       <body xmlns="http://www.w3.org/1999/xhtml"
             style="padding: 5px;">
       <div class="underlay-html-container">
-        <p class="orbit__label fadable"
+        <p class="location__label fadable"
            xmlns="http://www.w3.org/1999/xhtml">
           {{ label }}
         </p>
@@ -48,8 +48,8 @@
 <script>
 export default {
   props: [
-    'orbit',
-    'orbitType',
+    'location',
+    'locationType',
     'label',
     'radius',
     'fillColor',
@@ -62,7 +62,7 @@ export default {
     formattedShadowRadius: function () { return (this.radius - 2) + 'px' },
     shadowFill: function () {
       let gradId = '#gradient-'
-      if (this.orbit.data.id === 'Sun') {
+      if (this.location.data.id === 'Sun') {
         gradId += 'sun'
       } else {
         const dir = (this.xPos > 0) ? 'right' : 'left'
@@ -71,7 +71,7 @@ export default {
       return "url('" + gradId + "')"
     },
     locationIsSurface: function () {
-      return this.orbitType === 'surface'
+      return this.locationType === 'surface'
     },
     labelTransformValue: function () {
       return 'translate(' + (this.xPos - 75) + ',' + (this.yPos + 65) + ')'
@@ -107,7 +107,7 @@ $border-radius: 4px
   fill: $color-map-background
   z-index: 0
 
-.orbit
+.location
   $radius: 40
   stroke: $color-map-light
   &:hover
@@ -144,39 +144,39 @@ $border-radius: 4px
 
   &.origin-node
     opacity: 1
-    .orbit__icon
+    .location__icon
       stroke: $color-origin
-    .orbit__label
+    .location__label
       color: $color-map-dark
       background-color: $color-origin
 
   &.destination-node
     opacity: 1
-    .orbit__icon
+    .location__icon
       stroke: $color-destination
-    .orbit__label
+    .location__label
       color: $color-map-dark
       background-color: $color-destination
 
 .location-is-surface
-  .orbit__label
+  .location__label
     letter-spacing: .2em
     text-transform: uppercase
 
 .path-selected
   .node-on-path
-    .orbit__icon
+    .location__icon
       opacity: 1
-    .orbit__icon-surface-shadow
+    .location__icon-surface-shadow
       opacity: 1
-    .orbit__label
+    .location__label
       opacity: 1
-    .orbit__icon-atmosphere
+    .location__icon-atmosphere
       opacity: 1
   .node-on-path:not(.origin-node, .destination-node)
-    .orbit__icon
+    .location__icon
       stroke: $color-map-dark
-    .orbit__label
+    .location__label
       background-color: $color-map-dark
       color: $color-map-light
 
