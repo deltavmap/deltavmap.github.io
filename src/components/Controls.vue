@@ -4,7 +4,7 @@
                    :labelText="'origin'"
                    :valueText="originText"
                    :active="!!origin"
-                   :show="$vuetify.breakpoint.mdAndUp"
+                   :show="!!$vuetify.breakpoint.mdAndUp"
                    :isSurface="!!originIsSurface"
                    :hasColorIndicator="true"
     ></panel-control>
@@ -12,7 +12,7 @@
                    :labelText="'destination'"
                    :valueText="destinationText"
                    :active="!!destination"
-                   :show="$vuetify.breakpoint.mdAndUp"
+                   :show="!!$vuetify.breakpoint.mdAndUp"
                    :isSurface="!!destinationIsSurface"
                    :hasColorIndicator="true"
     ></panel-control>
@@ -20,13 +20,13 @@
                    :labelText="'delta v'"
                    :valueText="deltaVText"
                    :active="!!deltaV"
-                   :show="$vuetify.breakpoint.mdAndUp || (origin && destination)"
+                   :show="!!($vuetify.breakpoint.mdAndUp || (origin && destination))"
     ></panel-control>
     <panel-control :type="'aerobraking'"
                    :labelText="'aerobraking'"
                    :valueText="(origin && destination) ? ((aerobrakingAvailable) ? 'available' : 'unavailable') : ''"
-                   :active="(origin && destination)"
-                   :show="$vuetify.breakpoint.mdAndUp || (origin && destination)"
+                   :active="!!(origin && destination)"
+                   :show="!!($vuetify.breakpoint.mdAndUp || (origin && destination))"
                    :positive="aerobrakingAvailable"
     ></panel-control>
     <prompt v-show="!origin"

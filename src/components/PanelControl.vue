@@ -22,7 +22,10 @@
 <script>
 export default {
   props: {
-    active: Boolean,
+    active: {
+      default: true,
+      type: Boolean
+    },
     hasColorIndicator: Boolean,
     labelText: String,
     isSurface: Boolean,
@@ -33,7 +36,10 @@ export default {
     },
     valueClasses: Object,
     valueText: String,
-    show: Boolean,
+    show: {
+      default: true,
+      type: Boolean
+    },
     type: String
   }
 }
