@@ -57,8 +57,6 @@
           <p>Latest changes are <a href="https://github.com/deltavmap/deltavmap.github.io/commits/main">here</a> (commits log).</p>
           <h4>Some known issues</h4>
           <ul>
-            <li>Scrolling on mobile</li>
-            <li>Jumpy buttons on mobile</li>
             <li>The high DeltaV for Venus is confusing</li>
             <li>The NRHO values are unsubstantiated</li>
             <li>No Earth transfer orbit</li>
