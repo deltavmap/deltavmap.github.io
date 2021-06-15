@@ -735,7 +735,7 @@ export default {
     mapWidth = 100 + mapWidth + mapWidth * zoomLevel
     this.panzoom = panzoom(mapSVG, {
       maxZoom: 4,
-      minZoom: 0.025,
+      minZoom: 0.05,
       onTouch: function (e) {
         if (e.target.classList.contains('location__icon')) {
           return false
