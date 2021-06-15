@@ -80,12 +80,12 @@ $color-controls-light: lighten($color-purpley-red, 60%)
 
   &__value
     $control-value: &
-    border: 1px solid darken($color-panel-background, 5%)
+    border: 1px solid darken($color-panel-background, 2%)
     border-radius: .15rem
     color: $color-light
     min-width: 8rem
     overflow: hidden
-    padding: .25rem .5rem
+    padding: .25rem .5rem .19em
     position: relative
     text-align: center
 
@@ -119,7 +119,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
 
     &--is-surface
       text-transform: uppercase
-      letter-spacing: .2em
+      letter-spacing: .15em
 
     .control--is-negative &
       background-color: $color-panel-background
@@ -128,6 +128,5 @@ $color-controls-light: lighten($color-purpley-red, 60%)
   &--aerobraking
     text-transform: uppercase
     .control__value
-      letter-spacing: .05em
-
+      letter-spacing: .1em
 </style>
