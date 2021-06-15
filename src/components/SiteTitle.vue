@@ -1,8 +1,10 @@
 <template>
   <h1 class="site-title fade-in">
-    <span class="site-icon" style="">
-      <slot></slot>
-    </span>
+    <a href="/">
+      <span class="site-icon" style="">
+        <slot></slot>
+      </span>
+    </a>
   </h1>
 </template>
 <script>
@@ -37,8 +39,13 @@
   @media #{map-get($display-breakpoints, 'sm-and-down')}
     font-size: 1.25rem
     line-height: 2.25rem
-    padding: .5rem 1rem
     text-align: left
+
+  @media #{map-get($display-breakpoints, 'xs-only')}
+    padding: .5rem 1rem
+
+  @media #{map-get($display-breakpoints, 'sm-only')}
+    padding: .5rem 1.5rem
 
   @media #{map-get($display-breakpoints, 'md-and-up')}
     box-shadow: none
