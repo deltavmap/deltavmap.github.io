@@ -45,7 +45,6 @@
       </div>
       <div>
         <v-btn small
-               color="grey lighten-1"
                :disabled="!origin && !destination"
                @click="$emit('controls-clear-path')"
         >clear</v-btn>
@@ -90,7 +89,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
   @extend .u-shadow
   $shadow: 2px
   background-color: $color-panel-background
-  color: $color-panel-font-dark
+  color: $color-panel-font-light
   display: flex
   z-index: 2
 
@@ -170,9 +169,13 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     @media #{map-get($display-breakpoints, 'md-and-up')}
       justify-content: space-between
 
-    .v-btn
+    button.v-btn
+      background-color: darken($color-panel-font-light, 5%) !important
       .v-btn__content
-        color: $color-panel-font-dark
+        color: darken($color-panel-font-dark, 5%)
         font-weight: 400
+      &--disabled
+        .v-btn__content
+          color: darken($color-panel-font-light, 10%) !important
 
 </style>

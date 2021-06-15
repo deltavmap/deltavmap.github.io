@@ -15,7 +15,7 @@ export default {}
 .prompt
   background-color: $color-dark
   border-radius: .5em
-  color: $color-light
+  color: $color-panel-font-light
   padding: .25em .5em
   text-align: center
 

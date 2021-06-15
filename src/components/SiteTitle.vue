@@ -33,6 +33,7 @@
     align-items: center
     justify-content: space-between
     z-index: 3
+
   @media #{map-get($display-breakpoints, 'sm-and-down')}
     font-size: 1.25rem
     line-height: 2.25rem
@@ -49,9 +50,11 @@
     width: $controls-width
 
 .site-icon
-  color: lighten($color-dark-text, 3%)
+  color: $color-panel-font-light
   display: inline-block
   position: relative
+  font-weight: 500
+  letter-spacing: .05em
   &:before
     content: ' '
     width: 1.4em
@@ -71,5 +74,5 @@
       top: 0
       display: inline-block
       position: absolute
-      left: -1.4em
+      left: -1.6em
 </style>

@@ -117,7 +117,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
 
     .control--is-negative &
       background-color: $color-panel-background
-      color: $color-panel-font-dark
+      color: darken($color-panel-font-light, 10%)
 
   &--aerobraking
     text-transform: uppercase
