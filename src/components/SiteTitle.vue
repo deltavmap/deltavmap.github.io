@@ -15,7 +15,7 @@
 
 .site-title
   @extend .u-shadow
-  color: rgba(0,0,0,.85)
+  color: $color-panel-font-dark
   background-color: $color-panel-background
   position: relative
   text-transform: uppercase
@@ -49,7 +49,7 @@
     width: $controls-width
 
 .site-icon
-  color: $color-dark-text
+  color: lighten($color-dark-text, 3%)
   display: inline-block
   position: relative
   &:before

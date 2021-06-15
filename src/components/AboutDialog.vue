@@ -117,7 +117,8 @@
   p
     margin-bottom: 1em
   h2, h3, h4
-    margin: 1em 0 .5em
+    margin: 1em 0 .25em
+    text-transform: uppercase
 </style>
 <script>
 export default {
