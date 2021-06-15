@@ -38,7 +38,6 @@
     <div class="controls__buttons">
       <div>
         <v-btn small
-                  color="grey lighten-1"
                   :disabled="!origin || !destination"
                   @click="$emit('controls-reverse-selected-nodes')"
         >reverse</v-btn>

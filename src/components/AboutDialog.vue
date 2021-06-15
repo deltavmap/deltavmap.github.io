@@ -8,7 +8,6 @@
       <v-btn
         small
         class="about-dialog__button"
-        color="grey lighten-1"
         v-bind="attrs"
         v-on="on"
       >
@@ -91,7 +90,6 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          color="primary"
           text
           @click="dialogOpen = false"
         >
