@@ -56,30 +56,37 @@
     text-align: center
     width: $controls-width
 
+  a
+    display: inline-block
+    position: relative
+    &:before
+      content: ' '
+      width: 1.4em
+      height: 1.4em
+      background-image: url(/img/icons/mstile-70x70.png)
+      background-position: center
+      background-size: cover
+      display: block
+      float: left
+      position: relative
+      top: .15em
+
+      @media #{map-get($display-breakpoints, 'sm-and-down')}
+        margin-left: -0.4em
+
+      @media #{map-get($display-breakpoints, 'md-and-up')}
+        top: 0
+        display: inline-block
+        position: absolute
+        left: -1.6em
+
 .site-icon
   color: $color-panel-font-light
   display: inline-block
   position: relative
   font-weight: 500
   letter-spacing: .05em
-  &:before
-    content: ' '
-    width: 1.4em
-    height: 1.4em
-    background-image: url(/img/icons/mstile-70x70.png)
-    background-position: center
-    background-size: cover
-    display: block
-    float: left
-    position: relative
-    top: .15em
 
-    @media #{map-get($display-breakpoints, 'sm-and-down')}
-      margin-left: -0.4em
-
-    @media #{map-get($display-breakpoints, 'md-and-up')}
-      top: 0
-      display: inline-block
-      position: absolute
-      left: -1.6em
+  @media #{map-get($display-breakpoints, 'sm-only')}
+    margin-left: .1em
 </style>
