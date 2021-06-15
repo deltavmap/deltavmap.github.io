@@ -75,7 +75,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
   &__value
     $control-value: &
     border: 1px solid darken($color-panel-background, 5%)
-    border-radius: .5rem
+    border-radius: .15rem
     color: $color-light
     min-width: 8rem
     overflow: hidden
@@ -84,6 +84,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     text-align: center
 
     @media #{map-get($display-breakpoints, 'sm-and-down')}
+      border-radius: .5rem
       margin: 0 .5rem
 
     &:before
