@@ -31,6 +31,8 @@
       <svg id="map"
            class="map"
            :class="{'path-selected' : pathSelected}"
+           :width="(maxX + 2 * colDelta) + 'px'"
+           height="9000px"
       >
         <defs>
           <linearGradient id="gradient-shadow-left" x1="100%" y1="0%" x2="0%" y2="100%">
@@ -104,6 +106,7 @@
 import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
 import Locations from './nodes'
+import Positions from './positions'
 import UnformattedDeltaArrays from './edges'
 import CreateOuterPlanets from './create-outer-planets'
 import Controls from './Controls'
@@ -138,6 +141,9 @@ export default {
       edgeOnPathGraph: {},
       edgeOnPathList: [],
       nodesOnPath: {},
+      globalXOffset: 3000,
+      maxX: 0,
+      minX: 0,
       colDelta: 250,
       planetY: 0,
       planetYDelta: 350,
@@ -163,6 +169,12 @@ export default {
     },
     isDefined: function (thing) {
       return !this.isUndefined(thing)
+    },
+    col: function (n, localXOffset = 0) {
+      const x = n * this.colDelta + this.globalXOffset + localXOffset
+      if (x > this.maxX) this.maxX = x
+      if (x < this.minX) this.minX = x
+      return x
     },
     handleOriginClick: function () {
       if (this.locationOrigin) { // TODO necessary?
@@ -215,70 +227,7 @@ export default {
       return this.setPlanetY(this.planetY + amount)
     },
     applyPositionDataToLocations: function (locations) {
-      const col = n => n * this.colDelta
-      const planetXL = col(-3)
-      const planetXR = col(3)
-      const incY = this.incPlanetYDelta
-      const lOrbitXL = col(-2)
-      const lOrbitXR = col(2)
-      const captureXL = col(-1)
-      const captureXR = col(1)
-      const transferX = col(0)
-
-      const constraints = [] // position constrains
-      const c = (nodeId, x, y) => {
-        const location = locations[nodeId]
-        location.position = { x, y }
-      }
-      c('Sun', col(0), this.planetY)
-      c('LSunO', col(0), incY())
-      c('SunT', col(0), incY())
-
-      c('Merc', planetXL, incY())
-      c('LMercO', lOrbitXL, this.planetY)
-      c('MercCE', captureXL, this.planetY)
-      c('MercT', transferX, this.planetY)
-
-      c('Venus', planetXR, incY())
-      c('LVenusO', lOrbitXR, this.planetY)
-      c('VenusCE', captureXR, this.planetY)
-      c('VenusT', transferX, this.planetY)
-
-      const moonX = col(-2)
-      const earthY = incY()
-      const moonLY = incY()
-      c('MoonT', moonX, earthY)
-      c('EarthMoonL1', col(-3), moonLY)
-      c('EarthMoonL2', col(-1), moonLY)
-      c('MoonCE', moonX, this.planetY)
-      c('LMoonO', moonX, incY())
-      c('NRHOT', col(-3), this.planetY)
-      c('NRHO', col(-4), this.planetY)
-      c('Moon', moonX, incY())
-
-      c('EarthCE', col(-1), earthY)
-      c('GEO', col(-3), earthY - this.planetYDelta)
-      c('GTO', col(-3), earthY)
-      c('LEO', col(-4), earthY)
-      c('Earth', col(-5), earthY)
-
-      this.marsY = earthY + this.planetYDelta
-
-      const vestaY = incY()
-      c('VestaT', 0, vestaY)
-      c('VestaCE', captureXL, vestaY)
-      c('LVestaO', lOrbitXL, vestaY)
-      c('Vesta', planetXL, vestaY)
-
-      const ceresY = incY()
-      c('CeresT', 0, ceresY)
-      c('CeresCE', captureXR, ceresY)
-      c('LCeresO', lOrbitXR, ceresY)
-      c('Ceres', planetXR, ceresY)
-
-      incY()
-      this.planetXR = 0 // col(8)
-      return constraints
+      Positions(this, locations)
     },
     getFixedNodeConstraints: function () { return this.fixedNodeConstraints },
     addFixedNodeConstraint: function (c) { this.fixedNodeConstraints.push(c) },
@@ -311,7 +260,7 @@ export default {
       const addPositionData = (node, x, y) => {
         node.position = { x, y }
       }
-      const col = n => layoutStartX + (n * this.colDelta)
+      const col = n => this.col(n, layoutStartX)
       let currentCol = 0
       const dir = (alignLeft) ? -1 : 1
       const updateCurrentCol = (i = 1) => {
