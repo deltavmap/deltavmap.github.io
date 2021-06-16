@@ -123,6 +123,7 @@ export default {
   data () {
     return {
       mapSVG: null,
+      panzoom: null,
       nodeRadius: 40,
       locationOrigin: false,
       locationDestination: false,
@@ -720,6 +721,25 @@ export default {
     },
     clearPath: function () {
       this.clearPathCommon()
+    },
+    moveTo: function (nodeX, nodeY) {
+      const mapContainer = document.querySelector('.map-container')
+      const mapWidth = mapContainer.offsetWidth
+      const mapHeight = mapContainer.offsetHeight
+      const zoomLevel = 0.3
+      // TODO get zoomLevel
+      // scale position to current zoom level
+      let x = nodeX * zoomLevel
+      let y = nodeY * zoomLevel
+      // translate position from top left of screen
+      x -= mapWidth / 2
+      y -= mapHeight / 2
+      this.panzoom.moveTo(-x, -y)
+    },
+    moveToNode: function (node) {
+      const x = node.position.x
+      const y = node.position.y
+      this.moveTo(x, y)
     }
   },
   mounted () {
@@ -729,10 +749,13 @@ export default {
     this.map = this.mapSVG
     const mapSVG = this.mapSVG
     this.mapSVG = mapSVG
+    const mapContainer = document.querySelector('.map-container')
+    const mapWidth = mapContainer.offsetWidth
+    const mapHeight = mapContainer.offsetHeight
     const zoomLevel = 0.3
-    const clientY = 200
-    let mapWidth = document.querySelector('.map-container').offsetWidth
-    mapWidth = 100 + mapWidth + mapWidth * zoomLevel
+    const startX = (100 + mapWidth + mapWidth * zoomLevel) / 2 // center
+    const startY = (mapHeight + mapHeight * zoomLevel - 100) / 2 // center + offset
+
     this.panzoom = panzoom(mapSVG, {
       maxZoom: 4,
       minZoom: 0.05,
@@ -750,11 +773,10 @@ export default {
           }
         }
       }
-    }).zoomAbs(
-      (mapWidth / 2),
-      clientY,
-      zoomLevel
-    )
+    })
+    this.panzoom.zoomAbs(startX, startY, zoomLevel)
+    this.moveToNode(this.finalLocationsObject.SunT)
+
     setTimeout(_ => {
       this.pageLoaded = true
     }, 1000)
