@@ -52,6 +52,9 @@
         <about-dialog />
       </div>
     </div>
+<!--    <div class="controls__footer">-->
+<!--      <a id="kofi-button" href='https://ko-fi.com/N4N14ZTHI' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi5.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>-->
+<!--    </div>-->
   </div>
 </template>
 <script>
@@ -90,6 +93,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
   background-color: $color-panel-background
   color: $color-panel-font-light
   display: flex
+  position: relative
   z-index: 2
 
   @media #{map-get($display-breakpoints, 'sm-and-down')}
@@ -177,4 +181,21 @@ $color-controls-light: lighten($color-purpley-red, 60%)
         .v-btn__content
           color: darken($color-panel-font-light, 10%) !important
 
+.controls__footer
+  bottom: 0
+  display: flex
+  justify-content: center
+  left: 0
+  position: absolute
+
+  @media #{map-get($display-breakpoints, 'sm-and-down')}
+    display: none
+    justify-content: flex-start
+    margin-left: 1rem
+  @media #{map-get($display-breakpoints, 'md-and-up')}
+    width: 100%
+  #kofi-button
+    opacity: 0.2
+    &:hover
+      opacity: 1
 </style>
