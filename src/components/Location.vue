@@ -55,7 +55,8 @@ export default {
     'fillColor',
     'xPos',
     'yPos',
-    'hasAtmosphere'
+    'hasAtmosphere',
+    'sunX'
   ],
   computed: {
     formattedRadius: function () { return this.radius + 'px' },
@@ -65,7 +66,7 @@ export default {
       if (this.location.data.id === 'Sun') {
         gradId += 'sun'
       } else {
-        const dir = (this.xPos > 0) ? 'right' : 'left'
+        const dir = (this.xPos > this.sunX) ? 'right' : 'left'
         gradId += 'shadow-' + dir
       }
       return "url('" + gradId + "')"

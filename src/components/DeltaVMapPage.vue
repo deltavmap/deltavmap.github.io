@@ -94,6 +94,7 @@
                     :x-pos="location.position.x"
                     :y-pos="location.position.y"
                     :has-atmosphere="location.data.atmosphere"
+                    :sunX="locationsObject.Sun.data.position.x"
           ></location>
         </g>
       </svg>
