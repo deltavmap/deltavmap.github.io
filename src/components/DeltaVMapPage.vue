@@ -104,6 +104,7 @@
 </template>
 <script>
 // import DeltaVMap from './DeltaVMap'
+import axios from 'axios'
 import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
 import Locations from './nodes'
@@ -690,9 +691,27 @@ export default {
       const x = node.position.x
       const y = node.position.y
       this.moveTo(x, y)
+    },
+    performVersionCheck: function () {
+      axios.get('/version.txt').then(function (response) {
+        // handle success
+        const latestVersionNumber = parseInt(response.data)
+
+        // get local version number
+        const localVersionNumber = parseInt(window.deltaVMap_version)
+
+        if (localVersionNumber < latestVersionNumber) {
+          console.log('need to update')
+          console.log('  local version:  ', localVersionNumber)
+          console.log('  latest version: ', latestVersionNumber)
+        }
+      }).catch(e => {
+        console.error('problem getting /version.txt', e)
+      })
     }
   },
   mounted () {
+    this.performVersionCheck()
     const self = this
     self.createData()
     this.mapSVG = document.getElementById('map')

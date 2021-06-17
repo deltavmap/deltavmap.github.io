@@ -11,6 +11,7 @@
     "deploy": "./deploy.sh"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "core-js": "^3.6.5",
     "dijkstrajs": "^1.0.2",
     "panzoom": "^9.4.2",
