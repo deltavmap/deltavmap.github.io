@@ -18,7 +18,8 @@ function gitstashapply() {
 }
 
 date=$(date +%s)
-branch='gh-pages2'
+branch='gh-temp-branch'
+remote_branch='gh-branch2'
 current_branch=$(git branch --show-current)
 
 
@@ -29,7 +30,7 @@ echo ""
 
 echo "GIT STASH"; # TODO gitstash $date
 
-echo "GIT CHECKOUT gh-pages2"; git checkout $branch
+echo "GIT CHECKOUT $branch"; git checkout $branch
 
 echo "GIT MERGE MAIN"; git merge main
 
@@ -41,7 +42,7 @@ echo "ADDING DIST"; git add dist
 
 echo "GIT COMMIT"; git commit -m "build for production" --no-verify &> /dev/null
 
-echo "GIT PUSH SUBTREE"; git subtree push --prefix dist origin $branch
+echo "GIT PUSH SUBTREE"; git subtree push --prefix dist origin $remote_branch
 
 echo "RETURN TO MAIN BRANCH"; git checkout $current_branch
 
