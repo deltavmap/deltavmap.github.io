@@ -99,6 +99,7 @@
       </v-container>
       <v-divider></v-divider>
       <v-card-actions>
+        <span class="version-number">version: {{ localVersionNumber }}</span>
         <v-spacer></v-spacer>
         <v-btn
           text
@@ -130,9 +131,13 @@
     padding-top: 1rem
     text-transform: uppercase
 
+  .version-number
+    color: $color-light
+    padding-left: 8px
 </style>
 <script>
 export default {
+  props: ['localVersionNumber'],
   data () {
     return {
       loadKofi: false,

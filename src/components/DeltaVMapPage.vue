@@ -127,6 +127,7 @@ export default {
   },
   data () {
     return {
+      localVersionNumber: -1,
       mapSVG: null,
       panzoom: null,
       nodeRadius: 40,
@@ -693,17 +694,19 @@ export default {
       this.moveTo(x, y)
     },
     performVersionCheck: function () {
+      const self = this
       axios.get('/version.txt').then(function (response) {
         // handle success
+        console.dir(response)
         const latestVersionNumber = parseInt(response.data)
 
         // get local version number
-        const localVersionNumber = parseInt(window.deltaVMap_version)
+        self.localVersionNumber = parseInt(window.deltaVMap_version)
 
-        if (localVersionNumber < latestVersionNumber) {
-          console.log('need to update')
-          console.log('  local version:  ', localVersionNumber)
-          console.log('  latest version: ', latestVersionNumber)
+        if (self.localVersionNumber < latestVersionNumber) {
+          console.log('need to update:')
+          console.log('- local version:  ', self.localVersionNumber)
+          console.log('- latest version: ', latestVersionNumber)
         }
       }).catch(e => {
         console.error('problem getting /version.txt', e)

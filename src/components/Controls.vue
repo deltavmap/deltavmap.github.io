@@ -49,7 +49,7 @@
         >clear</v-btn>
       </div>
       <div>
-        <about-dialog />
+        <about-dialog :local-version-number="$parent.localVersionNumber"/>
       </div>
     </div>
 <!--    <div class="controls__footer">-->
@@ -71,7 +71,8 @@ export default {
     'originIsSurface',
     'destination',
     'destinationText',
-    'destinationIsSurface'
+    'destinationIsSurface',
+    'localVersionNumber'
   ],
   components: {
     AboutDialog,
