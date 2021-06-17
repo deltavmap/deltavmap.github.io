@@ -18,8 +18,7 @@
     <v-card>
       <v-container class="px-8 py-8">
         <h2 class="mb-4">About <span class="text-uppercase">delta v map</span></h2>
-        <p class="font-weight-medium">This app calculates the speed required to change orbits
-        </p>
+        <p class="font-weight-medium">This app calculates the speed required to change orbits</p>
         <p class="px-4 py-3 grey lighten-3">
           The change in speed is known as <a href="https://en.wikipedia.org/wiki/Delta-v">delta v</a>
           (change in velocity).
@@ -43,7 +42,6 @@
         <p>
           Press <span class="u-button">clear</span> to reset the app.
         </p>
-
         <div>
           <h3>Issues</h3>
           <p>To report any problems or make feature requests,
@@ -53,7 +51,9 @@
               Github
             </a>.
           </p>
-          <p>Latest changes are <a href="https://github.com/deltavmap/deltavmap.github.io/commits/main">here</a> (commits log).</p>
+          <p>Latest changes are
+            <a href="https://github.com/deltavmap/deltavmap.github.io/commits/main">here</a> (commits log).
+          </p>
           <h4>Some known issues</h4>
           <ul>
             <li>The high DeltaV for Venus is confusing</li>
@@ -86,15 +86,18 @@
         </div>
         <div>
           <h3>Support</h3>
-          <p>If you would like to help support this project,
-            you can buy me a coffee using the widget below.</p>
+          <p>If you would like to learn how to help support this project,
+            click this coffee mug => <a style="font-size: 1.4em" @click="kofiClick()">☕</a></p>
+          <div v-if="loadKofi">
+            <div v-show="showKofi">
+              <iframe src='https://ko-fi.com/deltavmap/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:4px;background:#f9f9f9;' height='712' title='deltavmap'></iframe>
+            </div>
+          </div>
           <p>Or you can help me by <span class="font-weight-bold">sharing</span> this app/site/whatever with someone you think might appreciate it.</p>
           <p>Many thanks :)</p>
-          <iframe src='https://ko-fi.com/deltavmap/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:4px;background:#f9f9f9;' height='712' title='deltavmap'></iframe>
         </div>
       </v-container>
       <v-divider></v-divider>
-
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
@@ -119,17 +122,30 @@
   .v-btn__content
     color: $color-purpley !important
   p
-    margin-bottom: 1em
+    margin-bottom: 1rem
   // h2,
   h3, h4
-    margin: 1.75em 0 .25em
+    border-top: .5px solid lighten($color-map-background, 50%)
+    margin: 2rem 0 .5rem
+    padding-top: 1rem
     text-transform: uppercase
+
 </style>
 <script>
 export default {
   data () {
     return {
+      loadKofi: false,
+      showKofi: false,
       dialogOpen: false
+    }
+  },
+  methods: {
+    kofiClick: function () {
+      if (!this.loadKofi) {
+        this.loadKofi = true
+      }
+      this.showKofi = !this.showKofi
     }
   }
 }
