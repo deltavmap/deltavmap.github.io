@@ -25,3 +25,4 @@ pnpm-debug.log*
 /public/img/icons/favicon_package_v0.16.zip
 /meta.org
 /meta/
+/dist/
