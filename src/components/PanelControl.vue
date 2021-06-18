@@ -91,6 +91,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
 
     @media #{map-get($display-breakpoints, 'sm-and-down')}
       border-radius: .5rem
+      font-size: .9em
       margin: 0 .5rem
 
     &:before
