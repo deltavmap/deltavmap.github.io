@@ -7,5 +7,12 @@ module.exports = {
   configureWebpack: {
     // plugins: [new BundleAnalyzerPlugin()]
   },
-  lintOnSave: true
+  lintOnSave: true,
+  pwa: {
+    name: 'DeltaVMap',
+    workboxPluginMode: 'InjectManifest',
+    workboxOptions: {
+      swSrc: 'src/service-worker.js'
+    }
+  }
 }

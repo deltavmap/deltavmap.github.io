@@ -52,18 +52,6 @@ git checkout -b $temp_local_branch
 echo "BUILD DIST"
 npm run build
 
-echo "CREATE VERSION.TXT"
-# version_dir="dist/version"
-version_dir="dist"
-# mkdir "$version_dir"
-# version_file_path="$version_dir/$date_stamp.txt"
-version_file_path="$version_dir/version.txt"
-touch "$version_file_path"
-echo "$date_stamp" > "$version_file_path"
-
-echo "UPDATE APP VERSION NUMBER"
-sed -i "s/window\.deltaVMap_version='0000000000'/window\.deltaVMap_version='$date_stamp'/" dist/index.html
-
 echo "CD DIST"
 cd dist
 

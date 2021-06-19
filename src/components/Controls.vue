@@ -50,7 +50,8 @@
       </div>
       <div>
         <about-dialog :local-version-number="$parent.localVersionNumber"
-                      :update-available="$parent.updateAvailable"
+                      :update-available="$parent.$parent.$parent.updateExists"
+                      v-on:refresh-button-click="$emit('refresh-button-click')"
         />
       </div>
     </div>

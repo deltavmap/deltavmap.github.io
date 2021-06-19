@@ -14,9 +14,10 @@
               v-on:controls-destination-click="handleDestinationClick()"
               v-on:controls-reverse-selected-nodes="reverseSelectedNodes()"
               v-on:controls-clear-path="clearPath()"
+              v-on:refresh-button-click="hardRefresh()"
     ></controls>
     <banner class="fade-in"
-            :display-banner="displayBanner"
+            :display-banner="displayBanner()"
             v-on:close-banner="handleBannerClose()"
     >
       <div class="px-4 mb-4 py-4 rounded u-bg-color-main">
@@ -28,7 +29,7 @@
           <div class="ml-1 banner__icon banner__icon--warn"><div>⚠</div></div>
         </div>
       </div>
-      <div v-if="updateAvailable"
+      <div v-if="$parent.$parent.updateExists"
            class="mb-4 pa-4 rounded u-bg-color-warn"
            style="letter-spacing: .05em"
       >
@@ -131,10 +132,9 @@
   </div>
 </template>
 <script>
-// import DeltaVMap from './DeltaVMap'
-import axios from 'axios'
 import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
+
 import Locations from './nodes'
 import Positions from './positions'
 import UnformattedDeltaArrays from './edges'
@@ -156,9 +156,7 @@ export default {
   data () {
     return {
       pageLoaded: false,
-      displayBanner: false,
-      localVersionNumber: -1,
-      updateAvailable: false,
+      // updateAvailable: false,
       bannerTitle: 'banner-intro-hide',
       mapSVG: null,
       panzoom: null,
@@ -206,6 +204,9 @@ export default {
     },
     isDefined: function (thing) {
       return !this.isUndefined(thing)
+    },
+    displayBanner: function () {
+      return (this.$parent.$parent.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
     },
     col: function (n, localXOffset = 0) {
       const x = n * this.colDelta + this.globalXOffset + localXOffset
@@ -727,55 +728,18 @@ export default {
       const y = node.position.y
       this.moveTo(x, y)
     },
-    performVersionCheck: function () {
-      const self = this
-      // const url = '/version/?id=' + Math.random()
-      const url = '/version.txt?id=' + Math.random()
-      console.log('performing version check', url)
-
-      return axios.get(url).then(function (response) {
-        // handle success
-        console.dir(response)
-        const latestVersionNumber = parseInt(response.data)
-
-        // get local version number
-        self.localVersionNumber = parseInt(window.deltaVMap_version)
-
-        if (self.localVersionNumber < latestVersionNumber) {
-          console.log('need to update:')
-          self.updateAvailable = true
-        } else {
-          console.log('don\'t need to update:')
-        }
-        console.log('- local version:  ', self.localVersionNumber)
-        console.log('- latest version: ', latestVersionNumber)
-      }).catch(e => {
-        console.error('problem getting ', url, e)
-      })
-    },
     handleBannerClose: function () {
       localStorage.setItem(this.bannerTitle, 'true')
       setTimeout(_ => {
-        this.displayBanner = false
+        this.$forceUpdate()
       }, 250)
     },
     hardRefresh: function () {
-      debugger
-      // caches.open('v1').then(function (cache) {
-      //   debugger
-      //   cache.delete('/').then(function (response) {
-      //     debugger
-      //     window.location.reload(true)
-      //   })
-      // })
-      window.location = '/refresh.html'
+      this.$emit('refresh-app')
     }
   },
   mounted () {
     const self = this
-    this.performVersionCheck().finally(_ => {
-      self.displayBanner = self.updateAvailable || localStorage.getItem(self.bannerTitle) !== 'true'
-    })
     self.createData()
     this.mapSVG = document.getElementById('map')
     this.map = this.mapSVG
@@ -817,8 +781,8 @@ export default {
 </script>
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
-@import '@/sass/variables'
-@import '@/sass/utils/shadow-box.sass'
+@import '../sass/variables'
+@import '../sass/utils/shadow-box.sass'
 
 .u-bg-color-main
   background-color: $color-map-background
