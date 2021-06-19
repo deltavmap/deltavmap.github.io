@@ -119,6 +119,10 @@
 <style lang="sass" scoped>
 @import '@/sass/variables'
 @import '@/sass/utils/button'
+
+*
+  color: $color-dark
+
 .u-button
   font-size: 12px
 
