@@ -15,14 +15,32 @@
               v-on:controls-reverse-selected-nodes="reverseSelectedNodes()"
               v-on:controls-clear-path="clearPath()"
     ></controls>
-    <banner class="fade-in">
-      <p class="px-2 py-2 rounded" style="background-color: #444">
-        ⚠ This is app is still in active development.
-      </p>
-      <p>
-        Use this app to: <br>
-        <span class="font-weight-medium">calculate the speed required to change orbits</span>.
-      </p>
+    <banner class="fade-in"
+            :display-banner="displayBanner"
+            v-on:close-banner="handleBannerClose()"
+    >
+      <div class="px-4 mb-4 py-4 rounded u-bg-color-main">
+        <div class="d-flex justify-space-between align-center">
+          <div class="mr-2 banner__icon banner__icon--warn"><div>⚠</div></div>
+          <span>
+            This is app is still in active development.
+          </span>
+          <div class="ml-2 banner__icon banner__icon--warn"><div>⚠</div></div>
+        </div>
+      </div>
+      <div v-if="updateAvailable"
+           class="mb-4 pa-4 rounded u-bg-color-warn"
+           style="letter-spacing: .1em"
+      >
+        <div class="d-flex justify-space-between align-center">
+          <div class="mr-4 banner__icon banner__icon--refresh"><div>↺</div></div>
+          <span>
+            UPDATE AVAILABLE<br>
+            PLEASE REFRESH
+          </span>
+          <div class="ml-4 banner__icon banner__icon--refresh"><div>↺</div></div>
+        </div>
+      </div>
       <p>
         Please view the ABOUT page for more information.
       </p>
@@ -127,13 +145,15 @@ export default {
   },
   data () {
     return {
+      pageLoaded: false,
+      displayBanner: false,
       localVersionNumber: -1,
+      updateAvailable: false,
+      bannerTitle: 'banner-intro-hide',
       mapSVG: null,
       panzoom: null,
       nodeRadius: 40,
-      locationOrigin: false,
-      locationDestination: false,
-      deltaV: null,
+      // system data
       fixedNodeConstraints: [],
       systemsObject: {},
       locationsObject: {},
@@ -141,18 +161,22 @@ export default {
       finalLocationsArray: [],
       finalDeltasArray: [],
       finalEdgeGraph: {},
-      edgeOnPathGraph: {},
-      edgeOnPathList: [],
-      nodesOnPath: {},
+      // map position
       globalXOffset: 3000,
       maxX: 0,
       minX: 0,
       colDelta: 250,
       planetY: 0,
       planetYDelta: 350,
+      // selected path
       pathSelected: false,
       aerobrakingAvailable: false,
-      pageLoaded: false
+      locationOrigin: false,
+      locationDestination: false,
+      deltaV: null,
+      edgeOnPathGraph: {},
+      edgeOnPathList: [],
+      nodesOnPath: {}
     }
   },
   computed: {
@@ -695,7 +719,7 @@ export default {
     },
     performVersionCheck: function () {
       const self = this
-      axios.get('/version.txt').then(function (response) {
+      return axios.get('/version.txt').then(function (response) {
         // handle success
         console.dir(response)
         const latestVersionNumber = parseInt(response.data)
@@ -707,15 +731,24 @@ export default {
           console.log('need to update:')
           console.log('- local version:  ', self.localVersionNumber)
           console.log('- latest version: ', latestVersionNumber)
+          self.updateAvailable = true
         }
       }).catch(e => {
         console.error('problem getting /version.txt', e)
       })
+    },
+    handleBannerClose: function () {
+      localStorage.setItem(this.bannerTitle, 'true')
+      setTimeout(_ => {
+        this.displayBanner = false
+      }, 250)
     }
   },
   mounted () {
-    this.performVersionCheck()
     const self = this
+    this.performVersionCheck().finally(_ => {
+      self.displayBanner = self.updateAvailable || localStorage.getItem(self.bannerTitle) !== 'true'
+    })
     self.createData()
     this.mapSVG = document.getElementById('map')
     this.map = this.mapSVG
@@ -759,6 +792,12 @@ export default {
 @import '~vuetify/src/styles/styles.sass'
 @import '@/sass/variables'
 @import '@/sass/utils/shadow-box.sass'
+
+.u-bg-color-main
+  background-color: $color-map-background
+
+.u-bg-color-warn
+  background-color: lighten($color-purpley-red, 0%)
 
 *
   box-sizing: border-box

@@ -15,22 +15,16 @@
 </template>
 <script>
 export default {
+  props: ['displayBanner'],
   data () {
-    const bannerTitle = 'banner-intro-hide'
-    const introHide = localStorage.getItem(bannerTitle)
     return {
-      bannerTitle,
-      fadeAway: false,
-      displayBanner: introHide !== 'true'
+      fadeAway: false
     }
   },
   methods: {
     handleClose: function () {
       this.fadeAway = true
-      localStorage.setItem(this.bannerTitle, 'true')
-      setTimeout(_ => {
-        this.displayBanner = false
-      }, 250)
+      this.$emit('close-banner')
     }
   }
 }
@@ -54,10 +48,10 @@ export default {
     border-width: 1px
     border-style: solid
     border-radius: 1em
-    color: hotpink
+    color: lighten($color-purpley, 50%)
     font-size: .8em
     letter-spacing: .12em
-    padding: 1em 2em
+    padding: .75em 2em
     text-transform: uppercase
     text-align: center
 
@@ -83,5 +77,28 @@ export default {
 
     &.fade-away
       opacity: 0
+.banner__icon
+  $bi: &
+  background-color: rgba(0,0,0,.05)
+  border-radius: 3rem
+  display: flex
+  justify-content: center
+  align-items: center
+  height: 2rem
+  width: 2rem !important
+  padding: .5rem
+
+  div
+    width: 1rem
+    height: 1rem
+    display: flex
+    align-items: center
+
+  &#{$bi}--warn div
+    margin-left: 1px
+
+  &#{$bi}--refresh div
+    margin-left: 2px
+    margin-top: 1px
 
 </style>

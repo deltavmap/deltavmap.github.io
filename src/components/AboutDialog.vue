@@ -96,10 +96,15 @@
           <p>Or you can help me by <span class="font-weight-bold">sharing</span> this app/site/whatever with someone you think might appreciate it.</p>
           <p>Many thanks :)</p>
         </div>
+        <div>
+          <h3>Version</h3>
+          <p>This version: {{ localVersionNumber }}</p>
+          <p v-if="updateAvailable">A newer version is available.
+            Please refresh to get the latest version</p>
+        </div>
       </v-container>
       <v-divider></v-divider>
-      <v-card-actions>
-        <span class="version-number">version: {{ localVersionNumber }}</span>
+      <v-card-actions class="text-center">
         <v-spacer></v-spacer>
         <v-btn
           text
@@ -137,12 +142,17 @@
 </style>
 <script>
 export default {
-  props: ['localVersionNumber'],
+  props: ['localVersionNumber', 'updateAvailable'],
   data () {
     return {
       loadKofi: false,
       showKofi: false,
       dialogOpen: false
+    }
+  },
+  computed: {
+    updateText: function () {
+      return (this.updateAvailable) ? 'update available' : 'up to date'
     }
   },
   methods: {

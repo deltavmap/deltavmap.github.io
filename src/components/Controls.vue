@@ -49,7 +49,9 @@
         >clear</v-btn>
       </div>
       <div>
-        <about-dialog :local-version-number="$parent.localVersionNumber"/>
+        <about-dialog :local-version-number="$parent.localVersionNumber"
+                      :update-available="$parent.updateAvailable"
+        />
       </div>
     </div>
 <!--    <div class="controls__footer">-->
