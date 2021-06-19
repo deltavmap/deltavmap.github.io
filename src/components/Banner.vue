@@ -38,6 +38,7 @@ export default {
   background-color: $color-map-dark
   border-radius: .5em
   color: $color-map-light
+  font-size: 1em
   max-width: 360px
   margin: 1rem
   padding: 1em 1em
@@ -79,14 +80,14 @@ export default {
       opacity: 0
 .banner__icon
   $bi: &
+  align-items: center
   background-color: rgba(0,0,0,.05)
   border-radius: 3rem
   display: flex
-  justify-content: center
-  align-items: center
   height: 2rem
-  width: 2rem !important
+  justify-content: flex-start
   padding: .5rem
+  width: 2rem !important
 
   div
     width: 1rem

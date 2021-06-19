@@ -20,25 +20,35 @@
             v-on:close-banner="handleBannerClose()"
     >
       <div class="px-4 mb-4 py-4 rounded u-bg-color-main">
-        <div class="d-flex justify-space-between align-center">
-          <div class="mr-2 banner__icon banner__icon--warn"><div>⚠</div></div>
-          <span>
+        <div class="d-flex justify-start align-center">
+          <div class="mr-1 banner__icon banner__icon--warn"><div>⚠</div></div>
+          <span class="text-center">
             This is app is still in active development.
           </span>
-          <div class="ml-2 banner__icon banner__icon--warn"><div>⚠</div></div>
+          <div class="ml-1 banner__icon banner__icon--warn"><div>⚠</div></div>
         </div>
       </div>
       <div v-if="updateAvailable"
            class="mb-4 pa-4 rounded u-bg-color-warn"
-           style="letter-spacing: .1em"
+           style="letter-spacing: .05em"
       >
-        <div class="d-flex justify-space-between align-center">
-          <div class="mr-4 banner__icon banner__icon--refresh"><div>↺</div></div>
-          <span>
-            UPDATE AVAILABLE<br>
-            PLEASE REFRESH
-          </span>
-          <div class="ml-4 banner__icon banner__icon--refresh"><div>↺</div></div>
+        <div class="d-flex justify-center align-center">
+
+          <div class="text-left d-flex flex-column justify-center text-center">
+            <p>UPDATE AVAILABLE, PLEASE:</p>
+            <button type="button"
+                    @click="hardRefresh()"
+                    class="d-flex align-center justify-space-between px-3"
+            >
+              <span class="mr-4 banner__icon banner__icon--refresh"><div>↺</div></span>
+              HARD REFRESH
+              <span class="ml-4 banner__icon banner__icon--refresh"><div>↺</div></span>
+            </button>
+            <div class="mt-4" style="font-size: .8em">
+              <a href="https://www.documate.org/automation/what-is-a-hard-refresh-how-to-do-a-hard-refresh-in-any-browser/"
+              >learn more</a>
+            </div>
+          </div>
         </div>
       </div>
       <p>
@@ -196,6 +206,9 @@ export default {
     },
     isDefined: function (thing) {
       return !this.isUndefined(thing)
+    },
+    hardRefresh: function () {
+      window.location.reload(true)
     },
     col: function (n, localXOffset = 0) {
       const x = n * this.colDelta + this.globalXOffset + localXOffset
@@ -801,6 +814,7 @@ export default {
 
 *
   box-sizing: border-box
+  color: #eee
   font-family: "Roboto", sans-serif
   transition: background-color .25s, color .25s, opacity .25s, stroke .25s
   transition-timing-function: ease
@@ -810,6 +824,9 @@ export default {
   display: grid
   height: 100vh
   width: 100vw
+
+  a
+    color: $color-light
 
   &.page-loaded:before
     opacity: 1
