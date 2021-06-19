@@ -732,7 +732,10 @@ export default {
     },
     performVersionCheck: function () {
       const self = this
-      return axios.get('/version.txt').then(function (response) {
+      const url = '/version.txt?' + Math.random()
+      console.log('performing version check', url)
+
+      return axios.get(url).then(function (response) {
         // handle success
         console.dir(response)
         const latestVersionNumber = parseInt(response.data)
@@ -742,10 +745,12 @@ export default {
 
         if (self.localVersionNumber < latestVersionNumber) {
           console.log('need to update:')
-          console.log('- local version:  ', self.localVersionNumber)
-          console.log('- latest version: ', latestVersionNumber)
           self.updateAvailable = true
+        } else {
+          console.log('don\'t need to update:')
         }
+        console.log('- local version:  ', self.localVersionNumber)
+        console.log('- latest version: ', latestVersionNumber)
       }).catch(e => {
         console.error('problem getting /version.txt', e)
       })
