@@ -207,9 +207,6 @@ export default {
     isDefined: function (thing) {
       return !this.isUndefined(thing)
     },
-    hardRefresh: function () {
-      window.location.reload(true)
-    },
     col: function (n, localXOffset = 0) {
       const x = n * this.colDelta + this.globalXOffset + localXOffset
       if (x > this.maxX) this.maxX = x
@@ -732,7 +729,8 @@ export default {
     },
     performVersionCheck: function () {
       const self = this
-      const url = '/version.txt?' + Math.random()
+      // const url = '/version/?id=' + Math.random()
+      const url = '/version.txt?id=' + Math.random()
       console.log('performing version check', url)
 
       return axios.get(url).then(function (response) {
@@ -752,7 +750,7 @@ export default {
         console.log('- local version:  ', self.localVersionNumber)
         console.log('- latest version: ', latestVersionNumber)
       }).catch(e => {
-        console.error('problem getting /version.txt', e)
+        console.error('problem getting ', url, e)
       })
     },
     handleBannerClose: function () {
@@ -760,6 +758,17 @@ export default {
       setTimeout(_ => {
         this.displayBanner = false
       }, 250)
+    },
+    hardRefresh: function () {
+      debugger
+      // caches.open('v1').then(function (cache) {
+      //   debugger
+      //   cache.delete('/').then(function (response) {
+      //     debugger
+      //     window.location.reload(true)
+      //   })
+      // })
+      window.location = '/refresh.html'
     }
   },
   mounted () {

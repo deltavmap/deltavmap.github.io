@@ -100,7 +100,7 @@
           <h3>Version</h3>
           <p>This version: {{ localVersionNumber }}</p>
           <p v-if="updateAvailable">A newer version is available.
-            Please refresh to get the latest version</p>
+            Please <a href="/refresh.html">refresh</a> to get the latest version</p>
         </div>
       </v-container>
       <v-divider></v-divider>

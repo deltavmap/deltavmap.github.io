@@ -53,7 +53,13 @@ echo "BUILD DIST"
 npm run build
 
 echo "CREATE VERSION.TXT"
-echo "$date_stamp" > 'dist/version.txt'
+# version_dir="dist/version"
+version_dir="dist"
+# mkdir "$version_dir"
+# version_file_path="$version_dir/$date_stamp.txt"
+version_file_path="$version_dir/version.txt"
+touch "$version_file_path"
+echo "$date_stamp" > "$version_file_path"
 
 echo "UPDATE APP VERSION NUMBER"
 sed -i "s/window\.deltaVMap_version='0000000000'/window\.deltaVMap_version='$date_stamp'/" dist/index.html
