@@ -181,20 +181,6 @@ export default {
     getFixedNodeConstraints: function () { return this.system.fixedNodeConstraints },
     addFixedNodeConstraint: function (c) { this.system.fixedNodeConstraints.push(c) },
     addFixedNodeConstraints: function (a) { a.forEach(c => this.addFixedNodeConstraint(c)) },
-    createSystem: function (id, label, parent = null) {
-      return {
-        id,
-        label,
-        parent,
-        selected: false,
-        nodeType: 'system'
-      }
-    },
-    createFurnishedSystem: function (id, label, parent = null) {
-      return this.furnishSystemObject(
-        this.formatData(this.createSystem(id, label, parent))
-      )
-    },
     createPlanetSystem: function (
       planetName, alignLeft, hasAtmosphere,
       predecessorTransferOrbitId, predecessorHasAtmosphere,
