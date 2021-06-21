@@ -3,48 +3,48 @@
     <panel-control :type="'origin'"
                    :labelText="'origin'"
                    :valueText="originText"
-                   :active="!!origin"
+                   :active="!!path.origin"
                    :show="!!$vuetify.breakpoint.mdAndUp"
-                   :isSurface="!!originIsSurface"
+                   :isSurface="originIsSurface"
                    :hasColorIndicator="true"
     ></panel-control>
     <panel-control :type="'destination'"
                    :labelText="'destination'"
                    :valueText="destinationText"
-                   :active="!!destination"
+                   :active="!!path.destination"
                    :show="!!$vuetify.breakpoint.mdAndUp"
-                   :isSurface="!!destinationIsSurface"
+                   :isSurface="destinationIsSurface"
                    :hasColorIndicator="true"
     ></panel-control>
     <panel-control :type="'delta-v'"
                    :labelText="'delta v'"
                    :valueText="deltaVText"
-                   :active="!!deltaV"
-                   :show="!!($vuetify.breakpoint.mdAndUp || (origin && destination))"
+                   :active="!!path.deltaV"
+                   :show="!!($vuetify.breakpoint.mdAndUp || (path.origin && path.destination))"
     ></panel-control>
     <panel-control :type="'aerobraking'"
                    :labelText="'aerobraking'"
-                   :valueText="(origin && destination) ? ((aerobrakingAvailable) ? 'available' : 'unavailable') : ''"
-                   :active="!!(origin && destination)"
-                   :show="!!($vuetify.breakpoint.mdAndUp || (origin && destination))"
-                   :positive="aerobrakingAvailable"
+                   :valueText="(path.origin && path.destination) ? ((path.aerobrakingAvailable) ? 'available' : 'unavailable') : ''"
+                   :active="!!(path.origin && path.destination)"
+                   :show="!!($vuetify.breakpoint.mdAndUp || (path.origin && path.destination))"
+                   :positive="!!path.aerobrakingAvailable"
     ></panel-control>
-    <prompt v-show="!origin"
+    <prompt v-show="!path.origin"
             type="origin"
     >Select origin</prompt>
-    <prompt v-show="origin && !destination"
+    <prompt v-show="path.origin && !path.destination"
             type="destination"
     >Select destination</prompt>
     <div class="controls__buttons">
       <div>
         <v-btn small
-                  :disabled="!origin || !destination"
+                  :disabled="!path.origin || !path.destination"
                   @click="$emit('controls-reverse-selected-nodes')"
         >reverse</v-btn>
       </div>
       <div>
         <v-btn small
-               :disabled="!origin && !destination"
+               :disabled="!path.origin && !path.destination"
                @click="$emit('controls-clear-path')"
         >clear</v-btn>
       </div>
@@ -61,26 +61,42 @@
   </div>
 </template>
 <script>
+import Utils from './utils'
+
 import AboutDialog from './AboutDialog'
 import PanelControl from './PanelControl'
 import Prompt from './Prompt'
+
 export default {
   props: [
-    'aerobrakingAvailable',
-    'deltaV',
-    'deltaVText',
-    'origin',
-    'originText',
-    'originIsSurface',
-    'destination',
-    'destinationText',
-    'destinationIsSurface',
-    'localVersionNumber'
+    'path'
   ],
   components: {
     AboutDialog,
     PanelControl,
     Prompt
+  },
+  methods: {
+    selectedIsSurface: function (nodeData) {
+      return (nodeData && Utils.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
+    }
+  },
+  computed: {
+    originText: function () {
+      return (this.path.origin) ? this.path.origin.label : ''
+    },
+    destinationText: function () {
+      return (this.path.destination) ? this.path.destination.label : ''
+    },
+    originIsSurface: function () {
+      return this.selectedIsSurface(this.path.origin)
+    },
+    destinationIsSurface: function () {
+      return this.selectedIsSurface(this.path.destination)
+    },
+    deltaVText: function () {
+      return (this.path.deltaV) ? this.path.deltaV.toFixed(3) + ' km/s' : ''
+    }
   }
 }
 </script>
@@ -102,7 +118,6 @@ $color-controls-light: lighten($color-purpley-red, 60%)
 
   @media #{map-get($display-breakpoints, 'sm-and-down')}
     display: grid
-    // grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto auto
     grid-template-columns: 8.5% 8.5% 8.5% 8.5% 8.5% 8.5% 8.5% 8.5% 8.5% 8.5% 8.5% 8.5%
     padding: .5rem
     width: 100%

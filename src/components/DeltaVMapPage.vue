@@ -1,15 +1,7 @@
 <template>
   <div id="page-container" :class="{'page-loaded': pageLoaded}">
     <site-title>Delta V Map</site-title>
-    <controls :aerobrakingAvailable="path.aerobrakingAvailable"
-              :deltaV="path.deltaV"
-              :deltaVText="deltaVText"
-              :origin="path.origin"
-              :originText="pathOriginText"
-              :originIsSurface="selectedIsSurface(path.origin)"
-              :destination="path.destination"
-              :destinationText="pathDestinationText"
-              :destinationIsSurface="selectedIsSurface(path.destination)"
+    <controls :path="path"
               v-on:controls-origin-click="handleOriginClick()"
               v-on:controls-destination-click="handleDestinationClick()"
               v-on:controls-reverse-selected-nodes="reverseSelectedNodes()"
@@ -124,9 +116,6 @@ export default {
     }
   },
   computed: {
-    pathOriginText: function () {
-      return (this.path.origin) ? this.path.origin.label : ''
-    },
     pathDestinationText: function () {
       return (this.path.destination) ? this.path.destination.label : ''
     },
@@ -135,9 +124,6 @@ export default {
     },
     pathDestinationId: function () {
       return (typeof this.path.destination === 'object') ? this.path.destination.id : ''
-    },
-    deltaVText: function () {
-      return (this.path.deltaV) ? this.path.deltaV.toFixed(3) + ' km/s' : ''
     }
   },
   methods: {
@@ -591,9 +577,6 @@ export default {
       }
 
       this.handleReceivedOriginTerminal(nodeData)
-    },
-    selectedIsSurface: function (nodeData) {
-      return (nodeData && Utils.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
     },
     reverseSelectedNodes: function () {
       const originalA = this.path.origin
