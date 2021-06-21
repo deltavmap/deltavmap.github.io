@@ -1,6 +1,6 @@
 export default function (deltaVMap) {
   const marsX = deltaVMap.planetXR
-  const marsY = deltaVMap.marsY
+  const marsY = deltaVMap.planetY
   deltaVMap.createPlanetSystem(
     'Mars',
     false,
@@ -19,7 +19,7 @@ export default function (deltaVMap) {
   )
 
   const jupiterX = marsX
-  const jupiterY = deltaVMap.planetY
+  const jupiterY = deltaVMap.map.planetY
   deltaVMap.jupiterSystem = deltaVMap.createPlanetSystem(
     'Jupiter',
     true,
@@ -41,7 +41,7 @@ export default function (deltaVMap) {
     jupiterX, jupiterY, 1
   )
   const saturnX = jupiterX
-  const saturnY = jupiterY + (1 * deltaVMap.planetYDelta)
+  const saturnY = jupiterY + (1 * deltaVMap.map.planetYDelta)
   deltaVMap.saturnSystem = deltaVMap.createPlanetSystem(
     'Saturn',
     false,
@@ -64,7 +64,7 @@ export default function (deltaVMap) {
     saturnX, saturnY, 0
   )
   const uranusX = jupiterX
-  const uranusY = saturnY + (3 * deltaVMap.planetYDelta)
+  const uranusY = saturnY + (3 * deltaVMap.map.planetYDelta)
   deltaVMap.uranusSystem = deltaVMap.createPlanetSystem(
     'Uranus',
     true,
@@ -86,7 +86,7 @@ export default function (deltaVMap) {
   )
 
   const neptuneX = jupiterX
-  const neptuneY = uranusY + (1 * deltaVMap.planetYDelta)
+  const neptuneY = uranusY + (1 * deltaVMap.map.planetYDelta)
   deltaVMap.neptuneSystem = deltaVMap.createPlanetSystem(
     'Neptune',
     false,
@@ -106,7 +106,7 @@ export default function (deltaVMap) {
   )
 
   const plutoX = jupiterX
-  const plutoY = neptuneY + (3 * deltaVMap.planetYDelta)
+  const plutoY = neptuneY + (3 * deltaVMap.map.planetYDelta)
   deltaVMap.plutoSystem = deltaVMap.createPlanetSystem(
     'Pluto',
     true,
@@ -124,7 +124,7 @@ export default function (deltaVMap) {
   )
 
   const haumeaX = jupiterX
-  const haumeaY = plutoY + deltaVMap.planetYDelta
+  const haumeaY = plutoY + deltaVMap.map.planetYDelta
   deltaVMap.haumeaSystem = deltaVMap.createPlanetSystem(
     'Haumea',
     false,
@@ -140,7 +140,7 @@ export default function (deltaVMap) {
   )
 
   const makemakeX = jupiterX
-  const makemakeY = haumeaY + deltaVMap.planetYDelta
+  const makemakeY = haumeaY + deltaVMap.map.planetYDelta
   deltaVMap.makemakeSystem = deltaVMap.createPlanetSystem(
     'Makemake',
     false,

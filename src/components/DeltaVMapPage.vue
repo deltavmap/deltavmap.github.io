@@ -1,15 +1,15 @@
 <template>
   <div id="page-container" :class="{'page-loaded': pageLoaded}">
     <site-title>Delta V Map</site-title>
-    <controls :aerobrakingAvailable="aerobrakingAvailable"
-              :deltaV="deltaV"
+    <controls :aerobrakingAvailable="path.aerobrakingAvailable"
+              :deltaV="path.deltaV"
               :deltaVText="deltaVText"
-              :origin="locationOrigin"
-              :originText="locationOriginText"
-              :originIsSurface="selectedIsSurface(locationOrigin)"
-              :destination="locationDestination"
-              :destinationText="locationDestinationText"
-              :destinationIsSurface="selectedIsSurface(locationDestination)"
+              :origin="path.origin"
+              :originText="pathOriginText"
+              :originIsSurface="selectedIsSurface(path.origin)"
+              :destination="path.destination"
+              :destinationText="pathDestinationText"
+              :destinationIsSurface="selectedIsSurface(path.destination)"
               v-on:controls-origin-click="handleOriginClick()"
               v-on:controls-destination-click="handleDestinationClick()"
               v-on:controls-reverse-selected-nodes="reverseSelectedNodes()"
@@ -56,11 +56,19 @@
         Please view the ABOUT page for more information.
       </p>
     </banner>
+<!--    <delta-v-map :path-selected="pathSelected"-->
+<!--                 :maxX="map.maxX"-->
+<!--                 :colDelta="map.colDelta"-->
+<!--                 :finalDeltasArray="finalDeltasArray"-->
+<!--                 :finalLocationsArray="finalLocationsArray"-->
+<!--                 :get-->
+<!--                 :edgesOnPathGraph="path.edgesGraph"-->
+<!--    ></delta-v-map>-->
     <div class="map-container fade-in">
       <svg id="map"
            class="map"
-           :class="{'path-selected' : pathSelected}"
-           :width="(maxX + 2 * colDelta) + 'px'"
+           :class="{'path-selected' : path.isSelected}"
+           :width="(map.maxX + 2 * map.colDelta) + 'px'"
            height="9000px"
       >
         <defs>
@@ -86,14 +94,14 @@
             <stop offset="100%" style="stop-color:white; stop-opacity:0" />
           </radialGradient>
         </defs>
-        <g v-for="(edge, edgeIndex) in finalDeltasArray"
+        <g v-for="(edge, edgeIndex) in system.finalDeltasArray"
            :key="'delta-' + edgeIndex"
            :id="edge.sourceId + '-' + edge.targetId"
            :class="[
              'edge',
              'edge--' + edge.sourceId + '-' + edge.targetId,
              'edge--' + edge.targetId + '-' + edge.sourceId,
-             edgeOnPathGraph[edge.sourceId][edge.targetId] ? 'edge-on-path' : ''
+             path.edgesGraph[edge.sourceId][edge.targetId] ? 'edge-on-path' : ''
            ]"
         >
           <delta :deltaData="edge"
@@ -102,16 +110,16 @@
           >
           </delta>
         </g>
-<!--        :transform="'translate(' + orbit.position.x + ',' + orbit.position.y + ')'"-->
-        <g v-for="(location, locationIndex) in finalLocationsArray"
+        <!--        :transform="'translate(' + orbit.position.x + ',' + orbit.position.y + ')'"-->
+        <g v-for="(location, locationIndex) in system.finalLocationsArray"
            :key="locationIndex"
            class="location"
            :id="location.data.id"
            @click="nodeSelected(location)"
            @tap="nodeSelected(location)"
            :class="{
-             'origin-node': location.data.id === locationOriginId,
-             'destination-node': location.data.id === locationDestinationId,
+             'origin-node': location.data.id === pathOriginId,
+             'destination-node': location.data.id === pathDestinationId,
              'node-on-path': isNodeOnPath(location.data.id)
            }"
         >
@@ -123,7 +131,7 @@
                     :x-pos="location.position.x"
                     :y-pos="location.position.y"
                     :has-atmosphere="location.data.atmosphere"
-                    :sunX="locationsObject.Sun.data.position.x"
+                    :sunX="system.locationsObject.Sun.data.position.x"
           ></location>
         </g>
       </svg>
@@ -140,8 +148,9 @@ import Positions from './positions'
 import UnformattedDeltaArrays from './edges'
 import CreateOuterPlanets from './create-outer-planets'
 import Controls from './Controls'
-import Location from './Location'
 import Delta from './Delta'
+import Location from './Location'
+// import DeltaVMap from './DeltaVMap'
 import SiteTitle from './SiteTitle'
 import Banner from './Banner'
 
@@ -149,9 +158,10 @@ export default {
   components: {
     Banner,
     Controls,
+    // DeltaVMap,
+    SiteTitle,
     Delta,
-    Location,
-    SiteTitle
+    Location
   },
   data () {
     return {
@@ -161,42 +171,55 @@ export default {
       mapSVG: null,
       panzoom: null,
       nodeRadius: 40,
+
       // system data
-      fixedNodeConstraints: [],
-      systemsObject: {},
-      locationsObject: {},
-      formattedDeltaObjectsArray: [],
-      finalLocationsArray: [],
-      finalDeltasArray: [],
-      finalEdgeGraph: {},
+      system: {
+        fixedNodeConstraints: [],
+        locationsObject: {},
+        formattedDeltaObjectsArray: [],
+        finalLocationsArray: [],
+        finalDeltasArray: [],
+        finalEdgeGraph: {}
+      },
+
       // map position
-      globalXOffset: 3000,
-      maxX: 0,
-      minX: 0,
-      colDelta: 250,
-      planetY: 0,
-      planetYDelta: 350,
+      map: {
+        globalXOffset: 3000,
+        maxX: 0,
+        minX: 0,
+        colDelta: 250,
+        planetY: 0,
+        planetYDelta: 350
+      },
       // selected path
-      pathSelected: false,
-      aerobrakingAvailable: false,
-      locationOrigin: false,
-      locationDestination: false,
-      deltaV: null,
-      edgeOnPathGraph: {},
-      edgeOnPathList: [],
-      nodesOnPath: {}
+      path: {
+        isSelected: false,
+        aerobrakingAvailable: false,
+        origin: false,
+        destination: false,
+        deltaV: null,
+        edgesGraph: {},
+        edgesList: [],
+        nodes: {}
+      }
     }
   },
   computed: {
-    locationOriginText: function () { return (this.locationOrigin) ? this.locationOrigin.label : '' },
-    locationDestinationText: function () { return (this.locationDestination) ? this.locationDestination.label : '' },
-    locationOriginId: function () {
-      return (typeof this.locationOrigin === 'object') ? this.locationOrigin.id : ''
+    pathOriginText: function () {
+      return (this.path.origin) ? this.path.origin.label : ''
     },
-    locationDestinationId: function () {
-      return (typeof this.locationDestination === 'object') ? this.locationDestination.id : ''
+    pathDestinationText: function () {
+      return (this.path.destination) ? this.path.destination.label : ''
     },
-    deltaVText: function () { return (this.deltaV) ? this.deltaV.toFixed(3) + ' km/s' : '' }
+    pathOriginId: function () {
+      return (typeof this.path.origin === 'object') ? this.path.origin.id : ''
+    },
+    pathDestinationId: function () {
+      return (typeof this.path.destination === 'object') ? this.path.destination.id : ''
+    },
+    deltaVText: function () {
+      return (this.path.deltaV) ? this.path.deltaV.toFixed(3) + ' km/s' : ''
+    }
   },
   methods: {
     isUndefined: function (thing) {
@@ -209,29 +232,23 @@ export default {
       return (this.$parent.$parent.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
     },
     col: function (n, localXOffset = 0) {
-      const x = n * this.colDelta + this.globalXOffset + localXOffset
-      if (x > this.maxX) this.maxX = x
-      if (x < this.minX) this.minX = x
+      const x = n * this.map.colDelta + this.map.globalXOffset + localXOffset
+      if (x > this.map.maxX) this.map.maxX = x
+      if (x < this.map.minX) this.map.minX = x
       return x
     },
     handleOriginClick: function () {
-      if (this.locationOrigin) { // TODO necessary?
+      if (this.path.origin) { // TODO necessary?
         this.clearSelectedOrigin()
       }
     },
     handleDestinationClick: function () {
-      if (this.locationDestination) { // TODO necessary?
+      if (this.path.destination) { // TODO necessary?
         this.clearSelectedDestination()
       }
     },
     getLocationById: function (nodeId) {
-      return this.finalLocationsObject[nodeId]
-    },
-    getPosOfLocation: function (nodeId) {
-      return this.getLocationById(nodeId).position
-    },
-    getYPosOfLocation: function (nodeId) {
-      return this.getPosOfLocation(nodeId).y
+      return this.system.finalLocationsObject[nodeId]
     },
     hasAtmosphere: function (nodeData) {
       if (this.isDefined(nodeData) && this.isDefined(nodeData.atmosphere)) {
@@ -241,10 +258,10 @@ export default {
       }
     },
     ancestorHasAtmosphere: function (nodeData) {
-      if (this.isUndefined(this.finalLocationsObject[nodeData.parent])) {
+      if (this.isUndefined(this.system.finalLocationsObject[nodeData.parent])) {
         return false
       } else {
-        const ancestor = this.finalLocationsObject[nodeData.parent]
+        const ancestor = this.system.finalLocationsObject[nodeData.parent]
         return this.hasAtmosphere(ancestor.data)
       }
     },
@@ -258,17 +275,17 @@ export default {
     },
     // nodeIsSurface: function (node) { return (node.data.nodeType === 'surface') },
     setPlanetY: function (amount) {
-      this.planetY = amount
-      return this.planetY
+      this.map.planetY = amount
+      return this.map.planetY
     },
-    incPlanetYDelta: function (amount = this.planetYDelta) {
-      return this.setPlanetY(this.planetY + amount)
+    incPlanetYDelta: function (amount = this.map.planetYDelta) {
+      return this.setPlanetY(this.map.planetY + amount)
     },
     applyPositionDataToLocations: function (locations) {
       Positions(this, locations)
     },
-    getFixedNodeConstraints: function () { return this.fixedNodeConstraints },
-    addFixedNodeConstraint: function (c) { this.fixedNodeConstraints.push(c) },
+    getFixedNodeConstraints: function () { return this.system.fixedNodeConstraints },
+    addFixedNodeConstraint: function (c) { this.system.fixedNodeConstraints.push(c) },
     addFixedNodeConstraints: function (a) { a.forEach(c => this.addFixedNodeConstraint(c)) },
     createSystem: function (id, label, parent = null) {
       return {
@@ -366,9 +383,9 @@ export default {
       const moonHighTransferY = layoutStartY
       // const modifier = -dir
       const modifier = 1
-      const moonCaptureY = moonHighTransferY + (modifier * this.planetYDelta)
-      const moonLowOrbitY = moonCaptureY + (modifier * this.planetYDelta)
-      const moonSurfaceY = moonLowOrbitY + (modifier * this.planetYDelta)
+      const moonCaptureY = moonHighTransferY + (modifier * this.map.planetYDelta)
+      const moonLowOrbitY = moonCaptureY + (modifier * this.map.planetYDelta)
+      const moonSurfaceY = moonLowOrbitY + (modifier * this.map.planetYDelta)
       let prevSource = outerPlanetCaptureEscape
 
       moonsArray.map(m => {
@@ -476,10 +493,10 @@ export default {
       return deltaArrays.map(o => this.furnishDeltaObject(o))
     },
     addLocation: function (locationData) {
-      this.locationsObject[locationData.data.id] = locationData
+      this.system.locationsObject[locationData.data.id] = locationData
     },
     addFormattedDeltaObject: function (formattedDeltaObject) {
-      this.formattedDeltaObjectsArray.push(formattedDeltaObject)
+      this.system.formattedDeltaObjectsArray.push(formattedDeltaObject)
     },
     addUnformattedDeltaArray: function (unformattedDeltaArray) {
       const deltaObject = this.createDeltaObjectFromArray(unformattedDeltaArray)
@@ -487,111 +504,111 @@ export default {
       this.addFormattedDeltaObject(formattedDeltaObject)
     },
     createData: function () {
-      this.locationsObject = Locations
-      this.applyPositionDataToLocations(this.locationsObject)
-      this.formatLocations(this.locationsObject)
+      this.system.locationsObject = Locations
+      this.applyPositionDataToLocations(this.system.locationsObject)
+      this.formatLocations(this.system.locationsObject)
 
       CreateOuterPlanets(this)
 
-      const finalLocationsArray = Object.values(this.locationsObject)
+      const finalLocationsArray = Object.values(this.system.locationsObject)
 
       UnformattedDeltaArrays.forEach((arr) => {
         this.addUnformattedDeltaArray(arr)
       })
-      this.finalDeltasArray = this.formattedDeltaObjectsArray
+      this.system.finalDeltasArray = this.system.formattedDeltaObjectsArray
       const edgeGraph = {}
-      const edgeOnPathGraph = {}
-      this.formattedDeltaObjectsArray.map(d => {
+      const edgesOnPathGraph = {}
+      this.system.formattedDeltaObjectsArray.map(d => {
         const source = d.sourceId
         const target = d.targetId
         const dv = d.dv
         if (this.isUndefined(edgeGraph[source])) {
           edgeGraph[source] = {}
-          edgeOnPathGraph[source] = {}
+          edgesOnPathGraph[source] = {}
         }
         if (this.isUndefined(edgeGraph[target])) {
           edgeGraph[target] = {}
-          edgeOnPathGraph[target] = {}
+          edgesOnPathGraph[target] = {}
         }
         edgeGraph[source][target] = dv
         edgeGraph[target][source] = dv
-        edgeOnPathGraph[source][target] = false
-        edgeOnPathGraph[target][source] = false
+        edgesOnPathGraph[source][target] = false
+        edgesOnPathGraph[target][source] = false
       })
 
-      this.finalEdgeGraph = edgeGraph
-      this.edgeOnPathGraph = edgeOnPathGraph
-      this.finalLocationsObject = this.locationsObject
-      this.finalLocationsArray = finalLocationsArray
+      this.system.finalEdgeGraph = edgeGraph
+      this.path.edgesGraph = edgesOnPathGraph
+      this.system.finalLocationsObject = this.system.locationsObject
+      this.system.finalLocationsArray = finalLocationsArray
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearPath()
-      this.locationOrigin = nodeData
-      this.locationDestination = false
-      this.deltaV = null
+      this.path.origin = nodeData
+      this.path.destination = false
+      this.path.deltaV = null
     },
     handleReceivedOriginTerminal: function (nodeData) {
-      this.locationOrigin = nodeData
+      this.path.origin = nodeData
 
-      if (this.locationOrigin && this.locationDestination) {
+      if (this.path.origin && this.path.destination) {
         this.computePath()
       }
     },
     testIfAeroBrakingIsAvailable: function (edge, previousNode) {
       if (edge.ab === 'both') {
-        this.aerobrakingAvailable = true
+        this.path.aerobrakingAvailable = true
       } else {
         // delta is going with the path direction
         if (previousNode.id === edge.sourceId && edge.ab === 'true') {
-          this.aerobrakingAvailable = true
+          this.path.aerobrakingAvailable = true
         }
 
         // delta is going against the path direction
         if (previousNode.id === edge.targetId && edge.ab === 'reverse') {
-          this.aerobrakingAvailable = true
+          this.path.aerobrakingAvailable = true
         }
       }
     },
     markEdgeOnPath: function (sourceId, targetId) {
-      this.edgeOnPathGraph[sourceId][targetId] = true
-      this.edgeOnPathGraph[targetId][sourceId] = true
-      this.edgeOnPathList.push([sourceId, targetId])
+      this.path.edgesGraph[sourceId][targetId] = true
+      this.path.edgesGraph[targetId][sourceId] = true
+      this.path.edgesList.push([sourceId, targetId])
     },
     demarkAllEdgesOnPath: function () {
-      this.edgeOnPathList.map(a => {
+      this.path.edgesList.map(a => {
         const sourceId = a[0]
         const targetId = a[1]
-        this.edgeOnPathGraph[sourceId][targetId] = false
-        this.edgeOnPathGraph[targetId][sourceId] = false
+        this.path.edgesGraph[sourceId][targetId] = false
+        this.path.edgesGraph[targetId][sourceId] = false
       })
     },
     markNodeOnPath: function (nodeId) {
-      this.nodesOnPath[nodeId] = true
+      this.path.nodes[nodeId] = true
     },
     demarkAllNodesOnPath: function () {
-      Object.keys(this.nodesOnPath).map(k => { this.nodesOnPath[k] = false })
+      Object.keys(this.path.nodes).map(k => { this.path.nodes[k] = false })
     },
     isNodeOnPath: function (nodeId) {
-      return (this.isDefined(this.nodesOnPath[nodeId]) && this.nodesOnPath[nodeId])
+      return (this.isDefined(this.path.nodes[nodeId]) && this.path.nodes[nodeId])
     },
     computePath: function () {
       const self = this
-      self.aerobrakingAvailable = false
-      self.pathSelected = true
+      self.path.aerobrakingAvailable = false
+      self.path.isSelected = true
 
-      const originNodeData = self.locationOrigin
-      const originId = self.locationOrigin.id
-      const destinationNodeData = self.locationDestination
-      const destinationId = self.locationDestination.id
+      const originNodeData = self.path.origin
+      const originId = self.path.origin.id
+      const destinationNodeData = self.path.destination
+      const destinationId = self.path.destination.id
 
-      const shortestPath = dijkstrajs.find_path(this.finalEdgeGraph, originId, destinationId)
+      const shortestPath = dijkstrajs.find_path(this.system.finalEdgeGraph, originId, destinationId)
 
       let previousNode = null
       let delta = 0
       // let lastEdge
       shortestPath.forEach(nodeId => {
         // handle node
-        const node = self.finalLocationsObject[nodeId]
+        const node = self.system.finalLocationsObject[nodeId]
         this.markNodeOnPath(nodeId)
 
         // handle edge
@@ -600,19 +617,19 @@ export default {
           this.markEdgeOnPath(previousNode.data.id, node.data.id)
 
           // increase the delta v running total
-          delta += this.finalEdgeGraph[previousNode.data.id][node.data.id]
+          delta += this.system.finalEdgeGraph[previousNode.data.id][node.data.id]
         }
 
         // keep a record the current node so the relevant edges can be identified
         previousNode = node
       })
 
-      self.aerobrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
-      self.deltaV = delta
+      self.path.aerobrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
+      self.path.deltaV = delta
     },
     handleReceivedDestinationTerminal: function (nodeData) {
-      this.locationDestination = nodeData
-      if (this.locationOrigin && this.locationDestination) {
+      this.path.destination = nodeData
+      if (this.path.origin && this.path.destination) {
         this.computePath()
       }
     },
@@ -645,25 +662,25 @@ export default {
       }
 
       // unselecting origin
-      if (this.locationOrigin && nodeData.id === this.locationOrigin.id) {
+      if (this.path.origin && nodeData.id === this.path.origin.id) {
         this.clearSelectedOrigin()
         return
       }
 
       // unselecting destination
-      if (this.locationDestination && nodeData.id === this.locationDestination.id) {
+      if (this.path.destination && nodeData.id === this.path.destination.id) {
         this.clearSelectedDestination()
         return
       }
 
       // starting over with a new node
-      if (this.locationOrigin && this.locationDestination) {
+      if (this.path.origin && this.path.destination) {
         this.handleBothTerminalsAlreadySelected(nodeData)
         return
       }
 
       // already have the origin
-      if (this.locationOrigin) {
+      if (this.path.origin) {
         this.handleReceivedDestinationTerminal(nodeData)
         return
       }
@@ -674,37 +691,37 @@ export default {
       return (nodeData && this.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
     },
     reverseSelectedNodes: function () {
-      const originalA = this.locationOrigin
-      const originalB = this.locationDestination
+      const originalA = this.path.origin
+      const originalB = this.path.destination
       this.clearPath()
-      this.locationOrigin = originalB
-      this.locationDestination = originalA
-      this.handleReceivedDestinationTerminal(this.locationDestination)
+      this.path.origin = originalB
+      this.path.destination = originalA
+      this.handleReceivedDestinationTerminal(this.path.destination)
     },
     clearPathCommon: function (selected) {
       this.demarkAllEdgesOnPath()
       this.demarkAllNodesOnPath()
-      this.pathSelected = false
-      this.deltaV = null
-      this.aerobrakingAvailable = false
+      this.path.isSelected = false
+      this.path.deltaV = null
+      this.path.aerobrakingAvailable = false
       switch (selected) {
-        case 'locationOrigin':
-          this.locationOrigin = false
+        case 'path-origin':
+          this.path.origin = false
           break
-        case 'locationDestination':
-          this.locationDestination = false
+        case 'path-destination':
+          this.path.destination = false
           break
         default:
-          this.locationOrigin = false
-          this.locationDestination = false
+          this.path.origin = false
+          this.path.destination = false
           break
       }
     },
     clearSelectedOrigin: function () {
-      this.clearPathCommon('locationOrigin')
+      this.clearPathCommon('path-origin')
     },
     clearSelectedDestination: function () {
-      this.clearPathCommon('locationDestination')
+      this.clearPathCommon('path-destination')
     },
     clearPath: function () {
       this.clearPathCommon()
@@ -763,7 +780,7 @@ export default {
         }
       },
       onDoubleClick: function (e) {
-        if (self.pathSelected) {
+        if (self.path.isSelected) {
           if (e.target.classList.contains('location__icon')) {
           } else {
           }
@@ -771,7 +788,7 @@ export default {
       }
     })
     this.panzoom.zoomAbs(startX, startY, zoomLevel)
-    this.moveToNode(this.finalLocationsObject.SunT)
+    this.moveToNode(this.system.finalLocationsObject.SunT)
 
     setTimeout(_ => {
       this.pageLoaded = true
