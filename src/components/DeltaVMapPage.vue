@@ -56,86 +56,11 @@
         Please view the ABOUT page for more information.
       </p>
     </banner>
-<!--    <delta-v-map :path-selected="pathSelected"-->
-<!--                 :maxX="map.maxX"-->
-<!--                 :colDelta="map.colDelta"-->
-<!--                 :finalDeltasArray="finalDeltasArray"-->
-<!--                 :finalLocationsArray="finalLocationsArray"-->
-<!--                 :get-->
-<!--                 :edgesOnPathGraph="path.edgesGraph"-->
-<!--    ></delta-v-map>-->
-    <div class="map-container fade-in">
-      <svg id="map"
-           class="map"
-           :class="{'path-selected' : path.isSelected}"
-           :width="(map.maxX + 2 * map.colDelta) + 'px'"
-           height="9000px"
-      >
-        <defs>
-          <linearGradient id="gradient-shadow-left" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%"  stop-color="rgba(255,255,255,0.5)" />
-            <stop offset="75%" stop-color="rgba(0,0,0.5)" />
-          </linearGradient>
-          <linearGradient id="gradient-shadow-right" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%"  stop-color="rgba(255,255,255,0.5)" />
-            <stop offset="75%" stop-color="rgba(0,0,0.5)" />
-          </linearGradient>
-          <radialGradient id="gradient-atmosphere" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-            <stop offset="0%" style="stop-color:rgb(255,255,255); stop-opacity:1" />
-            <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0" />
-          </radialGradient>
-          <radialGradient id="gradient-sun" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-            <stop offset="0%" style="stop-color:white; stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#bba; stop-opacity:1" />
-          </radialGradient>
-          <radialGradient id="gradient-sun-corona" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-            <stop offset="0%" style="stop-color:white; stop-opacity:1" />
-            <stop offset="5%" style="stop-color:white; stop-opacity:0.3" />
-            <stop offset="100%" style="stop-color:white; stop-opacity:0" />
-          </radialGradient>
-        </defs>
-        <g v-for="(edge, edgeIndex) in system.finalDeltasArray"
-           :key="'delta-' + edgeIndex"
-           :id="edge.sourceId + '-' + edge.targetId"
-           :class="[
-             'edge',
-             'edge--' + edge.sourceId + '-' + edge.targetId,
-             'edge--' + edge.targetId + '-' + edge.sourceId,
-             path.edgesGraph[edge.sourceId][edge.targetId] ? 'edge-on-path' : ''
-           ]"
-        >
-          <delta :deltaData="edge"
-                 :source="getLocationById(edge.sourceId)"
-                 :target="getLocationById(edge.targetId)"
-          >
-          </delta>
-        </g>
-        <!--        :transform="'translate(' + orbit.position.x + ',' + orbit.position.y + ')'"-->
-        <g v-for="(location, locationIndex) in system.finalLocationsArray"
-           :key="locationIndex"
-           class="location"
-           :id="location.data.id"
-           @click="nodeSelected(location)"
-           @tap="nodeSelected(location)"
-           :class="{
-             'origin-node': location.data.id === pathOriginId,
-             'destination-node': location.data.id === pathDestinationId,
-             'node-on-path': isNodeOnPath(location.data.id)
-           }"
-        >
-          <location :location="location"
-                    :label="location.data.label"
-                    :location-type="location.data.nodeType"
-                    :radius="nodeRadius"
-                    :fill-color="getNodeFill(location)"
-                    :x-pos="location.position.x"
-                    :y-pos="location.position.y"
-                    :has-atmosphere="location.data.atmosphere"
-                    :sunX="system.locationsObject.Sun.data.position.x"
-          ></location>
-        </g>
-      </svg>
-    </div>
+    <delta-v-map :system="system"
+                 :map="map"
+                 :path="path"
+                 v-on:node-selected="nodeSelected($event)"
+    ></delta-v-map>
     <div id="bottom-scroll-marker"></div>
   </div>
 </template>
@@ -143,14 +68,13 @@
 import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
 
+import Utils from './utils'
 import Locations from './nodes'
 import Positions from './positions'
 import UnformattedDeltaArrays from './edges'
 import CreateOuterPlanets from './create-outer-planets'
 import Controls from './Controls'
-import Delta from './Delta'
-import Location from './Location'
-// import DeltaVMap from './DeltaVMap'
+import DeltaVMap from './DeltaVMap'
 import SiteTitle from './SiteTitle'
 import Banner from './Banner'
 
@@ -158,19 +82,15 @@ export default {
   components: {
     Banner,
     Controls,
-    // DeltaVMap,
-    SiteTitle,
-    Delta,
-    Location
+    DeltaVMap,
+    SiteTitle
   },
   data () {
     return {
       pageLoaded: false,
-      // updateAvailable: false,
       bannerTitle: 'banner-intro-hide',
       mapSVG: null,
       panzoom: null,
-      nodeRadius: 40,
 
       // system data
       system: {
@@ -181,7 +101,6 @@ export default {
         finalDeltasArray: [],
         finalEdgeGraph: {}
       },
-
       // map position
       map: {
         globalXOffset: 3000,
@@ -222,19 +141,19 @@ export default {
     }
   },
   methods: {
-    isUndefined: function (thing) {
-      return typeof thing === 'undefined'
-    },
-    isDefined: function (thing) {
-      return !this.isUndefined(thing)
-    },
     displayBanner: function () {
       return (this.$parent.$parent.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
     },
     col: function (n, localXOffset = 0) {
       const x = n * this.map.colDelta + this.map.globalXOffset + localXOffset
-      if (x > this.map.maxX) this.map.maxX = x
-      if (x < this.map.minX) this.map.minX = x
+      if (x > this.map.maxX) {
+        this.map.maxX = x
+      }
+
+      if (x < this.map.minX) {
+        this.map.minX = x
+      }
+
       return x
     },
     handleOriginClick: function () {
@@ -247,30 +166,19 @@ export default {
         this.clearSelectedDestination()
       }
     },
-    getLocationById: function (nodeId) {
-      return this.system.finalLocationsObject[nodeId]
-    },
     hasAtmosphere: function (nodeData) {
-      if (this.isDefined(nodeData) && this.isDefined(nodeData.atmosphere)) {
+      if (Utils.isDefined(nodeData) && Utils.isDefined(nodeData.atmosphere)) {
         return nodeData.atmosphere
       } else {
         return false
       }
     },
     ancestorHasAtmosphere: function (nodeData) {
-      if (this.isUndefined(this.system.finalLocationsObject[nodeData.parent])) {
+      if (Utils.isUndefined(this.system.finalLocationsObject[nodeData.parent])) {
         return false
       } else {
         const ancestor = this.system.finalLocationsObject[nodeData.parent]
         return this.hasAtmosphere(ancestor.data)
-      }
-    },
-    getNodeFill: function (node) {
-      switch (node.data.nodeType) {
-        case 'surface':
-          return node.data.color
-        default:
-          return 'rgba(0,0,0,0)' // TODO add to sass
       }
     },
     // nodeIsSurface: function (node) { return (node.data.nodeType === 'surface') },
@@ -390,7 +298,7 @@ export default {
 
       moonsArray.map(m => {
         const moonName = m[1]
-        const ab = (this.isDefined(m[6])) ? m[6] : false // moon aeroBraking availability
+        const ab = (Utils.isDefined(m[6])) ? m[6] : false // moon aeroBraking availability
         const moonHighTransfer = this.furnishedLocationObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: planetName })
         addPositionData(moonHighTransfer, col(currentCol), moonHighTransferY)
         const moonHighTransferDelta = this.createDeltaObject(prevSource.data.id, moonHighTransfer.data.id, m[0], planetAB)
@@ -402,7 +310,7 @@ export default {
         addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
         const moonLowDelta = this.createDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
 
-        const atmosphere = (this.isDefined(m[7]) && m[7] === true)
+        const atmosphere = (Utils.isDefined(m[7]) && m[7] === true)
         const moonSurface = this.furnishedLocationObject({ id: moonName, label: moonName, nodeType: 'surface', parent: planetName, color: '#807E7F', atmosphere })
         addPositionData(moonSurface, col(currentCol), moonSurfaceY)
         const moonSurfaceDelta = this.createDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
@@ -455,7 +363,7 @@ export default {
       o.classes = 'top-center'
       o.grabbable = false
       o.selectable = false
-      if (this.isDefined(o.data.altitude)) {
+      if (Utils.isDefined(o.data.altitude)) {
         o.data.label = o.data.label + ' (' + o.data.altitude + 'km)'
       }
       o.position = o.data.position
@@ -522,11 +430,11 @@ export default {
         const source = d.sourceId
         const target = d.targetId
         const dv = d.dv
-        if (this.isUndefined(edgeGraph[source])) {
+        if (Utils.isUndefined(edgeGraph[source])) {
           edgeGraph[source] = {}
           edgesOnPathGraph[source] = {}
         }
-        if (this.isUndefined(edgeGraph[target])) {
+        if (Utils.isUndefined(edgeGraph[target])) {
           edgeGraph[target] = {}
           edgesOnPathGraph[target] = {}
         }
@@ -587,9 +495,6 @@ export default {
     },
     demarkAllNodesOnPath: function () {
       Object.keys(this.path.nodes).map(k => { this.path.nodes[k] = false })
-    },
-    isNodeOnPath: function (nodeId) {
-      return (this.isDefined(this.path.nodes[nodeId]) && this.path.nodes[nodeId])
     },
     computePath: function () {
       const self = this
@@ -688,7 +593,7 @@ export default {
       this.handleReceivedOriginTerminal(nodeData)
     },
     selectedIsSurface: function (nodeData) {
-      return (nodeData && this.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
+      return (nodeData && Utils.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
     },
     reverseSelectedNodes: function () {
       const originalA = this.path.origin
@@ -759,7 +664,6 @@ export default {
     const self = this
     self.createData()
     this.mapSVG = document.getElementById('map')
-    this.map = this.mapSVG
     const mapSVG = this.mapSVG
     this.mapSVG = mapSVG
     const mapContainer = document.querySelector('.map-container')
@@ -792,6 +696,7 @@ export default {
 
     setTimeout(_ => {
       this.pageLoaded = true
+      this.map.mapX = 1234
     }, 1000)
   }
 }
@@ -851,67 +756,6 @@ export default {
   max-width: 500px
   p
     text-align: left
-
-.map-container
-  background: $color-map-background
-  background-image: linear-gradient(179deg, $color-map-background, $color-map-background-darker)
-  grid-row-start: 1
-  grid-row-end: 3
-  grid-column-start: 2
-  grid-column-end: 2
-  opacity: 0
-  overflow: hidden
-  position: relative
-  z-index: 1
-
-  @media #{map-get($display-breakpoints, 'sm-and-down')}
-    grid-column-start: 1
-    grid-column-end: 1
-    grid-row-start: 2
-    grid-row-end: 2
-  &:hover
-    cursor: hand
-  &--visible
-    opacity: 1
-
-  &__prompt
-    @extend .u-shadow
-    background-color: $color-dark
-    border-radius: .5rem
-    border-left-width: 5px
-    border-left-style: solid
-    color: $color-light
-    left: 2rem
-    padding: .5rem 1rem
-    position: absolute
-    top: 2rem
-    z-index: 3
-
-    &--origin
-      border-left-color: $color-origin
-
-    &--destination
-      border-left-color: $color-destination
-
-    @media #{map-get($display-breakpoints, 'sm-and-down')}
-    @media #{map-get($display-breakpoints, 'md-and-up')}
-      display: none
-
-  @media #{map-get($display-breakpoints, 'sm-and-down')}
-    grid-row-start: 2
-
-  @media #{map-get($display-breakpoints, 'md-and-up')}
-    grid-row-end: span 2
-
-.map
-  min-height: 100%
-  width: 100%
-  overflow: visible
-  text-align: initial
-
-.path-selected
-  .fadable
-    opacity: $opacity
 
 .fade-in
   opacity: 0
