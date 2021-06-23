@@ -26,8 +26,8 @@ export default [
   ['MoonT', 'EarthMoonL2', 0.35, 0],
   ['EarthMoonL1', 'LMoonO', 0.64, 0],
   ['EarthMoonL2', 'LMoonO', 0.64, 0],
-  ['LMoonO', 'NRHOT', 3.124, 0],
-  ['NRHOT', 'NRHO', 0.829, 0],
+  ['LMoonO', 'NRHO', 0.73, 0],
+  ['MoonT', 'NRHO', 0.83, 0],
 
   ['MarsT', 'EarthCE', 0.39, 2],
   ['MarsT', 'MarsCE', 0.67, 1],
