@@ -4,7 +4,7 @@
             :cx="xPos"
             :cy="yPos"
             r="400"
-            v-if="location.data.id === 'Sun'"
+            v-if="location.id === 'Sun'"
             fill="url('#gradient-sun-corona')"
     />
 
@@ -63,7 +63,7 @@ export default {
     formattedShadowRadius: function () { return (this.radius - 2) + 'px' },
     shadowFill: function () {
       let gradId = '#gradient-'
-      if (this.location.data.id === 'Sun') {
+      if (this.location.id === 'Sun') {
         gradId += 'sun'
       } else {
         const dir = (this.xPos > this.sunX) ? 'right' : 'left'
@@ -72,7 +72,7 @@ export default {
       return "url('" + gradId + "')"
     },
     locationIsSurface: function () {
-      return this.locationType === 'surface'
+      return this.locationType === 'body'
     },
     labelTransformValue: function () {
       return 'translate(' + (this.xPos - 75) + ',' + (this.yPos + 65) + ')'

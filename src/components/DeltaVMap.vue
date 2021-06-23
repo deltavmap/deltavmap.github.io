@@ -45,28 +45,27 @@
         >
         </delta>
       </g>
-      <!--        :transform="'translate(' + orbit.position.x + ',' + orbit.position.y + ')'"-->
       <g v-for="(location, locationIndex) in system.finalLocationsArray"
          :key="locationIndex"
          class="location"
-         :id="location.data.id"
+         :id="location.id"
          @click="$emit('node-selected', location)"
          @tap="$emit('node-selected', location)"
          :class="{
-             'origin-node': location.data.id === path.origin.id,
-             'destination-node': location.data.id === path.destination.id,
-             'node-on-path': isNodeOnPath(location.data.id)
+             'origin-node': location.id === path.origin.id,
+             'destination-node': location.id === path.destination.id,
+             'node-on-path': isNodeOnPath(location.id)
            }"
       >
         <location :location="location"
-                  :label="location.data.label"
-                  :location-type="location.data.nodeType"
+                  :label="location.label"
+                  :location-type="location.nodeType"
                   :radius="nodeRadius"
                   :fill-color="getNodeFill(location)"
                   :x-pos="location.position.x"
                   :y-pos="location.position.y"
-                  :has-atmosphere="location.data.atmosphere"
-                  :sunX="system.locationsObject.Sun.data.position.x"
+                  :has-atmosphere="location.atmosphere"
+                  :sunX="system.locationsObject.Sun.position.x"
         ></location>
       </g>
     </svg>
@@ -108,9 +107,9 @@ export default {
       return this.system.finalLocationsObject[nodeId]
     },
     getNodeFill: function (node) {
-      switch (node.data.nodeType) {
-        case 'surface':
-          return node.data.color
+      switch (node.nodeType) {
+        case 'body':
+          return node.color
         default:
           return 'rgba(0,0,0,0)' // TODO add to sass
       }

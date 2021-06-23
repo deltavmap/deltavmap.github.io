@@ -83,7 +83,6 @@ export default {
       bannerTitle: 'banner-intro-hide',
       mapSVG: null,
       panzoom: null,
-
       // system data
       system: {
         fixedNodeConstraints: [],
@@ -167,7 +166,6 @@ export default {
         return this.hasAtmosphere(ancestor.data)
       }
     },
-    // nodeIsSurface: function (node) { return (node.data.nodeType === 'surface') },
     setPlanetY: function (amount) {
       this.map.planetY = amount
       return this.map.planetY
@@ -181,13 +179,49 @@ export default {
     getFixedNodeConstraints: function () { return this.system.fixedNodeConstraints },
     addFixedNodeConstraint: function (c) { this.system.fixedNodeConstraints.push(c) },
     addFixedNodeConstraints: function (a) { a.forEach(c => this.addFixedNodeConstraint(c)) },
+    createLocationObject: function (id, label, nodeType, parent, color = null, altitude = null, atmosphere = false) {
+      if (altitude) {
+        label = label + ' (' + altitude + 'km)'
+      }
+      return {
+        id, label, nodeType, parent, color, altitude, atmosphere
+      }
+    },
+    createBody: function (id, parent, color = null, atmosphere = false) {
+      return this.createLocationObject(id, id, 'body', parent, color, null, atmosphere)
+    },
+    createTransferOrbit: function (bodyName, parent) {
+      return this.createLocationObject(
+        bodyName + 'T',
+        bodyName + ' Transfer',
+        'orbit-transfer', parent
+      )
+    },
+    createCaptureEscapeOrbit: function (planetName) {
+      return this.createLocationObject(
+        planetName + 'CE',
+        planetName + ' Capture/Escape',
+        'orbit-capture-escape',
+        planetName
+      )
+    },
+    createLowOrbit: function (bodyName, altitude) {
+      return this.createLocationObject(
+        'L' + bodyName + 'O',
+        'Low ' + bodyName + ' Orbit',
+        'orbit',
+        bodyName,
+        null,
+        altitude
+      )
+    },
     createPlanetSystem: function (
       planetName, alignLeft, hasAtmosphere,
       predecessorTransferOrbitId, predecessorHasAtmosphere,
       outerPlanetTransferDV, outerPlanetCaptureDV,
       color, moonsArray,
       lowOrbitDV, lowOrbitAltitude,
-      surfaceDV,
+      bodyDV,
       layoutStartX,
       layoutStartY,
       yOffsetInt
@@ -204,21 +238,20 @@ export default {
       }
 
       // create outer planet
-      const planetSurface = this.furnishedLocationObject({
-        id: planetName, label: planetName, nodeType: 'surface', parent: 'Sun', color, atmosphere: hasAtmosphere
-      })
-      this.addLocation(planetSurface)
+      const planetBody = this.createBody(
+        planetName,
+        'Sun',
+        color,
+        hasAtmosphere
+      )
+      this.addLocation(planetBody)
 
       // create the outer planet transfer orbit and delta
-      const transferName = planetName + 'T'
-      const outerPlanetTransfer = this.furnishedLocationObject(
-        {
-          id: transferName,
-          label: planetName + ' Transfer',
-          nodeType: 'orbit-transfer',
-          parent: 'Sun'
-        }
+      const outerPlanetTransfer = this.createTransferOrbit(
+        planetName,
+        'Sun'
       )
+      const transferName = outerPlanetTransfer.id
       addPositionData(outerPlanetTransfer, col(0), layoutStartY)
       this.addLocation(outerPlanetTransfer)
 
@@ -242,16 +275,8 @@ export default {
       )
 
       // create outer planet capture orbit and delta
-      const captureName = planetName + 'CE'
-      const outerPlanetCaptureEscape = this.furnishedLocationObject(
-        {
-          id: captureName,
-          label: planetName + ' Capture/Escape',
-          nodeType: 'orbit-capture-escape',
-          parent: planetName
-        }
-      )
-
+      const outerPlanetCaptureEscape = this.createCaptureEscapeOrbit(planetName)
+      const captureName = outerPlanetCaptureEscape.id
       updateCurrentCol()
       addPositionData(outerPlanetCaptureEscape, col(currentCol), layoutStartY)
       this.addLocation(outerPlanetCaptureEscape)
@@ -260,95 +285,59 @@ export default {
         transferName, captureName, outerPlanetCaptureDV, planetAB
       )
       updateCurrentCol()
-      const moonHighTransferY = layoutStartY
+      const moonTransferY = layoutStartY
       // const modifier = -dir
       const modifier = 1
-      const moonCaptureY = moonHighTransferY + (modifier * this.map.planetYDelta)
+      const moonCaptureY = moonTransferY + (modifier * this.map.planetYDelta)
       const moonLowOrbitY = moonCaptureY + (modifier * this.map.planetYDelta)
-      const moonSurfaceY = moonLowOrbitY + (modifier * this.map.planetYDelta)
+      const moonBodyY = moonLowOrbitY + (modifier * this.map.planetYDelta)
       let prevSource = outerPlanetCaptureEscape
 
       moonsArray.map(m => {
         const moonName = m[1]
         const ab = (Utils.isDefined(m[6])) ? m[6] : false // moon aeroBraking availability
-        const moonHighTransfer = this.furnishedLocationObject({ id: moonName + 'T', label: moonName + ' Transfer', nodeType: 'orbit-transfer', parent: planetName })
-        addPositionData(moonHighTransfer, col(currentCol), moonHighTransferY)
-        const moonHighTransferDelta = this.createDeltaObject(prevSource.data.id, moonHighTransfer.data.id, m[0], planetAB)
-        const moonCapture = this.furnishedLocationObject({ id: moonName + 'CE', label: moonName + ' Capture/Escape', nodeType: 'orbit-capture-escape', parent: planetName })
+        const moonTransfer = this.createTransferOrbit(moonName, planetName)
+        addPositionData(moonTransfer, col(currentCol), moonTransferY)
+        const moonTransferDelta = this.createDeltaObject(prevSource.id, moonTransfer.id, m[0], planetAB)
+        const moonCapture = this.createCaptureEscapeOrbit(moonName)
         addPositionData(moonCapture, col(currentCol), moonCaptureY)
-        const moonCaptureDelta = this.createDeltaObject(moonHighTransfer.data.id, moonCapture.data.id, m[2], ab)
+        const moonCaptureDelta = this.createDeltaObject(moonTransfer.id, moonCapture.id, m[2], ab)
 
-        const moonLowOrbit = this.furnishedLocationObject({ id: 'L' + moonName + 'O', label: 'Low ' + moonName + ' Orbit', nodeType: 'orbit', parent: planetName, altitude: m[4] })
+        const moonLowOrbit = this.createLowOrbit(moonName, m[4])
         addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
-        const moonLowDelta = this.createDeltaObject(moonCapture.data.id, moonLowOrbit.data.id, m[3], ab)
+        const moonLowDelta = this.createDeltaObject(moonCapture.id, moonLowOrbit.id, m[3], ab)
 
-        const atmosphere = (Utils.isDefined(m[7]) && m[7] === true)
-        const moonSurface = this.furnishedLocationObject({ id: moonName, label: moonName, nodeType: 'surface', parent: planetName, color: '#807E7F', atmosphere })
-        addPositionData(moonSurface, col(currentCol), moonSurfaceY)
-        const moonSurfaceDelta = this.createDeltaObject(moonLowOrbit.data.id, moonSurface.data.id, m[5], ab)
+        const moonBody = this.createBody(
+          moonName,
+          planetName,
+          '#807E7F',
+          (Utils.isDefined(m[7]) && m[7] === true)
+        )
+        addPositionData(moonBody, col(currentCol), moonBodyY)
+        const moonBodyDelta = this.createDeltaObject(moonLowOrbit.id, moonBody.id, m[5], ab)
 
-        prevSource = moonHighTransfer
+        prevSource = moonTransfer
         updateCurrentCol()
 
-        this.addLocation(moonHighTransfer)
-        this.addFormattedDeltaObject(moonHighTransferDelta)
+        this.addLocation(moonTransfer)
+        this.addFormattedDeltaObject(moonTransferDelta)
         this.addFormattedDeltaObject(moonCaptureDelta)
         this.addLocation(moonCapture)
         this.addFormattedDeltaObject(moonLowDelta)
         this.addLocation(moonLowOrbit)
-        this.addLocation(moonSurface)
-        this.addFormattedDeltaObject(moonSurfaceDelta)
+        this.addLocation(moonBody)
+        this.addFormattedDeltaObject(moonBodyDelta)
       })
 
-      const lowOrbitName = 'L' + planetName + 'O'
-      const lowOrbit = this.furnishedLocationObject({
-        id: lowOrbitName, label: 'Low ' + planetName + ' Orbit', nodeType: 'orbit', parent: planetName, altitude: lowOrbitAltitude
-      })
+      const lowOrbit = this.createLowOrbit(planetName, lowOrbitAltitude)
+      const lowOrbitName = lowOrbit.id
       addPositionData(lowOrbit, col(currentCol), layoutStartY)
-      addPositionData(planetSurface, col(updateCurrentCol()), layoutStartY)
+      addPositionData(planetBody, col(updateCurrentCol()), layoutStartY)
       this.addFormattedDeltaObject(outerPlanetTransferDeltaObject)
       this.addFormattedDeltaObject(outerPlanetCaptureDeltaObject)
       this.addLocation(lowOrbit)
-      this.addFormattedDeltaObject(this.createDeltaObject(prevSource.data.id, lowOrbitName, lowOrbitDV, planetAB))
-      this.addFormattedDeltaObject(this.createDeltaObject(lowOrbitName, planetName, surfaceDV, planetAB))
-    },
-    formatData: function (o) {
-      return { data: o }
-    },
-    furnishSystemObject: function (formatedSystemObject) {
-      const o = formatedSystemObject
-      o.events = false
-      o.classes = 'top-center'
-      o.grabbable = false
-      o.selectable = false
-      o.pannable = true
-      return o
-    },
-    furnishedSystemObject: function (unformatedSystemObject) {
-      return this.furnishSystemObject(this.formatData(unformatedSystemObject))
-    },
-    formatSystems: function (unformatedSystemsArray) {
-      return unformatedSystemsArray.map(o => this.furnishedSystemObject(o))
-    },
-    furnishLocationObject: function (formatedObject) {
-      const o = formatedObject
-      o.classes = 'top-center'
-      o.grabbable = false
-      o.selectable = false
-      if (Utils.isDefined(o.data.altitude)) {
-        o.data.label = o.data.label + ' (' + o.data.altitude + 'km)'
-      }
-      o.position = o.data.position
-      return o
-    },
-    furnishedLocationObject: function (unformatedLocationObject) {
-      return this.furnishLocationObject(this.formatData(unformatedLocationObject))
-    },
-    formatLocations: function (unformattedLocationDataObject) {
-      Object.keys(unformattedLocationDataObject).map((id) => {
-        const location = unformattedLocationDataObject[id]
-        unformattedLocationDataObject[id] = this.furnishedLocationObject(location)
-      })
+      this.addFormattedDeltaObject(this.createDeltaObject(prevSource.id, lowOrbitName, lowOrbitDV, planetAB))
+      this.addFormattedDeltaObject(this.createDeltaObject(lowOrbitName, planetName, bodyDV, planetAB))
     },
     createDeltaObject: function (sourceId, targetId, dv, ab = 0) {
       switch (ab) {
@@ -363,30 +352,19 @@ export default {
       const a = deltaArray
       return this.createDeltaObject(a[0], a[1], a[2], a[3])
     },
-    furnishDeltaObject: function (unfurnishedDeltaObject) {
-      const o = unfurnishedDeltaObject
-      // TODO perhaps remove all 'furnishing'
-      return o
-    },
-    formatDeltasArray: function (locationsObject, deltaArrays) {
-      // convert array to objects
-      return deltaArrays.map(o => this.furnishDeltaObject(o))
-    },
     addLocation: function (locationData) {
-      this.system.locationsObject[locationData.data.id] = locationData
+      this.system.locationsObject[locationData.id] = locationData
     },
     addFormattedDeltaObject: function (formattedDeltaObject) {
       this.system.formattedDeltaObjectsArray.push(formattedDeltaObject)
     },
     addUnformattedDeltaArray: function (unformattedDeltaArray) {
       const deltaObject = this.createDeltaObjectFromArray(unformattedDeltaArray)
-      const formattedDeltaObject = this.furnishDeltaObject(deltaObject)
-      this.addFormattedDeltaObject(formattedDeltaObject)
+      this.addFormattedDeltaObject(deltaObject)
     },
     createData: function () {
       this.system.locationsObject = Locations
       this.applyPositionDataToLocations(this.system.locationsObject)
-      this.formatLocations(this.system.locationsObject)
 
       CreateOuterPlanets(this)
 
@@ -491,10 +469,10 @@ export default {
         // handle edge
         if (previousNode) {
           // mark the edge SVGs that are on path with .edge-on-path class
-          this.markEdgeOnPath(previousNode.data.id, node.data.id)
+          this.markEdgeOnPath(previousNode.id, node.id)
 
           // increase the delta v running total
-          delta += this.system.finalEdgeGraph[previousNode.data.id][node.data.id]
+          delta += this.system.finalEdgeGraph[previousNode.id][node.id]
         }
 
         // keep a record the current node so the relevant edges can be identified
@@ -514,9 +492,9 @@ export default {
       const self = this
       const destinationHasAtmosphere = self.hasAtmosphere(destinationNodeData)
 
-      // If landing on a surface with an atmosphere,
+      // If landing on a body with an atmosphere,
       // then aerobraking is available
-      if (destinationNodeData.nodeType === 'surface' && destinationHasAtmosphere) {
+      if (destinationNodeData.nodeType === 'body' && destinationHasAtmosphere) {
         return true
       }
 
@@ -531,38 +509,31 @@ export default {
       }
     },
     nodeSelected: function (node) {
-      const nodeData = node.data
-
-      if (nodeData.nodeType === 'system') {
-        this.clearPath()
-        return
-      }
-
       // unselecting origin
-      if (this.path.origin && nodeData.id === this.path.origin.id) {
+      if (this.path.origin && node.id === this.path.origin.id) {
         this.clearSelectedOrigin()
         return
       }
 
       // unselecting destination
-      if (this.path.destination && nodeData.id === this.path.destination.id) {
+      if (this.path.destination && node.id === this.path.destination.id) {
         this.clearSelectedDestination()
         return
       }
 
       // starting over with a new node
       if (this.path.origin && this.path.destination) {
-        this.handleBothTerminalsAlreadySelected(nodeData)
+        this.handleBothTerminalsAlreadySelected(node)
         return
       }
 
       // already have the origin
       if (this.path.origin) {
-        this.handleReceivedDestinationTerminal(nodeData)
+        this.handleReceivedDestinationTerminal(node)
         return
       }
 
-      this.handleReceivedOriginTerminal(nodeData)
+      this.handleReceivedOriginTerminal(node)
     },
     reverseSelectedNodes: function () {
       const originalA = this.path.origin
