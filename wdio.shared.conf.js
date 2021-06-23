@@ -35,7 +35,7 @@ exports.config = {
   bail: 0,
   //
   // Default timeout for all waitFor* commands.
-  waitforTimeout: 1000,
+  waitforTimeout: 2000,
   //
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber

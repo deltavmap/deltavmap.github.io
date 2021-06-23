@@ -30,12 +30,14 @@ exports.config = {
     'sauce:options': {
       build: `Build ${BUILD_ID}`
     }
-  }, {
-    browserName: 'chrome',
-    browserVersion: 'latest',
-    platformName: 'Windows 10',
-    'sauce:options': {
-      build: `Build ${BUILD_ID}`
-    }
-  }]
+  }
+  // , {
+  //   browserName: 'chromium',
+  //   browserVersion: 'latest',
+  //   platformName: 'Windows 10',
+  //   'sauce:options': {
+  //     build: `Build ${BUILD_ID}`
+  //   }
+  // }
+  ]
 }

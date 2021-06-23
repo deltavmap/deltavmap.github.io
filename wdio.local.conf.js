@@ -11,15 +11,15 @@ exports.config = {
   maxInstances: 1,
   services: ['chromedriver', 'geckodriver'],
   capabilities: [
-    {
-      browserName: 'chrome',
-      acceptInsecureCerts: true,
-      'goog:chromeOptions': {
-        args: process.argv.includes('--headless')
-          ? ['--headless', '--disable-gpu']
-          : []
-      }
-    },
+    // {
+    //   browserName: 'chromium',
+    //   acceptInsecureCerts: true,
+    //   'goog:chromeOptions': {
+    //     args: process.argv.includes('--headless')
+    //       ? ['--headless', '--disable-gpu']
+    //       : []
+    //   }
+    // },
     {
       browserName: 'firefox',
       acceptInsecureCerts: true
