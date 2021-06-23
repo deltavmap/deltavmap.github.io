@@ -87,7 +87,7 @@
         <div>
           <h3>Support</h3>
           <p>If you would like to learn how to help support this project,
-            click this coffee mug => <a style="font-size: 1.4em" @click="kofiClick()">☕</a></p>
+            click this coffee mug => <a style="font-size: 2.4em" @click="kofiClick()">☕</a></p>
           <div v-if="loadKofi">
             <div v-show="showKofi">
               <iframe src='https://ko-fi.com/deltavmap/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:4px;background:#f9f9f9;' height='712' title='deltavmap'></iframe>
