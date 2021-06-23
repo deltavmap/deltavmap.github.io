@@ -15,7 +15,7 @@
          ]"
          @click="$emit('controls-' + type + '-click')"
     >
-      &#8203;{{ valueText }}
+      {{ valueText }}
     </div>
   </div>
 </template>
@@ -88,6 +88,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     padding: .25rem .5rem .19em
     position: relative
     text-align: center
+    height: 2em
 
     @media #{map-get($display-breakpoints, 'sm-and-down')}
       border-radius: .5rem
