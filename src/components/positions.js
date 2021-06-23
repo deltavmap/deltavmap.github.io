@@ -18,10 +18,10 @@ export default function (deltaVMap, locations) {
   c('LSunO', col(0), incY())
   c('SunT', col(0), incY())
 
-  c('Merc', planetXL, incY())
-  c('LMercO', lOrbitXL, deltaVMap.map.planetY)
-  c('MercCE', captureXL, deltaVMap.map.planetY)
-  c('MercT', transferX, deltaVMap.map.planetY)
+  c('Mercury', planetXL, incY())
+  c('LMercuryO', lOrbitXL, deltaVMap.map.planetY)
+  c('MercuryCE', captureXL, deltaVMap.map.planetY)
+  c('MercuryT', transferX, deltaVMap.map.planetY)
 
   c('Venus', planetXR, incY())
   c('LVenusO', lOrbitXR, deltaVMap.map.planetY)

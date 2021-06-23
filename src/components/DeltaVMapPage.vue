@@ -163,7 +163,7 @@ export default {
         return false
       } else {
         const ancestor = this.system.finalLocationsObject[nodeData.parent]
-        return this.hasAtmosphere(ancestor.data)
+        return this.hasAtmosphere(ancestor)
       }
     },
     setPlanetY: function (amount) {

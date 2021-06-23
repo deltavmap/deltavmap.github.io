@@ -1,13 +1,13 @@
 export default [
   ['LSunO', 'Sun', 440, 0],
   ['SunT', 'LSunO', 178, 0],
-  ['SunT', 'MercT', 15.74, 0],
+  ['SunT', 'MercuryT', 15.74, 0],
 
-  ['LMercO', 'Merc', 3.06, 0],
-  ['MercCE', 'LMercO', 1.22, 0],
-  ['MercT', 'MercCE', 6.31, 0],
+  ['LMercuryO', 'Mercury', 3.06, 0],
+  ['MercuryCE', 'LMercuryO', 1.22, 0],
+  ['MercuryT', 'MercuryCE', 6.31, 0],
 
-  ['MercT', 'VenusT', 2.06, 1],
+  ['MercuryT', 'VenusT', 2.06, 1],
   ['LVenusO', 'Venus', 27, 1],
   ['VenusCE', 'LVenusO', 2.94, 0],
   ['VenusT', 'VenusCE', 0.36, 1],

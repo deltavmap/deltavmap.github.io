@@ -3,10 +3,10 @@ const array = [
   { id: 'LSunO', label: 'Low Sun Orbit', nodeType: 'orbit', parent: 'Sun', altitude: '10000' },
   { id: 'SunT', label: 'Sun Transfer', nodeType: 'orbit-transfer', parent: 'Sun' },
 
-  { id: 'Merc', label: 'Mercury', nodeType: 'body', parent: 'Sun', color: '#7E7878' },
-  { id: 'LMercO', label: 'Low Mercury Orbit', nodeType: 'orbit', parent: 'Mercury', altitude: '100' },
-  { id: 'MercCE', label: 'Mercury Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Mercury' },
-  { id: 'MercT', label: 'Mercury Transfer', nodeType: 'orbit-transfer', parent: 'Sun' },
+  { id: 'Mercury', label: 'Mercury', nodeType: 'body', parent: 'Sun', color: '#7E7878' },
+  { id: 'LMercuryO', label: 'Low Mercury Orbit', nodeType: 'orbit', parent: 'Mercury', altitude: '100' },
+  { id: 'MercuryCE', label: 'Mercury Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Mercury' },
+  { id: 'MercuryT', label: 'Mercury Transfer', nodeType: 'orbit-transfer', parent: 'Sun' },
 
   { id: 'Venus', label: 'Venus', nodeType: 'body', parent: 'Sun', color: '#D7C9AF', atmosphere: true },
   { id: 'LVenusO', label: 'Low Venus Orbit', nodeType: 'orbit', parent: 'Venus', altitude: '400' },
