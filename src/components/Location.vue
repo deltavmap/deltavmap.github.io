@@ -46,6 +46,12 @@
         </div>
       </body>
     </foreignObject>
+    <circle :cx="xPos - 1"
+            :cy="yPos - 1"
+            r="44"
+            class="click-target"
+            @click="clickHandler"
+    ></circle>
     <foreignObject :x="xPos - 75"
                    :y="(yPos + 65)"
                    width="150"
@@ -62,13 +68,6 @@
       </div>
       </body>
     </foreignObject>
-
-    <circle :cx="xPos - 1"
-          :cy="yPos - 1"
-            r="44"
-          class="click-target"
-          @click="clickHandler"
-    ></circle>
   </g>
 </template>
 <script>
@@ -105,13 +104,16 @@ export default {
       return 'translate(' + (this.xPos - 75) + ',' + (this.yPos + 65) + ')'
     },
     surfaceShadowPositionStyle: function () {
-      // const x = this.xPos
-      // const y = this.yPos
-      // const xRel = this.xPos - this.sunX
-      // const yRel = this.yPos - this.sunY
-      const right = -1.5 * this.radius * 2
-      const top = -1.5 * this.radius * 2
-      return 'top: ' + top + 'px; right: ' + right + 'px;'
+      const xRel = this.xPos - this.sunX
+      const yRel = this.yPos - this.sunY
+      const hype = Math.sqrt(Math.pow(xRel, 2) + Math.pow(yRel, 2))
+      const xScale = xRel / hype
+      const yScale = yRel / hype
+      let right = this.radius * xScale
+      let top = this.radius * yScale
+      top -= this.radius * 2
+      right -= this.radius * 2
+      return 'bottom: ' + top + 'px; right: ' + right + 'px;'
     }
   },
   methods: {
@@ -267,18 +269,16 @@ $border-radius: 4px
     height: 100%
     width: 100%
     position: relative
-    filter: brightness(1.2)
+    filter: brightness(1.05)
 
     &-shadow
       $ssize: 3 * $size
       border-radius: $ssize
-      background-image: radial-gradient(rgba(255, 255, 255, 0.5) 0%, rgba(0, 0, 0, 1) 48%) !important
+      background-image: radial-gradient(rgba(255, 255, 255, 0.5) 0%, rgba(0, 0, 0, 1) 39%) !important
       content: ''
       display: block
       height: $ssize
       position: absolute
-      // right: - 1.5 * $size
-      // top: - 1.5 * $size
       width: $ssize
       z-index: 1
 
