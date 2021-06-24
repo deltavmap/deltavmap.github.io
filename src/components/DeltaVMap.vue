@@ -128,6 +128,7 @@ export default {
 .map-container
   background: $color-map-background
   background-image: linear-gradient(179deg, $color-map-background, $color-map-background-darker)
+  cursor: crosshair
   grid-row-start: 1
   grid-row-end: 3
   grid-column-start: 2
