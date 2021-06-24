@@ -1,5 +1,6 @@
 <template>
-  <g :class="{'location-is-surface': locationIsSurface}">
+  <g :class="[(locationIsSurface) ? 'location-is-surface' : '']"
+  >
     <circle class="location__icon-atmosphere fadable"
             :cx="xPos"
             :cy="yPos"
@@ -20,29 +21,54 @@
             :cy="yPos"
             :fill="fillColor"
             :r="formattedRadius"
+            v-if="!locationIsSurface || location.id === 'Sun'"
     />
     <circle class="location__icon-surface-shadow fadable"
-            v-if="locationIsSurface"
+            v-if="locationIsSurface && location.id === 'Sun'"
             :cx="xPos"
             :cy="yPos"
             :r="formattedShadowRadius"
             stroke-width="0"
             :fill="shadowFill"
     />
+    <foreignObject :x="xPos - 45"
+                   :y="yPos - 45"
+                   height="88"
+                   width="88"
+                   v-if="locationIsSurface && location.id !== 'Sun'"
+                   class="body__container"
+    >
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="body fadable">
+          <div class="body__surface" :style="'background-color: ' + fillColor"></div>
+          <div class="body__surface-shadow" :style="surfaceShadowPositionStyle"></div>
+          <div class="body__surface-haze" style=""></div>
+        </div>
+      </body>
+    </foreignObject>
     <foreignObject :x="xPos - 75"
                    :y="(yPos + 65)"
                    width="150"
-                   height="100">
+                   height="100"
+    >
       <body xmlns="http://www.w3.org/1999/xhtml"
-            style="padding: 5px;">
+            style="padding: 5px;"
+      >
       <div class="underlay-html-container">
-        <p class="location__label fadable"
-           xmlns="http://www.w3.org/1999/xhtml">
+        <p class="location__label fadable">
           {{ label }}
         </p>
+        <div class="click-target" @click="clickHandler"></div>
       </div>
       </body>
     </foreignObject>
+
+    <circle :cx="xPos - 1"
+          :cy="yPos - 1"
+            r="44"
+          class="click-target"
+          @click="clickHandler"
+    ></circle>
   </g>
 </template>
 <script>
@@ -56,7 +82,8 @@ export default {
     'xPos',
     'yPos',
     'hasAtmosphere',
-    'sunX'
+    'sunX',
+    'sunY'
   ],
   computed: {
     formattedRadius: function () { return this.radius + 'px' },
@@ -76,7 +103,20 @@ export default {
     },
     labelTransformValue: function () {
       return 'translate(' + (this.xPos - 75) + ',' + (this.yPos + 65) + ')'
-      // return 'translate(100, 300)'
+    },
+    surfaceShadowPositionStyle: function () {
+      // const x = this.xPos
+      // const y = this.yPos
+      // const xRel = this.xPos - this.sunX
+      // const yRel = this.yPos - this.sunY
+      const right = -1.5 * this.radius * 2
+      const top = -1.5 * this.radius * 2
+      return 'top: ' + top + 'px; right: ' + right + 'px;'
+    }
+  },
+  methods: {
+    clickHandler: function () {
+      this.$emit('node-selected', this.location)
     }
   }
 }
@@ -88,6 +128,10 @@ $border-radius: 4px
 *
   transform: none
   transition: none
+.click-target
+  opacity: 0
+  &:hover
+    cursor: pointer
 
 .underlay-html-container
   position: relative
@@ -104,6 +148,13 @@ $border-radius: 4px
   & > *
     z-index: 1
 
+  .click-target
+    position: absolute
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+
 .underlay
   fill: $color-map-background
   z-index: 0
@@ -111,8 +162,7 @@ $border-radius: 4px
 .location
   $radius: 40
   stroke: $color-map-light
-  &:hover
-    cursor: pointer
+
   &__label
     background-color: darken($color-map-background, 7%)
     border-radius: $border-radius
@@ -145,6 +195,8 @@ $border-radius: 4px
 
   &.origin-node
     opacity: 1
+    .body
+      border-color: $color-origin
     .location__icon
       stroke: $color-origin
     .location__label
@@ -153,6 +205,8 @@ $border-radius: 4px
 
   &.destination-node
     opacity: 1
+    .body
+      border-color: $color-destination
     .location__icon
       stroke: $color-destination
     .location__label
@@ -174,11 +228,68 @@ $border-radius: 4px
       opacity: 1
     .location__icon-atmosphere
       opacity: 1
+    .body
+      opacity: 1
   .node-on-path:not(.origin-node, .destination-node)
     .location__icon
       stroke: $color-map-dark
     .location__label
       background-color: $color-map-dark
       color: $color-map-light
+
+.body
+  $size: 80px
+  $border-size: $size * 0.05
+  border: $border-size solid #eee
+  border-radius: $size
+  height: 100%
+  overflow: hidden
+  position: relative
+  width: 100%
+
+  &__container
+    body
+      height: 100%
+      width: 100%
+
+  &__atmosphere
+    $asize: 1.45 * $size
+    align-items: center
+    background-image: radial-gradient(rgba(256, 256, 256, 0.4) 35%, rgba(256, 256, 256, 0) 70%)
+    border-radius: $size * 1.4
+    display: flex
+    height: $asize
+    justify-content: center
+    padding: 1rem
+    width: $asize
+
+  &__surface
+    height: 100%
+    width: 100%
+    position: relative
+    filter: brightness(1.2)
+
+    &-shadow
+      $ssize: 3 * $size
+      border-radius: $ssize
+      background-image: radial-gradient(rgba(255, 255, 255, 0.5) 0%, rgba(0, 0, 0, 1) 48%) !important
+      content: ''
+      display: block
+      height: $ssize
+      position: absolute
+      // right: - 1.5 * $size
+      // top: - 1.5 * $size
+      width: $ssize
+      z-index: 1
+
+    &-haze
+      background-color: rgba(255,255,255,0.1) !important
+      content: ''
+      height: $size
+      position: absolute
+      right: 0
+      top: 0
+      width: $size
+      z-index: 2
 
 </style>

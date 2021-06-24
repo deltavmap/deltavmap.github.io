@@ -9,11 +9,11 @@
       <defs>
         <linearGradient id="gradient-shadow-left" x1="100%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%"  stop-color="rgba(255,255,255,0.5)" />
-          <stop offset="75%" stop-color="rgba(0,0,0.5)" />
+          <stop offset="75%" stop-color="rgba(0,0,0,1)" />
         </linearGradient>
         <linearGradient id="gradient-shadow-right" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%"  stop-color="rgba(255,255,255,0.5)" />
-          <stop offset="75%" stop-color="rgba(0,0,0.5)" />
+          <stop offset="75%" stop-color="rgba(0,0,0,1)" />
         </linearGradient>
         <radialGradient id="gradient-atmosphere" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
           <stop offset="0%" style="stop-color:rgb(255,255,255); stop-opacity:1" />
@@ -49,8 +49,6 @@
          :key="locationIndex"
          class="location"
          :id="location.id"
-         @click="$emit('node-selected', location)"
-         @tap="$emit('node-selected', location)"
          :class="{
              'origin-node': location.id === path.origin.id,
              'destination-node': location.id === path.destination.id,
@@ -66,6 +64,8 @@
                   :y-pos="location.position.y"
                   :has-atmosphere="location.atmosphere"
                   :sunX="system.locationsObject.Sun.position.x"
+                  :sunY="system.locationsObject.Sun.position.y"
+                  v-on:node-selected="$emit('node-selected', location)"
         ></location>
       </g>
     </svg>
@@ -127,7 +127,7 @@ export default {
 
 .map-container
   background: $color-map-background
-  background-image: linear-gradient(179deg, $color-map-background, $color-map-background-darker)
+  background-image: linear-gradient(175deg, $color-map-background, darken($color-map-background-darker, 5%))
   cursor: crosshair
   grid-row-start: 1
   grid-row-end: 3

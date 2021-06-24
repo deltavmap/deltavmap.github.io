@@ -102,8 +102,8 @@ export default {
 </script>
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
-@import '@/sass/variables'
-@import '@/sass/utils/shadow-box.sass'
+@import '../sass/variables'
+@import '../sass/utils/shadow-box.sass'
 
 $color-controls-light: lighten($color-purpley-red, 60%)
 

@@ -617,7 +617,7 @@ export default {
       maxZoom: 4,
       minZoom: 0.05,
       onTouch: function (e) {
-        if (e.target.classList.contains('location__icon')) {
+        if (e.target.classList.contains('click-target')) {
           return false
         } else {
           return true
@@ -656,7 +656,7 @@ export default {
   box-sizing: border-box
   color: #eee
   font-family: "Roboto", sans-serif
-  transition: background-color .25s, color .25s, opacity .25s, stroke .25s
+  transition: background-color .25s, border-color .25s, color .25s, opacity .25s, stroke .25s
   transition-timing-function: ease
 
 #page-container
@@ -699,6 +699,7 @@ export default {
 
 .fade-in
   opacity: 0
+
 .page-loaded
   .fade-in
     opacity: 1
