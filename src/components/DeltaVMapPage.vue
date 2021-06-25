@@ -87,7 +87,7 @@ export default {
       system: {
         fixedNodeConstraints: [],
         locationsObject: {},
-        formattedDeltaObjectsArray: [],
+        deltaObjectsArray: [],
         finalLocationsArray: [],
         finalDeltasArray: [],
         finalEdgeGraph: {}
@@ -353,9 +353,9 @@ export default {
       this.system.locationsObject[locationData.id] = locationData
     },
     addDeltaObject: function (deltaObject) {
-      this.system.formattedDeltaObjectsArray.push(deltaObject)
+      this.system.deltaObjectsArray.push(deltaObject)
     },
-    addUnformattedDeltaArray: function (unformattedDeltaArray) {
+    addDeltaArray: function (unformattedDeltaArray) {
       const deltaObject = this.createDeltaObjectFromArray(unformattedDeltaArray)
       this.addDeltaObject(deltaObject)
     },
@@ -368,12 +368,12 @@ export default {
       const finalLocationsArray = Object.values(this.system.locationsObject)
 
       UnformattedDeltaArrays.forEach((arr) => {
-        this.addUnformattedDeltaArray(arr)
+        this.addDeltaArray(arr)
       })
-      this.system.finalDeltasArray = this.system.formattedDeltaObjectsArray
+      this.system.finalDeltasArray = this.system.deltaObjectsArray
       const edgeGraph = {}
       const edgesOnPathGraph = {}
-      this.system.formattedDeltaObjectsArray.map(d => {
+      this.system.deltaObjectsArray.map(d => {
         const source = d.sourceId
         const target = d.targetId
         const dv = d.dv
