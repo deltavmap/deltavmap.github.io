@@ -593,9 +593,7 @@ export default {
   mounted () {
     const self = this
     self.createData()
-    this.mapSVG = document.getElementById('map')
-    const mapSVG = this.mapSVG
-    this.mapSVG = mapSVG
+    self.mapSVG = document.getElementById('map')
     const mapContainer = document.querySelector('.map-container')
     const mapWidth = mapContainer.offsetWidth
     const mapHeight = mapContainer.offsetHeight
@@ -603,22 +601,11 @@ export default {
     const startX = (100 + mapWidth + mapWidth * zoomLevel) / 2 // center
     const startY = (mapHeight + mapHeight * zoomLevel - 100) / 2 // center + offset
 
-    this.panzoom = panzoom(mapSVG, {
+    this.panzoom = panzoom(self.mapSVG, {
       maxZoom: 4,
       minZoom: 0.05,
       onTouch: function (e) {
-        if (e.target.classList.contains('click-target')) {
-          return false
-        } else {
-          return true
-        }
-      },
-      onDoubleClick: function (e) {
-        if (self.path.isSelected) {
-          if (e.target.classList.contains('location__icon')) {
-          } else {
-          }
-        }
+        return !e.target.classList.contains('click-target')
       }
     })
     this.panzoom.zoomAbs(startX, startY, zoomLevel)
@@ -626,7 +613,6 @@ export default {
 
     setTimeout(_ => {
       this.pageLoaded = true
-      this.map.mapX = 1234
     }, 1000)
   }
 }
