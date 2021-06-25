@@ -64,7 +64,7 @@ import Utils from './utils'
 import Locations from './nodes'
 import Positions from './positions'
 import UnformattedDeltaArrays from './edges'
-import CreateOuterPlanets from './create-outer-planets'
+import CreatePlanetSystems from './create-outer-planets'
 import Controls from './Controls'
 import DeltaVMap from './DeltaVMap'
 import SiteTitle from './SiteTitle'
@@ -85,12 +85,9 @@ export default {
       panzoom: null,
       // system data
       system: {
-        fixedNodeConstraints: [],
         locationsObject: {},
         deltaObjectsArray: [],
-        finalLocationsArray: [],
-        finalDeltasArray: [],
-        finalEdgeGraph: {}
+        edgeGraph: {}
       },
       // map position
       map: {
@@ -159,10 +156,10 @@ export default {
       }
     },
     ancestorHasAtmosphere: function (nodeData) {
-      if (Utils.isUndefined(this.system.finalLocationsObject[nodeData.parent])) {
+      if (Utils.isUndefined(this.system.locationsObject[nodeData.parent])) {
         return false
       } else {
-        const ancestor = this.system.finalLocationsObject[nodeData.parent]
+        const ancestor = this.system.locationsObject[nodeData.parent]
         return this.hasAtmosphere(ancestor)
       }
     },
@@ -353,48 +350,44 @@ export default {
       this.system.locationsObject[locationData.id] = locationData
     },
     addDeltaObject: function (deltaObject) {
+      // record the delta object
       this.system.deltaObjectsArray.push(deltaObject)
+
+      // create delta v and active path graph
+      const source = deltaObject.sourceId
+      const target = deltaObject.targetId
+      const dv = deltaObject.dv
+      if (Utils.isUndefined(this.system.edgeGraph[source])) {
+        this.system.edgeGraph[source] = {}
+        this.path.edgesGraph[source] = {}
+      }
+      if (Utils.isUndefined(this.system.edgeGraph[target])) {
+        this.system.edgeGraph[target] = {}
+        this.path.edgesGraph[target] = {}
+      }
+      this.system.edgeGraph[source][target] = dv
+      this.system.edgeGraph[target][source] = dv
+      this.path.edgesGraph[source][target] = false
+      this.path.edgesGraph[target][source] = false
     },
     addDeltaArray: function (deltaArray) {
       const deltaObject = this.createDeltaObjectFromArray(deltaArray)
       this.addDeltaObject(deltaObject)
     },
     createData: function () {
+      // load manual locations data
       this.system.locationsObject = Locations
+
+      // apply position data to locations
       this.applyPositionDataToLocations(this.system.locationsObject)
 
-      CreateOuterPlanets(this)
-
-      const finalLocationsArray = Object.values(this.system.locationsObject)
-
+      // add edges
       UnformattedDeltaArrays.forEach((arr) => {
         this.addDeltaArray(arr)
       })
-      this.system.finalDeltasArray = this.system.deltaObjectsArray
-      const edgeGraph = {}
-      const edgesOnPathGraph = {}
-      this.system.deltaObjectsArray.map(d => {
-        const source = d.sourceId
-        const target = d.targetId
-        const dv = d.dv
-        if (Utils.isUndefined(edgeGraph[source])) {
-          edgeGraph[source] = {}
-          edgesOnPathGraph[source] = {}
-        }
-        if (Utils.isUndefined(edgeGraph[target])) {
-          edgeGraph[target] = {}
-          edgesOnPathGraph[target] = {}
-        }
-        edgeGraph[source][target] = dv
-        edgeGraph[target][source] = dv
-        edgesOnPathGraph[source][target] = false
-        edgesOnPathGraph[target][source] = false
-      })
 
-      this.system.finalEdgeGraph = edgeGraph
-      this.path.edgesGraph = edgesOnPathGraph
-      this.system.finalLocationsObject = this.system.locationsObject
-      this.system.finalLocationsArray = finalLocationsArray
+      // automatically create planet systems
+      CreatePlanetSystems(this)
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearPath()
@@ -453,14 +446,14 @@ export default {
       const destinationNodeData = self.path.destination
       const destinationId = self.path.destination.id
 
-      const shortestPath = dijkstrajs.find_path(this.system.finalEdgeGraph, originId, destinationId)
+      const shortestPath = dijkstrajs.find_path(this.system.edgeGraph, originId, destinationId)
 
       let previousNode = null
       let delta = 0
       // let lastEdge
       shortestPath.forEach(nodeId => {
         // handle node
-        const node = self.system.finalLocationsObject[nodeId]
+        const node = self.system.locationsObject[nodeId]
         this.markNodeOnPath(nodeId)
 
         // handle edge
@@ -469,7 +462,7 @@ export default {
           this.markEdgeOnPath(previousNode.id, node.id)
 
           // increase the delta v running total
-          delta += this.system.finalEdgeGraph[previousNode.id][node.id]
+          delta += this.system.edgeGraph[previousNode.id][node.id]
         }
 
         // keep a record the current node so the relevant edges can be identified
@@ -629,7 +622,7 @@ export default {
       }
     })
     this.panzoom.zoomAbs(startX, startY, zoomLevel)
-    this.moveToNode(this.system.finalLocationsObject.SunT)
+    this.moveToNode(this.system.locationsObject.SunT)
 
     setTimeout(_ => {
       this.pageLoaded = true

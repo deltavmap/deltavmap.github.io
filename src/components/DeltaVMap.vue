@@ -29,7 +29,7 @@
           <stop offset="100%" style="stop-color:white; stop-opacity:0" />
         </radialGradient>
       </defs>
-      <g v-for="(edge, edgeIndex) in system.finalDeltasArray"
+      <g v-for="(edge, edgeIndex) in system.deltaObjectsArray"
          :key="'delta-' + edgeIndex"
          :id="edge.sourceId + '-' + edge.targetId"
          :class="[
@@ -45,7 +45,7 @@
         >
         </delta>
       </g>
-      <location v-for="(location, locationIndex) in system.finalLocationsArray"
+      <location v-for="(location, locationIndex) in system.locationsObject"
                  :key="locationIndex"
                 :location="location"
                 :radius="nodeRadius"
@@ -92,7 +92,7 @@ export default {
   },
   methods: {
     getLocationById: function (nodeId) {
-      return this.system.finalLocationsObject[nodeId]
+      return this.system.locationsObject[nodeId]
     },
     isNodeOnPath: function (nodeId) {
       return (Utils.isDefined(this.path.nodes[nodeId]) && this.path.nodes[nodeId])
