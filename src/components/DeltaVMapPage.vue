@@ -176,9 +176,6 @@ export default {
     applyPositionDataToLocations: function (locations) {
       Positions(this, locations)
     },
-    getFixedNodeConstraints: function () { return this.system.fixedNodeConstraints },
-    addFixedNodeConstraint: function (c) { this.system.fixedNodeConstraints.push(c) },
-    addFixedNodeConstraints: function (a) { a.forEach(c => this.addFixedNodeConstraint(c)) },
     createLocationObject: function (id, label, nodeType, parent, color = null, altitude = null, atmosphere = false) {
       if (altitude) {
         label = label + ' (' + altitude + 'km)'
