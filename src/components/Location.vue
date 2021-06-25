@@ -1,5 +1,12 @@
 <template>
-  <g :class="[(locationIsSurface) ? 'location-is-surface' : '']"
+  <g :id="location.id"
+     class="location"
+     :class="[
+       (locationIsSurface) ? 'location-is-surface' : '',
+       (isOriginNode) ? 'origin-node': '',
+       (isDestinationNode) ? 'destination-node': '',
+       (nodeOnPath) ? 'node-on-path': ''
+     ]"
   >
     <circle class="location__icon-atmosphere fadable"
             :cx="xPos"
@@ -13,7 +20,7 @@
       :cx="xPos"
       :cy="yPos"
       r="60"
-      v-if="hasAtmosphere"
+      v-if="location.atmosphere"
       fill="url('#gradient-atmosphere')"
     />
     <circle class="location__icon fadable"
@@ -62,7 +69,7 @@
       >
       <div class="underlay-html-container">
         <p class="location__label fadable">
-          {{ label }}
+          {{ location.label }}
         </p>
         <div class="click-target" @click="clickHandler"></div>
       </div>
@@ -74,19 +81,18 @@
 export default {
   props: [
     'location',
-    'locationType',
-    'label',
+    'isDestinationNode',
+    'isOriginNode',
+    'nodeOnPath',
     'radius',
-    'fillColor',
-    'xPos',
-    'yPos',
-    'hasAtmosphere',
     'sunX',
     'sunY'
   ],
   computed: {
     formattedRadius: function () { return this.radius + 'px' },
     formattedShadowRadius: function () { return (this.radius - 2) + 'px' },
+    xPos: function () { return this.location.position.x },
+    yPos: function () { return this.location.position.y },
     shadowFill: function () {
       let gradId = '#gradient-'
       if (this.location.id === 'Sun') {
@@ -98,7 +104,7 @@ export default {
       return "url('" + gradId + "')"
     },
     locationIsSurface: function () {
-      return this.locationType === 'body'
+      return this.location.nodeType === 'body'
     },
     labelTransformValue: function () {
       return 'translate(' + (this.xPos - 75) + ',' + (this.yPos + 65) + ')'
@@ -114,6 +120,14 @@ export default {
       top -= this.radius * 2
       right -= this.radius * 2
       return 'bottom: ' + top + 'px; right: ' + right + 'px;'
+    },
+    fillColor: function () {
+      switch (this.location.nodeType) {
+        case 'body':
+          return this.location.color
+        default:
+          return 'rgba(0,0,0,0)' // TODO add to sass
+      }
     }
   },
   methods: {

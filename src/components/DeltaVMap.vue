@@ -45,29 +45,17 @@
         >
         </delta>
       </g>
-      <g v-for="(location, locationIndex) in system.finalLocationsArray"
-         :key="locationIndex"
-         class="location"
-         :id="location.id"
-         :class="{
-             'origin-node': location.id === path.origin.id,
-             'destination-node': location.id === path.destination.id,
-             'node-on-path': isNodeOnPath(location.id)
-           }"
-      >
-        <location :location="location"
-                  :label="location.label"
-                  :location-type="location.nodeType"
-                  :radius="nodeRadius"
-                  :fill-color="getNodeFill(location)"
-                  :x-pos="location.position.x"
-                  :y-pos="location.position.y"
-                  :has-atmosphere="location.atmosphere"
-                  :sunX="system.locationsObject.Sun.position.x"
-                  :sunY="system.locationsObject.Sun.position.y"
-                  v-on:node-selected="$emit('node-selected', location)"
-        ></location>
-      </g>
+      <location v-for="(location, locationIndex) in system.finalLocationsArray"
+                 :key="locationIndex"
+                :location="location"
+                :radius="nodeRadius"
+                :sunX="system.locationsObject.Sun.position.x"
+                :sunY="system.locationsObject.Sun.position.y"
+                :node-on-path="isNodeOnPath(location.id)"
+                :is-origin-node="(location.id === path.origin.id)"
+                :is-destination-node="(location.id === path.destination.id)"
+                v-on:node-selected="$emit('node-selected', location)"
+      ></location>
     </svg>
   </div>
 </template>
@@ -105,14 +93,6 @@ export default {
   methods: {
     getLocationById: function (nodeId) {
       return this.system.finalLocationsObject[nodeId]
-    },
-    getNodeFill: function (node) {
-      switch (node.nodeType) {
-        case 'body':
-          return node.color
-        default:
-          return 'rgba(0,0,0,0)' // TODO add to sass
-      }
     },
     isNodeOnPath: function (nodeId) {
       return (Utils.isDefined(this.path.nodes[nodeId]) && this.path.nodes[nodeId])
