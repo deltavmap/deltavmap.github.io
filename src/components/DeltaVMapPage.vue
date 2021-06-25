@@ -61,10 +61,10 @@ import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
 
 import Utils from './utils'
-import Locations from './nodes'
-import Positions from './positions'
-import UnformattedDeltaArrays from './edges'
-import CreatePlanetSystems from './create-outer-planets'
+import Locations from '../data/nodes'
+import Positions from '../data/positions'
+import Deltas from '../data/edges'
+import CreatePlanetSystems from '../data/planet-systems'
 import Controls from './Controls'
 import DeltaVMap from './DeltaVMap'
 import SiteTitle from './SiteTitle'
@@ -382,9 +382,7 @@ export default {
       this.applyPositionDataToLocations(this.system.locationsObject)
 
       // add edges
-      UnformattedDeltaArrays.forEach((arr) => {
-        this.addDeltaArray(arr)
-      })
+      Deltas.forEach((arr) => { this.addDeltaArray(arr) })
 
       // automatically create planet systems
       CreatePlanetSystems(this)
