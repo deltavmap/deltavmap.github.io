@@ -42,6 +42,10 @@
         <delta :deltaData="edge"
                :source="getLocationById(edge.sourceId)"
                :target="getLocationById(edge.targetId)"
+               :x1="calculateXPos(system.locationsObject[edge.sourceId].position.x)"
+               :y1="calculateYPos(system.locationsObject[edge.sourceId].position.y)"
+               :x2="calculateXPos(system.locationsObject[edge.targetId].position.x)"
+               :y2="calculateYPos(system.locationsObject[edge.targetId].position.y)"
         >
         </delta>
       </g>
@@ -49,12 +53,14 @@
                  :key="locationIndex"
                 :location="location"
                 :radius="nodeRadius"
-                :sunX="system.locationsObject.Sun.position.x"
-                :sunY="system.locationsObject.Sun.position.y"
+                :sunX="calculateXPos(system.locationsObject.Sun.position.x)"
+                :sunY="calculateYPos(system.locationsObject.Sun.position.y)"
                 :node-on-path="isNodeOnPath(location.id)"
                 :is-origin-node="(location.id === path.origin.id)"
                 :is-destination-node="(location.id === path.destination.id)"
                 v-on:node-selected="$emit('node-selected', location)"
+                :x-pos="calculateXPos(location.position.x)"
+                :y-pos="calculateYPos(location.position.y)"
       ></location>
     </svg>
   </div>
@@ -72,12 +78,14 @@ export default {
   props: [
     'map',
     'system',
-    'path'
+    'path',
+    'calculateXPos',
+    'calculateYPos'
   ],
   data () {
     return {
-      pageLoaded: false,
-      nodeRadius: 40
+      nodeRadius: 40,
+      pageLoaded: false
     }
   },
   mounted () {
@@ -87,7 +95,7 @@ export default {
   },
   computed: {
     mapWidth: function () {
-      return (this.map.maxX + 2 * this.map.colDelta) + 'px'
+      return (this.map.maxX + 2 * this.map.yDelta) + 'px'
     }
   },
   methods: {

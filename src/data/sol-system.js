@@ -1,74 +1,82 @@
 export default {
   applyPositionData: function (deltaVMap, locations) {
-    const col = deltaVMap.col
-    const planetXL = col(-3)
-    const planetXR = col(3)
-    const incY = deltaVMap.incPlanetYDelta
-    const lOrbitXL = col(-2)
-    const lOrbitXR = col(2)
-    const captureXL = col(-1)
-    const captureXR = col(1)
-    const transferX = col(0)
+    // specify the logical positions of locations
+    // these will then be translated to pixel coordintates later
+
+    const planetXL = -3
+    const planetXR = 3
+
+    const incY = (x = 1) => {
+      deltaVMap.map.currentY += x
+      return deltaVMap.map.currentY
+    }
+    const lOrbitXL = -2
+    const lOrbitXR = 2
+    const captureXL = -1
+    const captureXR = 1
+    const transferX = 0
 
     const c = (nodeId, x, y) => {
       const location = locations[nodeId]
       location.position = { x, y }
     }
     incY()
-    c('Sun', col(0), deltaVMap.map.planetY)
-    c('LSunO', col(0), incY())
-    c('SunT', col(0), incY())
+    c('Sun', 0, deltaVMap.map.currentY)
+    // c('Test', 0), -1)
+    c('LSunO', 0, incY())
+    c('SunT', 0, incY())
 
     c('Mercury', planetXL, incY())
-    c('LMercuryO', lOrbitXL, deltaVMap.map.planetY)
-    c('MercuryCE', captureXL, deltaVMap.map.planetY)
-    c('MercuryT', transferX, deltaVMap.map.planetY)
+    c('LMercuryO', lOrbitXL, deltaVMap.map.currentY)
+    c('MercuryCE', captureXL, deltaVMap.map.currentY)
+    c('MercuryT', transferX, deltaVMap.map.currentY)
 
     c('Venus', planetXR, incY())
-    c('LVenusO', lOrbitXR, deltaVMap.map.planetY)
-    c('VenusCE', captureXR, deltaVMap.map.planetY)
-    c('VenusT', transferX, deltaVMap.map.planetY)
+    c('LVenusO', lOrbitXR, deltaVMap.map.currentY)
+    c('VenusCE', captureXR, deltaVMap.map.currentY)
+    c('VenusT', transferX, deltaVMap.map.currentY)
 
     const moonXCol = -2
-    const moonX = col(moonXCol)
+    const moonX = moonXCol
     const earthY = incY()
     const moonLY = incY()
     const moonXDelta = 0.3
     c('MoonT', moonX, earthY)
-    c('EarthMoonL1', col(moonXCol + moonXDelta), moonLY)
-    c('EarthMoonL2', col(moonXCol + 3 * moonXDelta), moonLY)
-    c('MoonCE', col(moonXCol - moonXDelta), moonLY)
+    c('EarthMoonL1', moonXCol + moonXDelta, moonLY)
+    c('EarthMoonL2', moonXCol + 3 * moonXDelta, moonLY)
+    c('MoonCE', moonXCol - moonXDelta, moonLY)
     c('LMoonO', moonX, incY())
-    c('NRHO', col(moonXCol - 3 * moonXDelta), moonLY)
+    c('NRHO', moonXCol - 3 * moonXDelta, moonLY)
     c('Moon', moonX, incY())
 
-    c('EarthCE', col(-1), earthY)
-    c('GEO', col(moonXCol - 1), earthY - deltaVMap.map.planetYDelta)
-    c('GTO', col(moonXCol - 1), earthY)
-    c('LEO', col(moonXCol - 2), earthY)
-    c('Earth', col(moonXCol - 3), earthY)
+    c('EarthCE', -1, earthY)
+    c('GEO', moonXCol - 1, earthY - 1)
+    c('GTO', moonXCol - 1, earthY)
+    c('LEO', moonXCol - 2, earthY)
+    c('Earth', moonXCol - 3, earthY)
 
-    const marsY = earthY + deltaVMap.map.planetYDelta
+    const marsY = earthY + 1
 
     const vestaY = incY()
-    c('VestaT', col(0), vestaY)
+    c('VestaT', 0, vestaY)
     c('VestaCE', captureXL, vestaY)
     c('LVestaO', lOrbitXL, vestaY)
     c('Vesta', planetXL, vestaY)
 
     const ceresY = incY()
-    c('CeresT', col(0), ceresY)
+    c('CeresT', 0, ceresY)
     c('CeresCE', captureXR, ceresY)
     c('LCeresO', lOrbitXR, ceresY)
     c('Ceres', planetXR, ceresY)
 
     incY()
-    deltaVMap.planetXR = 0 // col(8)
-    deltaVMap.planetY = marsY
+    deltaVMap.map.planetXR = 0
+    deltaVMap.map.currentY = marsY
   },
   getLocations: function () {
     const array = [
       { id: 'Sun', label: 'Sun', nodeType: 'body', parent: 'MilkyWay', color: '#ffc' },
+      // { id: 'Test', label: 'Test', nodeType: 'body', parent: 'MilkyWay', color: 'red' },
       { id: 'LSunO', label: 'Low Sun Orbit', nodeType: 'orbit', parent: 'Sun', altitude: '10000' },
       { id: 'SunT', label: 'Sun Transfer', nodeType: 'orbit-transfer', parent: 'Sun' },
 
@@ -175,8 +183,8 @@ export default {
     ]
   },
   createPlanetSystems: function (deltaVMap) {
-    const marsX = deltaVMap.planetXR
-    const marsY = deltaVMap.planetY
+    const marsX = deltaVMap.map.planetXR
+    const marsY = deltaVMap.map.currentY
     deltaVMap.createPlanetSystem(
       'Mars',
       false,
@@ -195,8 +203,8 @@ export default {
     )
 
     const jupiterX = marsX
-    const jupiterY = deltaVMap.map.planetY
-    deltaVMap.jupiterSystem = deltaVMap.createPlanetSystem(
+    const jupiterY = marsY + 5
+    deltaVMap.createPlanetSystem(
       'Jupiter',
       true,
       true,
@@ -217,8 +225,8 @@ export default {
       jupiterX, jupiterY, 1
     )
     const saturnX = jupiterX
-    const saturnY = jupiterY + (1 * deltaVMap.map.planetYDelta)
-    deltaVMap.saturnSystem = deltaVMap.createPlanetSystem(
+    const saturnY = jupiterY + 1
+    deltaVMap.createPlanetSystem(
       'Saturn',
       false,
       true,
@@ -240,8 +248,8 @@ export default {
       saturnX, saturnY, 0
     )
     const uranusX = jupiterX
-    const uranusY = saturnY + (3 * deltaVMap.map.planetYDelta)
-    deltaVMap.uranusSystem = deltaVMap.createPlanetSystem(
+    const uranusY = saturnY + 3
+    deltaVMap.createPlanetSystem(
       'Uranus',
       true,
       true,
@@ -262,8 +270,8 @@ export default {
     )
 
     const neptuneX = jupiterX
-    const neptuneY = uranusY + (1 * deltaVMap.map.planetYDelta)
-    deltaVMap.neptuneSystem = deltaVMap.createPlanetSystem(
+    const neptuneY = uranusY + 1
+    deltaVMap.createPlanetSystem(
       'Neptune',
       false,
       true,
@@ -282,8 +290,8 @@ export default {
     )
 
     const plutoX = jupiterX
-    const plutoY = neptuneY + (3 * deltaVMap.map.planetYDelta)
-    deltaVMap.plutoSystem = deltaVMap.createPlanetSystem(
+    const plutoY = neptuneY + 3
+    deltaVMap.createPlanetSystem(
       'Pluto',
       true,
       false,
@@ -300,8 +308,8 @@ export default {
     )
 
     const haumeaX = jupiterX
-    const haumeaY = plutoY + deltaVMap.map.planetYDelta
-    deltaVMap.haumeaSystem = deltaVMap.createPlanetSystem(
+    const haumeaY = plutoY + 1
+    deltaVMap.createPlanetSystem(
       'Haumea',
       false,
       false,
@@ -316,8 +324,8 @@ export default {
     )
 
     const makemakeX = jupiterX
-    const makemakeY = haumeaY + deltaVMap.map.planetYDelta
-    deltaVMap.makemakeSystem = deltaVMap.createPlanetSystem(
+    const makemakeY = haumeaY + 1
+    deltaVMap.createPlanetSystem(
       'Makemake',
       false,
       false,

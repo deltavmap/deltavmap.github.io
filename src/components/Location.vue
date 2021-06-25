@@ -15,7 +15,6 @@
             v-if="location.id === 'Sun'"
             fill="url('#gradient-sun-corona')"
     />
-
     <circle class="location__icon-atmosphere fadable"
       :cx="xPos"
       :cy="yPos"
@@ -86,13 +85,13 @@ export default {
     'nodeOnPath',
     'radius',
     'sunX',
-    'sunY'
+    'sunY',
+    'xPos',
+    'yPos'
   ],
   computed: {
     formattedRadius: function () { return this.radius + 'px' },
     formattedShadowRadius: function () { return (this.radius - 2) + 'px' },
-    xPos: function () { return this.location.position.x },
-    yPos: function () { return this.location.position.y },
     shadowFill: function () {
       let gradId = '#gradient-'
       if (this.location.id === 'Sun') {
@@ -138,7 +137,7 @@ export default {
 }
 </script>
 <style lang="sass">
-@import '@/sass/variables'
+@import '../sass/variables'
 $border-radius: 4px
 
 *

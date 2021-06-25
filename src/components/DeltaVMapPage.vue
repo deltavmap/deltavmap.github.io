@@ -52,6 +52,8 @@
                  :map="map"
                  :path="path"
                  v-on:node-selected="nodeSelected($event)"
+                 :calculate-x-pos="calculateXPos"
+                 :calculate-y-pos="calculateYPos"
     ></delta-v-map>
     <div id="bottom-scroll-marker"></div>
   </div>
@@ -89,11 +91,12 @@ export default {
       // map position
       map: {
         globalXOffset: 3000,
+        globalYOffset: 300,
         maxX: 0,
         minX: 0,
-        colDelta: 250,
-        planetY: 0,
-        planetYDelta: 350
+        currentY: 0,
+        yDelta: 350,
+        xDelta: 250
       },
       // selected path
       path: {
@@ -123,18 +126,6 @@ export default {
     displayBanner: function () {
       return (this.$parent.$parent.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
     },
-    col: function (n, localXOffset = 0) {
-      const x = n * this.map.colDelta + this.map.globalXOffset + localXOffset
-      if (x > this.map.maxX) {
-        this.map.maxX = x
-      }
-
-      if (x < this.map.minX) {
-        this.map.minX = x
-      }
-
-      return x
-    },
     handleOriginClick: function () {
       if (this.path.origin) { // TODO necessary?
         this.clearSelectedOrigin()
@@ -159,13 +150,6 @@ export default {
         const ancestor = this.system.locationsObject[nodeData.parent]
         return this.hasAtmosphere(ancestor)
       }
-    },
-    setPlanetY: function (amount) {
-      this.map.planetY = amount
-      return this.map.planetY
-    },
-    incPlanetYDelta: function (amount = this.map.planetYDelta) {
-      return this.setPlanetY(this.map.planetY + amount)
     },
     applyPositionDataToLocations: function (locations) {
       StarSystem.applyPositionData(this, locations)
@@ -220,7 +204,6 @@ export default {
       const addPositionData = (node, x, y) => {
         node.position = { x, y }
       }
-      const col = n => this.col(n, layoutStartX)
       let currentCol = 0
       const dir = (alignLeft) ? -1 : 1
       const updateCurrentCol = (i = 1) => {
@@ -243,7 +226,7 @@ export default {
         'Sun'
       )
       const transferName = outerPlanetTransfer.id
-      addPositionData(outerPlanetTransfer, col(0), layoutStartY)
+      addPositionData(outerPlanetTransfer, 0, layoutStartY)
       this.addLocation(outerPlanetTransfer)
 
       let predecessorTransferAB
@@ -269,7 +252,7 @@ export default {
       const outerPlanetCaptureEscape = this.createCaptureEscapeOrbit(planetName)
       const captureName = outerPlanetCaptureEscape.id
       updateCurrentCol()
-      addPositionData(outerPlanetCaptureEscape, col(currentCol), layoutStartY)
+      addPositionData(outerPlanetCaptureEscape, currentCol, layoutStartY)
       this.addLocation(outerPlanetCaptureEscape)
 
       const outerPlanetCaptureDeltaObject = this.createDeltaObject(
@@ -279,23 +262,23 @@ export default {
       const moonTransferY = layoutStartY
       // const modifier = -dir
       const modifier = 1
-      const moonCaptureY = moonTransferY + (modifier * this.map.planetYDelta)
-      const moonLowOrbitY = moonCaptureY + (modifier * this.map.planetYDelta)
-      const moonBodyY = moonLowOrbitY + (modifier * this.map.planetYDelta)
+      const moonCaptureY = moonTransferY + (modifier * 1)
+      const moonLowOrbitY = moonCaptureY + (modifier * 1)
+      const moonBodyY = moonLowOrbitY + (modifier * 1)
       let prevSource = outerPlanetCaptureEscape
 
       moonsArray.map(m => {
         const moonName = m[1]
         const ab = (Utils.isDefined(m[6])) ? m[6] : false // moon aeroBraking availability
         const moonTransfer = this.createTransferOrbit(moonName, planetName)
-        addPositionData(moonTransfer, col(currentCol), moonTransferY)
+        addPositionData(moonTransfer, currentCol, moonTransferY)
         const moonTransferDelta = this.createDeltaObject(prevSource.id, moonTransfer.id, m[0], planetAB)
         const moonCapture = this.createCaptureEscapeOrbit(moonName)
-        addPositionData(moonCapture, col(currentCol), moonCaptureY)
+        addPositionData(moonCapture, currentCol, moonCaptureY)
         const moonCaptureDelta = this.createDeltaObject(moonTransfer.id, moonCapture.id, m[2], ab)
 
         const moonLowOrbit = this.createLowOrbit(moonName, m[4])
-        addPositionData(moonLowOrbit, col(currentCol), moonLowOrbitY)
+        addPositionData(moonLowOrbit, currentCol, moonLowOrbitY)
         const moonLowDelta = this.createDeltaObject(moonCapture.id, moonLowOrbit.id, m[3], ab)
 
         const moonBody = this.createBody(
@@ -304,7 +287,7 @@ export default {
           '#807E7F',
           (Utils.isDefined(m[7]) && m[7] === true)
         )
-        addPositionData(moonBody, col(currentCol), moonBodyY)
+        addPositionData(moonBody, currentCol, moonBodyY)
         const moonBodyDelta = this.createDeltaObject(moonLowOrbit.id, moonBody.id, m[5], ab)
 
         prevSource = moonTransfer
@@ -322,8 +305,8 @@ export default {
 
       const lowOrbit = this.createLowOrbit(planetName, lowOrbitAltitude)
       const lowOrbitName = lowOrbit.id
-      addPositionData(lowOrbit, col(currentCol), layoutStartY)
-      addPositionData(planetBody, col(updateCurrentCol()), layoutStartY)
+      addPositionData(lowOrbit, currentCol, layoutStartY)
+      addPositionData(planetBody, updateCurrentCol(), layoutStartY)
       this.addDeltaObject(outerPlanetTransferDeltaObject)
       this.addDeltaObject(outerPlanetCaptureDeltaObject)
       this.addLocation(lowOrbit)
@@ -571,8 +554,8 @@ export default {
       this.panzoom.moveTo(-x, -y)
     },
     moveToNode: function (node) {
-      const x = node.position.x
-      const y = node.position.y
+      const x = this.calculateXPos(node.position.x)
+      const y = this.calculateYPos(node.position.y)
       this.moveTo(x, y)
     },
     handleBannerClose: function () {
@@ -583,6 +566,30 @@ export default {
     },
     hardRefresh: function () {
       this.$emit('refresh-app')
+    },
+    calculateXPos: function (n) {
+      const x = n * this.map.xDelta + this.map.globalXOffset
+      if (x > this.map.maxX) {
+        this.map.maxX = x
+      }
+
+      if (x < this.map.minX) {
+        this.map.minX = x
+      }
+
+      return x
+    },
+    calculateYPos: function (n) {
+      const y = n * this.map.yDelta + this.map.globalYOffset
+      if (y > this.map.maxY) {
+        this.map.maxY = y
+      }
+
+      if (y < this.map.minY) {
+        this.map.minY = y
+      }
+
+      return y
     }
   },
   mounted () {

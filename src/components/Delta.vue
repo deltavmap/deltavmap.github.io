@@ -23,7 +23,11 @@ export default {
   props: [
     'deltaData',
     'source',
-    'target'
+    'target',
+    'x1',
+    'x2',
+    'y1',
+    'y2'
   ],
   computed: {
     nodeRadius: function () {
@@ -35,13 +39,11 @@ export default {
       const hyp = Math.sqrt(Math.pow(this.xdiff, 2) + Math.pow(this.ydiff, 2))
       return this.nodeRadius / hyp
     },
-    x1: function () { return this.source.position.x },
-    x1Mod: function () { return this.x1 + (this.scale * this.xdiff) },
-    y1: function () { return this.source.position.y },
+    x1Mod: function () {
+      return this.x1 + (this.scale * this.xdiff)
+    },
     y1Mod: function () { return this.y1 + (this.scale * this.ydiff) },
-    x2: function () { return this.target.position.x },
     x2Mod: function () { return this.x2 - (this.scale * this.xdiff) },
-    y2: function () { return this.target.position.y },
     y2Mod: function () { return this.y2 - (this.scale * this.ydiff) },
     xdiff: function () { return this.x2 - this.x1 },
     ydiff: function () { return this.y2 - this.y1 },
@@ -67,12 +69,9 @@ export default {
         return y - opposite
       }
     },
-    getXPosOfOrbit: function (nodeId) {
-      return this.getPosOfOrbit(nodeId).x
-    },
     getXMidPointOfDelta: function () {
-      const sourceX = this.source.position.x
-      const targetX = this.target.position.x
+      const sourceX = this.x1
+      const targetX = this.x2
       let xLow, xHigh
       if (sourceX < targetX) {
         xLow = sourceX
@@ -84,8 +83,8 @@ export default {
       return xLow + ((xHigh - xLow) / 2)
     },
     getYMidPointOfDelta: function () {
-      const sourceY = this.source.position.y
-      const targetY = this.target.position.y
+      const sourceY = this.y1
+      const targetY = this.y2
       let yLow, yHigh
       if (sourceY < targetY) {
         yLow = sourceY
@@ -100,7 +99,7 @@ export default {
 }
 </script>
 <style lang="sass">
-@import '@/sass/variables'
+@import '../sass/variables'
 .map
   .edge
     &__line
