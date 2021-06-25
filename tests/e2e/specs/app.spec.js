@@ -7,12 +7,12 @@ describe('smoke tests', function () {
   })
 
   it('should have a sun', function () {
-    const sunIcon = $('#Sun .location__icon')
+    const sunIcon = $('#Sun.location')
     expect(sunIcon).toExist()
   })
 
   it('should have an Earth', function () {
-    const earthIcon = $('#Earth .location__icon')
+    const earthIcon = $('#Earth.location')
     expect(earthIcon).toExist()
   })
 })
@@ -25,8 +25,8 @@ describe('map', function () {
   it('should allow path to be selected', function () {
     const earth = $('#Earth')
     const moon = $('#Moon')
-    const earthIcon = $('#Earth .location__icon')
-    const moonIcon = $('#Moon .location__icon')
+    const earthIcon = $('#Earth.location .click-target')
+    const moonIcon = $('#Moon.location .click-target')
     const origin = $('.control--origin .control__value')
     const destination = $('.control--destination .control__value')
     const deltaV = $('.control--delta-v .control__value')
@@ -74,8 +74,8 @@ describe('map', function () {
   it('should allow different system aerobraking', function () {
     const deimos = $('#Deimos')
     const moon = $('#Moon')
-    const deimosIcon = $('#Deimos .location__icon')
-    const moonIcon = $('#Moon .location__icon')
+    const deimosIcon = $('#Deimos.location .click-target')
+    const moonIcon = $('#Moon.location .click-target')
     const aerobraking = $('.control--aerobraking .control__value')
     expect(deimos).toExist()
     expect(moon).toExist()
@@ -100,8 +100,8 @@ describe('map', function () {
   it('should not allow different system aerobraking', function () {
     const mercury = $('#Mercury')
     const moon = $('#Moon')
-    const mercuryIcon = $('#Mercury .location__icon')
-    const moonIcon = $('#Moon .location__icon')
+    const mercuryIcon = $('#Mercury.location .click-target')
+    const moonIcon = $('#Moon.location .click-target')
     const aerobraking = $('.control--aerobraking .control__value')
     expect(mercury).toExist()
     expect(moon).toExist()
@@ -121,4 +121,13 @@ describe('map', function () {
 
     expect(aerobraking).toHaveText('unavailable'.toUpperCase())
   })
+
+  // TODO test click label
+  // TODO test low orbit exists
+  // TODO test transfer orbit exists
+  // TODO test capture/escape orbit exists
+  // TODO test all elements of generated planet system
+  // TODO test clear button
+  // TODO test reverse button
+  // TODO test about button
 })
