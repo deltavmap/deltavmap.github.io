@@ -317,24 +317,24 @@ export default {
         updateCurrentCol()
 
         this.addLocation(moonTransfer)
-        this.addFormattedDeltaObject(moonTransferDelta)
-        this.addFormattedDeltaObject(moonCaptureDelta)
+        this.addDeltaObject(moonTransferDelta)
+        this.addDeltaObject(moonCaptureDelta)
         this.addLocation(moonCapture)
-        this.addFormattedDeltaObject(moonLowDelta)
+        this.addDeltaObject(moonLowDelta)
         this.addLocation(moonLowOrbit)
         this.addLocation(moonBody)
-        this.addFormattedDeltaObject(moonBodyDelta)
+        this.addDeltaObject(moonBodyDelta)
       })
 
       const lowOrbit = this.createLowOrbit(planetName, lowOrbitAltitude)
       const lowOrbitName = lowOrbit.id
       addPositionData(lowOrbit, col(currentCol), layoutStartY)
       addPositionData(planetBody, col(updateCurrentCol()), layoutStartY)
-      this.addFormattedDeltaObject(outerPlanetTransferDeltaObject)
-      this.addFormattedDeltaObject(outerPlanetCaptureDeltaObject)
+      this.addDeltaObject(outerPlanetTransferDeltaObject)
+      this.addDeltaObject(outerPlanetCaptureDeltaObject)
       this.addLocation(lowOrbit)
-      this.addFormattedDeltaObject(this.createDeltaObject(prevSource.id, lowOrbitName, lowOrbitDV, planetAB))
-      this.addFormattedDeltaObject(this.createDeltaObject(lowOrbitName, planetName, bodyDV, planetAB))
+      this.addDeltaObject(this.createDeltaObject(prevSource.id, lowOrbitName, lowOrbitDV, planetAB))
+      this.addDeltaObject(this.createDeltaObject(lowOrbitName, planetName, bodyDV, planetAB))
     },
     createDeltaObject: function (sourceId, targetId, dv, ab = 0) {
       switch (ab) {
@@ -352,12 +352,12 @@ export default {
     addLocation: function (locationData) {
       this.system.locationsObject[locationData.id] = locationData
     },
-    addFormattedDeltaObject: function (formattedDeltaObject) {
-      this.system.formattedDeltaObjectsArray.push(formattedDeltaObject)
+    addDeltaObject: function (deltaObject) {
+      this.system.formattedDeltaObjectsArray.push(deltaObject)
     },
     addUnformattedDeltaArray: function (unformattedDeltaArray) {
       const deltaObject = this.createDeltaObjectFromArray(unformattedDeltaArray)
-      this.addFormattedDeltaObject(deltaObject)
+      this.addDeltaObject(deltaObject)
     },
     createData: function () {
       this.system.locationsObject = Locations
