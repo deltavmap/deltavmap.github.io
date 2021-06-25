@@ -28,22 +28,24 @@ export default function (deltaVMap, locations) {
   c('VenusCE', captureXR, deltaVMap.map.planetY)
   c('VenusT', transferX, deltaVMap.map.planetY)
 
-  const moonX = col(-3)
+  const moonXCol = -2
+  const moonX = col(moonXCol)
   const earthY = incY()
   const moonLY = incY()
+  const moonXDelta = 0.3
   c('MoonT', moonX, earthY)
-  c('EarthMoonL1', col(-2.5), moonLY)
-  c('EarthMoonL2', col(-1.5), moonLY)
-  c('MoonCE', col(-3.5), moonLY)
+  c('EarthMoonL1', col(moonXCol + moonXDelta), moonLY)
+  c('EarthMoonL2', col(moonXCol + 3 * moonXDelta), moonLY)
+  c('MoonCE', col(moonXCol - moonXDelta), moonLY)
   c('LMoonO', moonX, incY())
-  c('NRHO', col(-4.5), moonLY)
+  c('NRHO', col(moonXCol - 3 * moonXDelta), moonLY)
   c('Moon', moonX, incY())
 
   c('EarthCE', col(-1), earthY)
-  c('GEO', col(-4), earthY - deltaVMap.map.planetYDelta)
-  c('GTO', col(-4), earthY)
-  c('LEO', col(-5), earthY)
-  c('Earth', col(-6), earthY)
+  c('GEO', col(moonXCol - 1), earthY - deltaVMap.map.planetYDelta)
+  c('GTO', col(moonXCol - 1), earthY)
+  c('LEO', col(moonXCol - 2), earthY)
+  c('Earth', col(moonXCol - 3), earthY)
 
   const marsY = earthY + deltaVMap.map.planetYDelta
 
