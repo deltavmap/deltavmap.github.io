@@ -355,8 +355,8 @@ export default {
     addDeltaObject: function (deltaObject) {
       this.system.deltaObjectsArray.push(deltaObject)
     },
-    addDeltaArray: function (unformattedDeltaArray) {
-      const deltaObject = this.createDeltaObjectFromArray(unformattedDeltaArray)
+    addDeltaArray: function (deltaArray) {
+      const deltaObject = this.createDeltaObjectFromArray(deltaArray)
       this.addDeltaObject(deltaObject)
     },
     createData: function () {
