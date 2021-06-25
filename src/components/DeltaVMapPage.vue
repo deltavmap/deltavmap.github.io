@@ -61,10 +61,7 @@ import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
 
 import Utils from './utils'
-import Locations from '../data/nodes'
-import Positions from '../data/positions'
-import Deltas from '../data/edges'
-import CreatePlanetSystems from '../data/planet-systems'
+import StarSystem from '../data/sol-system'
 import Controls from './Controls'
 import DeltaVMap from './DeltaVMap'
 import SiteTitle from './SiteTitle'
@@ -171,7 +168,7 @@ export default {
       return this.setPlanetY(this.map.planetY + amount)
     },
     applyPositionDataToLocations: function (locations) {
-      Positions(this, locations)
+      StarSystem.applyPositionData(this, locations)
     },
     createLocationObject: function (id, label, nodeType, parent, color = null, altitude = null, atmosphere = false) {
       if (altitude) {
@@ -376,16 +373,16 @@ export default {
     },
     createData: function () {
       // load manual locations data
-      this.system.locationsObject = Locations
+      this.system.locationsObject = StarSystem.getLocations()
 
       // apply position data to locations
       this.applyPositionDataToLocations(this.system.locationsObject)
 
       // add edges
-      Deltas.forEach((arr) => { this.addDeltaArray(arr) })
+      StarSystem.getDeltas().forEach((arr) => { this.addDeltaArray(arr) })
 
       // automatically create planet systems
-      CreatePlanetSystems(this)
+      StarSystem.createPlanetSystems(this)
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearPath()
