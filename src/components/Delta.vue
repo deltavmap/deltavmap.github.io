@@ -36,8 +36,9 @@ export default {
     midPointX: function () { return this.getXMidPointOfDelta() },
     midPointY: function () { return this.getYMidPointOfDelta() },
     scale: function () {
+      const halfStrokeWidth = 2
       const hyp = Math.sqrt(Math.pow(this.xdiff, 2) + Math.pow(this.ydiff, 2))
-      return this.nodeRadius / hyp
+      return (this.nodeRadius + halfStrokeWidth) / hyp
     },
     x1Mod: function () {
       return this.x1 + (this.scale * this.xdiff)
