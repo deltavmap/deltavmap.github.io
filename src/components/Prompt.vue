@@ -1,7 +1,5 @@
 <template>
-  <div class="prompt"
-       v-if="$vuetify.breakpoint.smAndDown"
-  >
+  <div class="prompt">
     <slot></slot>
   </div>
 </template>

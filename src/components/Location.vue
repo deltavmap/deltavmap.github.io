@@ -12,8 +12,8 @@
             :cx="xPos"
             :cy="yPos"
             r="400"
-            v-if="location.id === 'Sun'"
-            fill="url('#gradient-sun-corona')"
+            v-if="location.id === starId"
+            fill="url('#gradient-star-corona')"
     />
     <circle class="location__icon-atmosphere fadable"
       :cx="xPos"
@@ -27,21 +27,21 @@
             :cy="yPos"
             :fill="fillColor"
             :r="formattedRadius"
-            v-if="!locationIsSurface || location.id === 'Sun'"
+            v-if="!locationIsSurface || location.id === starId"
     />
     <circle class="location__icon-surface-shadow fadable"
-            v-if="locationIsSurface && location.id === 'Sun'"
+            v-if="locationIsSurface && location.id === starId"
             :cx="xPos"
             :cy="yPos"
             :r="formattedShadowRadius"
             stroke-width="0"
             :fill="shadowFill"
     />
-    <foreignObject :x="xPos - 45"
-                   :y="yPos - 45"
-                   height="88"
-                   width="88"
-                   v-if="locationIsSurface && location.id !== 'Sun'"
+    <foreignObject :x="xPos - (radius + 2)"
+                   :y="yPos - (radius + 2)"
+                   :height="formattedSize"
+                   :width="formattedSize"
+                   v-if="locationIsSurface && location.id !== starId"
                    class="body__container"
     >
       <body xmlns="http://www.w3.org/1999/xhtml">
@@ -52,9 +52,9 @@
         </div>
       </body>
     </foreignObject>
-    <circle :cx="xPos - 1"
-            :cy="yPos - 1"
-            r="44"
+    <circle :cx="xPos"
+            :cy="yPos"
+            :r="formattedRadius"
             class="click-target"
             @click="clickHandler"
     ></circle>
@@ -84,20 +84,22 @@ export default {
     'isOriginNode',
     'nodeOnPath',
     'radius',
-    'sunX',
-    'sunY',
+    'starId',
+    'starX',
+    'starY',
     'xPos',
     'yPos'
   ],
   computed: {
     formattedRadius: function () { return this.radius + 'px' },
+    formattedSize: function () { return (this.radius * 2) + 4 + 'px' },
     formattedShadowRadius: function () { return (this.radius - 2) + 'px' },
     shadowFill: function () {
       let gradId = '#gradient-'
-      if (this.location.id === 'Sun') {
-        gradId += 'sun'
+      if (this.location.id === this.starId) {
+        gradId += 'star'
       } else {
-        const dir = (this.xPos > this.sunX) ? 'right' : 'left'
+        const dir = (this.xPos > this.starX) ? 'right' : 'left'
         gradId += 'shadow-' + dir
       }
       return "url('" + gradId + "')"
@@ -109,8 +111,8 @@ export default {
       return 'translate(' + (this.xPos - 75) + ',' + (this.yPos + 65) + ')'
     },
     surfaceShadowPositionStyle: function () {
-      const xRel = this.xPos - this.sunX
-      const yRel = this.yPos - this.sunY
+      const xRel = this.xPos - this.starX
+      const yRel = this.yPos - this.starY
       const hype = Math.sqrt(Math.pow(xRel, 2) + Math.pow(yRel, 2))
       const xScale = xRel / hype
       const yScale = yRel / hype

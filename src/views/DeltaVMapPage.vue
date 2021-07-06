@@ -2,6 +2,9 @@
   <div id="page-container" :class="{'page-loaded': pageLoaded}">
     <site-title>Delta V Map</site-title>
     <controls :path="path"
+              :system="system"
+              :systemNames="Object.keys(systemBuilders).map(x => systemBuilders[x].systemName)"
+              :system-change-handler="handleSystemChange"
               v-on:controls-origin-click="handleOriginClick()"
               v-on:controls-destination-click="handleDestinationClick()"
               v-on:controls-reverse-selected-nodes="reverseSelectedNodes()"
@@ -62,12 +65,13 @@
 import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
 
-import Utils from './utils'
-import StarSystem from '../data/sol-system'
-import Controls from './Controls'
-import DeltaVMap from './DeltaVMap'
-import SiteTitle from './SiteTitle'
-import Banner from './Banner'
+import Utils from '../components/utils'
+import SolarSystem from '../data/solar-system'
+import KerbolSystem from '../data/kerbol-system'
+import Controls from '../components/Controls'
+import DeltaVMap from '../components/DeltaVMap'
+import SiteTitle from '../components/SiteTitle'
+import Banner from '../components/Banner'
 
 export default {
   components: {
@@ -77,17 +81,23 @@ export default {
     SiteTitle
   },
   data () {
-    return {
+    const systemBuilders = {
+      Solar: SolarSystem,
+      Kerbol: KerbolSystem
+    }
+    const localStorageSystemName = localStorage.getItem('system-name')
+    const currentSystemName = localStorageSystemName || 'Solar'
+
+    // const currentSystemName = 'Solar'
+    const dataObject = {
       pageLoaded: false,
       bannerTitle: 'banner-intro-hide',
       mapSVG: null,
       panzoom: null,
       // system data
-      system: {
-        locationsObject: {},
-        deltaObjectsArray: [],
-        edgeGraph: {}
-      },
+      systemBuilders,
+      currentSystemBuilder: systemBuilders[currentSystemName],
+      system: this.resetSystemDataStructures(systemBuilders[currentSystemName]),
       // map position
       map: {
         globalXOffset: 3000,
@@ -110,6 +120,8 @@ export default {
         nodes: {}
       }
     }
+
+    return dataObject
   },
   computed: {
     pathDestinationText: function () {
@@ -123,6 +135,18 @@ export default {
     }
   },
   methods: {
+    resetSystemDataStructures: function (systemBuilder) {
+      const system = {
+        name: systemBuilder.systemName,
+        star: systemBuilder.star,
+        locationsObject: {},
+        deltaObjectsArray: [],
+        edgeGraph: {}
+      }
+      this.system = system
+      localStorage.setItem('system-name', systemBuilder.systemName)
+      return system
+    },
     displayBanner: function () {
       return (this.$parent.$parent.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
     },
@@ -135,6 +159,11 @@ export default {
       if (this.path.destination) { // TODO necessary?
         this.clearSelectedDestination()
       }
+    },
+    handleSystemChange: function (systemName) {
+      this.clearPath()
+      this.createData(systemName)
+      this.moveToStartingPosition()
     },
     hasAtmosphere: function (nodeData) {
       if (Utils.isDefined(nodeData) && Utils.isDefined(nodeData.atmosphere)) {
@@ -152,7 +181,7 @@ export default {
       }
     },
     applyPositionDataToLocations: function (locations) {
-      StarSystem.applyPositionData(this, locations)
+
     },
     createLocationObject: function (id, label, nodeType, parent, color = null, altitude = null, atmosphere = false) {
       if (altitude) {
@@ -193,7 +222,7 @@ export default {
     createPlanetSystem: function (
       planetName, alignLeft, hasAtmosphere,
       predecessorTransferOrbitId, predecessorHasAtmosphere,
-      outerPlanetTransferDV, outerPlanetCaptureDV,
+      planetTransferDV, planetCaptureDV,
       color, moonsArray,
       lowOrbitDV, lowOrbitAltitude,
       bodyDV,
@@ -214,20 +243,25 @@ export default {
       // create outer planet
       const planetBody = this.createBody(
         planetName,
-        'Sun',
+        // 'Sun',
+        this.system.star,
         color,
         hasAtmosphere
       )
       this.addLocation(planetBody)
 
+      let prevSource
+
       // create the outer planet transfer orbit and delta
-      const outerPlanetTransfer = this.createTransferOrbit(
+      const planetTransfer = this.createTransferOrbit(
         planetName,
-        'Sun'
+        // 'Sun',
+        this.system.star
       )
-      const transferName = outerPlanetTransfer.id
-      addPositionData(outerPlanetTransfer, 0, layoutStartY)
-      this.addLocation(outerPlanetTransfer)
+      prevSource = planetTransfer
+      const transferName = planetTransfer.id
+      addPositionData(planetTransfer, 0, layoutStartY)
+      this.addLocation(planetTransfer)
 
       let predecessorTransferAB
       if (predecessorHasAtmosphere) {
@@ -244,74 +278,103 @@ export default {
         }
       }
       const planetAB = (hasAtmosphere) ? 1 : 0
-      const outerPlanetTransferDeltaObject = this.createDeltaObject(
-        transferName, predecessorTransferOrbitId, outerPlanetTransferDV, predecessorTransferAB
+      const planetTransferDeltaObject = this.createDeltaObject(
+        transferName, predecessorTransferOrbitId, planetTransferDV, predecessorTransferAB
       )
+      this.addDeltaObject(planetTransferDeltaObject)
 
       // create outer planet capture orbit and delta
-      const outerPlanetCaptureEscape = this.createCaptureEscapeOrbit(planetName)
-      const captureName = outerPlanetCaptureEscape.id
-      updateCurrentCol()
-      addPositionData(outerPlanetCaptureEscape, currentCol, layoutStartY)
-      this.addLocation(outerPlanetCaptureEscape)
+      if (planetCaptureDV) {
+        const planetCaptureEscape = this.createCaptureEscapeOrbit(planetName)
+        prevSource = planetCaptureEscape
+        const captureName = planetCaptureEscape.id
+        updateCurrentCol()
+        addPositionData(planetCaptureEscape, currentCol, layoutStartY)
+        this.addLocation(planetCaptureEscape)
 
-      const outerPlanetCaptureDeltaObject = this.createDeltaObject(
-        transferName, captureName, outerPlanetCaptureDV, planetAB
-      )
+        // create planet capture delta object
+        const planetCaptureDeltaObject = this.createDeltaObject(
+          transferName, captureName, planetCaptureDV, planetAB
+        )
+        this.addDeltaObject(planetCaptureDeltaObject)
+      }
+
       updateCurrentCol()
       const moonTransferY = layoutStartY
       // const modifier = -dir
-      const modifier = 1
-      const moonCaptureY = moonTransferY + (modifier * 1)
-      const moonLowOrbitY = moonCaptureY + (modifier * 1)
-      const moonBodyY = moonLowOrbitY + (modifier * 1)
-      let prevSource = outerPlanetCaptureEscape
+      // const modifier = 1
+      // const moonCaptureY = moonTransferY + (modifier * 1)
+      // const moonLowOrbitY = moonCaptureY + (modifier * 1)
+      // const moonBodyY = moonLowOrbitY + (modifier * 1)
 
-      moonsArray.map(m => {
-        const moonName = m[1]
-        const ab = (Utils.isDefined(m[6])) ? m[6] : false // moon aeroBraking availability
-        const moonTransfer = this.createTransferOrbit(moonName, planetName)
-        addPositionData(moonTransfer, currentCol, moonTransferY)
-        const moonTransferDelta = this.createDeltaObject(prevSource.id, moonTransfer.id, m[0], planetAB)
-        const moonCapture = this.createCaptureEscapeOrbit(moonName)
-        addPositionData(moonCapture, currentCol, moonCaptureY)
-        const moonCaptureDelta = this.createDeltaObject(moonTransfer.id, moonCapture.id, m[2], ab)
+      if (Array.isArray(moonsArray)) {
+        moonsArray.map(m => {
+          let currentY = moonTransferY
+          let moonName, aerobrakingAvailable, transferDV, captureDV, lowOrbitDV, lowOrbitAltitude, surfaceDV, hasAtmosphere
+          if (Array.isArray(m)) {
+            transferDV = m[0]
+            moonName = m[1]
+            captureDV = m[2]
+            lowOrbitDV = m[3]
+            lowOrbitAltitude = m[4]
+            surfaceDV = m[5]
+            aerobrakingAvailable = (Utils.isDefined(m[6])) ? m[6] : false
+            hasAtmosphere = (Utils.isDefined(m[7]) && m[7] === true)
+          } else {
+            moonName = m.moonName
+            transferDV = m.transferDV
+            captureDV = m.captureDV
+            lowOrbitDV = m.lowOrbitDV
+            lowOrbitAltitude = m.lowOrbitAltitude
+            surfaceDV = m.surfaceDV
+            aerobrakingAvailable = m.aerobrakingAvailable
+            hasAtmosphere = m.hasAtmosphere
+          }
 
-        const moonLowOrbit = this.createLowOrbit(moonName, m[4])
-        addPositionData(moonLowOrbit, currentCol, moonLowOrbitY)
-        const moonLowDelta = this.createDeltaObject(moonCapture.id, moonLowOrbit.id, m[3], ab)
+          const moonTransfer = this.createTransferOrbit(moonName, planetName)
+          addPositionData(moonTransfer, currentCol, currentY++)
+          const moonTransferDelta = this.createDeltaObject(prevSource.id, moonTransfer.id, transferDV, planetAB)
+          this.addLocation(moonTransfer)
+          this.addDeltaObject(moonTransferDelta)
+          let preLowOrbitLocation = moonTransfer
 
-        const moonBody = this.createBody(
-          moonName,
-          planetName,
-          '#807E7F',
-          (Utils.isDefined(m[7]) && m[7] === true)
-        )
-        addPositionData(moonBody, currentCol, moonBodyY)
-        const moonBodyDelta = this.createDeltaObject(moonLowOrbit.id, moonBody.id, m[5], ab)
+          if (Utils.isDefined(captureDV)) {
+            const moonCapture = this.createCaptureEscapeOrbit(moonName)
+            addPositionData(moonCapture, currentCol, currentY++)
+            const moonCaptureDelta = this.createDeltaObject(moonTransfer.id, moonCapture.id, captureDV, aerobrakingAvailable)
+            this.addLocation(moonCapture)
+            this.addDeltaObject(moonCaptureDelta)
+            preLowOrbitLocation = moonCapture
+          }
 
-        prevSource = moonTransfer
-        updateCurrentCol()
+          const moonLowOrbit = this.createLowOrbit(moonName, lowOrbitAltitude)
+          addPositionData(moonLowOrbit, currentCol, currentY++)
+          const moonLowOrbitDelta = this.createDeltaObject(preLowOrbitLocation.id, moonLowOrbit.id, lowOrbitDV, aerobrakingAvailable)
+          this.addDeltaObject(moonLowOrbitDelta)
+          this.addLocation(moonLowOrbit)
 
-        this.addLocation(moonTransfer)
-        this.addDeltaObject(moonTransferDelta)
-        this.addDeltaObject(moonCaptureDelta)
-        this.addLocation(moonCapture)
-        this.addDeltaObject(moonLowDelta)
-        this.addLocation(moonLowOrbit)
-        this.addLocation(moonBody)
-        this.addDeltaObject(moonBodyDelta)
-      })
+          const moonBody = this.createBody(
+            moonName,
+            planetName,
+            '#807E7F',
+            hasAtmosphere
+          )
+          addPositionData(moonBody, currentCol, currentY)
+          const moonBodyDelta = this.createDeltaObject(moonLowOrbit.id, moonBody.id, surfaceDV, aerobrakingAvailable)
+          this.addLocation(moonBody)
+          this.addDeltaObject(moonBodyDelta)
+
+          prevSource = moonTransfer
+          updateCurrentCol()
+        })
+      }
 
       const lowOrbit = this.createLowOrbit(planetName, lowOrbitAltitude)
-      const lowOrbitName = lowOrbit.id
       addPositionData(lowOrbit, currentCol, layoutStartY)
       addPositionData(planetBody, updateCurrentCol(), layoutStartY)
-      this.addDeltaObject(outerPlanetTransferDeltaObject)
-      this.addDeltaObject(outerPlanetCaptureDeltaObject)
       this.addLocation(lowOrbit)
-      this.addDeltaObject(this.createDeltaObject(prevSource.id, lowOrbitName, lowOrbitDV, planetAB))
-      this.addDeltaObject(this.createDeltaObject(lowOrbitName, planetName, bodyDV, planetAB))
+      this.addDeltaObject(this.createDeltaObject(prevSource.id, lowOrbit.id, lowOrbitDV, planetAB))
+      this.addDeltaObject(this.createDeltaObject(lowOrbit.id, planetName, bodyDV, planetAB))
     },
     createDeltaObject: function (sourceId, targetId, dv, ab = 0) {
       switch (ab) {
@@ -354,18 +417,21 @@ export default {
       const deltaObject = this.createDeltaObjectFromArray(deltaArray)
       this.addDeltaObject(deltaObject)
     },
-    createData: function () {
+    createData: function (systemName) {
+      const systemBuilder = this.systemBuilders[systemName]
+      this.resetSystemDataStructures(systemBuilder)
+
       // load manual locations data
-      this.system.locationsObject = StarSystem.getLocations()
+      this.system.locationsObject = systemBuilder.getLocations(this)
 
       // apply position data to locations
-      this.applyPositionDataToLocations(this.system.locationsObject)
+      systemBuilder.applyPositionData(this, this.system.locationsObject)
 
       // add edges
-      StarSystem.getDeltas().forEach((arr) => { this.addDeltaArray(arr) })
+      systemBuilder.getDeltas().forEach((arr) => { this.addDeltaArray(arr) })
 
       // automatically create planet systems
-      StarSystem.createPlanetSystems(this)
+      systemBuilder.createPlanetSystems(this)
     },
     handleBothTerminalsAlreadySelected: function (nodeData) {
       this.clearPath()
@@ -428,6 +494,7 @@ export default {
 
       let previousNode = null
       let delta = 0
+
       // let lastEdge
       shortestPath.forEach(nodeId => {
         // handle node
@@ -440,7 +507,8 @@ export default {
           this.markEdgeOnPath(previousNode.id, node.id)
 
           // increase the delta v running total
-          delta += this.system.edgeGraph[previousNode.id][node.id]
+          const dv = this.system.edgeGraph[previousNode.id][node.id]
+          delta += dv
         }
 
         // keep a record the current node so the relevant edges can be identified
@@ -543,8 +611,7 @@ export default {
       const mapContainer = document.querySelector('.map-container')
       const mapWidth = mapContainer.offsetWidth
       const mapHeight = mapContainer.offsetHeight
-      const zoomLevel = 0.3
-      // TODO get zoomLevel
+      const zoomLevel = this.panzoom.getTransform().scale
       // scale position to current zoom level
       let x = nodeX * zoomLevel
       let y = nodeY * zoomLevel
@@ -557,6 +624,15 @@ export default {
       const x = this.calculateXPos(node.position.x)
       const y = this.calculateYPos(node.position.y)
       this.moveTo(x, y)
+    },
+    moveToStartingPosition: function () {
+      const po = this.system.star
+      const locationId = po + 'T'
+      this.panzoom.zoomAbs(0, 0, 0.3)
+      this.moveToNode(this.system.locationsObject[locationId])
+      setTimeout(_ => {
+        this.pageLoaded = true
+      }, 1000)
     },
     handleBannerClose: function () {
       localStorage.setItem(this.bannerTitle, 'true')
@@ -594,7 +670,7 @@ export default {
   },
   mounted () {
     const self = this
-    self.createData()
+    self.createData(this.system.name)
     self.mapSVG = document.getElementById('map')
     const mapContainer = document.querySelector('.map-container')
     const mapWidth = mapContainer.offsetWidth
@@ -603,16 +679,15 @@ export default {
     const startX = (100 + mapWidth + mapWidth * zoomLevel) / 2 // center
     const startY = (mapHeight + mapHeight * zoomLevel - 100) / 2 // center + offset
 
-    this.panzoom = panzoom(self.mapSVG, {
+    self.panzoom = panzoom(self.mapSVG, {
       maxZoom: 4,
       minZoom: 0.05,
       onTouch: function (e) {
         return !e.target.classList.contains('click-target')
       }
     })
-    this.panzoom.zoomAbs(startX, startY, zoomLevel)
-    this.moveToNode(this.system.locationsObject.SunT)
-
+    self.panzoom.zoomAbs(startX, startY, zoomLevel)
+    self.moveToStartingPosition()
     setTimeout(_ => {
       this.pageLoaded = true
     }, 1000)
@@ -622,7 +697,10 @@ export default {
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
 @import '../sass/variables'
-@import '../sass/utils/shadow-box.sass'
+@import '../sass/utils/shadow-box'
+
+html
+  overflow-y: hidden !important
 
 .u-bg-color-main
   background-color: $color-map-background
@@ -632,7 +710,6 @@ export default {
 
 *
   box-sizing: border-box
-  color: #eee
   font-family: "Roboto", sans-serif
   transition: background-color .25s, border-color .25s, color .25s, opacity .25s, stroke .25s
   transition-timing-function: ease

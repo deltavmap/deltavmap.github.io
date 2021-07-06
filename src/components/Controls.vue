@@ -1,5 +1,11 @@
 <template>
   <div class="controls text-left fade-in">
+    <panel-select :items="systemNames"
+                  :type="'system-change'"
+                  :change-event-name="'system-change'"
+                  v-on:system-change="handleSystemChange"
+                  :value="system.name"
+    ></panel-select>
     <panel-control :type="'origin'"
                    :labelText="'origin'"
                    :valueText="originText"
@@ -30,12 +36,39 @@
                    :positive="!!path.aerobrakingAvailable"
     ></panel-control>
     <prompt v-show="!path.origin"
+            v-if="$vuetify.breakpoint.smAndDown"
             type="origin"
     >Select origin</prompt>
     <prompt v-show="path.origin && !path.destination"
+            v-if="$vuetify.breakpoint.smAndDown"
             type="destination"
     >Select destination</prompt>
     <div class="controls__buttons">
+      <v-menu
+        top
+        offset-y
+        v-if="$vuetify.breakpoint.smAndDown"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            class=""
+            small
+            v-bind="attrs"
+            v-on="on"
+          >
+            System
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(item, i) in systemNames"
+            :key="i"
+            @click="() => { handleSystemChange(item) }"
+          >
+            <v-list-item-title>{{ item }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <div>
         <v-btn small
                   :disabled="!path.origin || !path.destination"
@@ -65,20 +98,28 @@ import Utils from './utils'
 
 import AboutDialog from './AboutDialog'
 import PanelControl from './PanelControl'
+import PanelSelect from './PanelSelect'
 import Prompt from './Prompt'
 
 export default {
   props: [
-    'path'
+    'path',
+    'system',
+    'systemNames',
+    'systemChangeHandler'
   ],
   components: {
     AboutDialog,
     PanelControl,
+    PanelSelect,
     Prompt
   },
   methods: {
     selectedIsSurface: function (nodeData) {
       return (nodeData && Utils.isDefined(nodeData.nodeType) && nodeData.nodeType === 'surface')
+    },
+    handleSystemChange: function (systemName) {
+      this.systemChangeHandler(systemName)
     }
   },
   computed: {
@@ -123,9 +164,10 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     width: 100%
     position: fixed
     bottom: 0
+    .panel-select--system-change
+      display: none
 
   @media #{map-get($display-breakpoints, 'xs-only')}
-    // grid: 100% / auto
     display: flex
     flex-direction: column
     justify-content: space-around
@@ -135,12 +177,6 @@ $color-controls-light: lighten($color-purpley-red, 60%)
       align-self: center
 
   @media #{map-get($display-breakpoints, 'sm-only')}
-    // .control--origin
-    //   grid-row: 1
-    //   grid-column: 5 / span 4
-    // .control--destination
-    //   grid-row: 1
-    //   grid-column: 5 / span 4
     .control--delta-v
       display: flex
       grid-row: 1
@@ -164,7 +200,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
 
   @media #{map-get($display-breakpoints, 'md-and-up')}
     box-shadow: none
-    flex-direction: column
+    display: block
     grid-column: 1
     grid-row: 2
     padding: 0 1rem
@@ -174,8 +210,8 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     margin: .25rem 0
 
   &__buttons
+    align-items: center
     display: flex
-    // grid-row: 3
     flex-direction: row
     margin-top: .5rem
     padding: 0

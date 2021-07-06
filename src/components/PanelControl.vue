@@ -7,7 +7,7 @@
        ]"
        v-show="show">
 
-    <label class="control__label">{{ labelText }}</label>
+    <panel-label>{{ labelText }}</panel-label>
 
     <div class="control__value"
          :class="[
@@ -20,7 +20,11 @@
   </div>
 </template>
 <script>
+import PanelLabel from './PanelLabel'
 export default {
+  components: {
+    PanelLabel
+  },
   props: {
     active: {
       default: true,
@@ -46,8 +50,9 @@ export default {
 </script>
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
-@import '@/sass/variables'
-@import '@/sass/utils/shadow-box.sass'
+@import '../sass/variables'
+@import '../sass/utils/shadow-box.sass'
+@import '../sass/utils/border.sass'
 
 $color-controls-light: lighten($color-purpley-red, 60%)
 
@@ -63,26 +68,30 @@ $color-controls-light: lighten($color-purpley-red, 60%)
   @media #{map-get($display-breakpoints, 'md-and-up')}
     margin-top: .5rem
 
-  &__label
-    font-size: .9em
-    font-weight: 400
-    letter-spacing: .1em
-    text-transform: uppercase
-
-    @media #{map-get($display-breakpoints, 'sm-and-down')}
-      display: flex
-      flex-direction: column
-      justify-content: center
-      margin: 0 .5rem
-
-    @media #{map-get($display-breakpoints, 'md-and-up')}
-      min-width: 6rem
+  //&__label
+  //  font-size: .9em
+  //  font-weight: 400
+  //  letter-spacing: .1em
+  //  text-transform: uppercase
+  //
+  //  @media #{map-get($display-breakpoints, 'sm-and-down')}
+  //    display: flex
+  //    flex-direction: column
+  //    justify-content: center
+  //    margin: 0 .5rem
+  //
+  //  @media #{map-get($display-breakpoints, 'md-and-up')}
+  //    min-width: 6rem
 
   &__value
     $control-value: &
-    border: 1px solid darken($color-panel-background, 2%)
-    border-radius: .15rem
+    //border: 1px solid darken($color-panel-background, 2%)
+    //border-radius: .15rem
+    @extend .u-border-subtle
+    align-items: center
     color: $color-light
+    display: flex
+    justify-content: center
     min-width: 8rem
     overflow: hidden
     padding: .25rem .5rem .19em
@@ -131,4 +140,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     text-transform: uppercase
     .control__value
       letter-spacing: .1em
+  &--delta-v
+    .control__value
+      font-family: monospace
 </style>

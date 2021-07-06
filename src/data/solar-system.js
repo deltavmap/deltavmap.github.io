@@ -76,7 +76,6 @@ export default {
   getLocations: function () {
     const array = [
       { id: 'Sun', label: 'Sun', nodeType: 'body', parent: 'MilkyWay', color: '#ffc' },
-      // { id: 'Test', label: 'Test', nodeType: 'body', parent: 'MilkyWay', color: 'red' },
       { id: 'LSunO', label: 'Low Sun Orbit', nodeType: 'orbit', parent: 'Sun', altitude: '10000' },
       { id: 'SunT', label: 'Sun Transfer', nodeType: 'orbit-transfer', parent: 'Sun' },
 
@@ -154,21 +153,6 @@ export default {
       ['EarthMoonL2', 'LMoonO', 0.64, 0],
       ['LMoonO', 'NRHO', 0.73, 0],
       ['MoonT', 'NRHO', 0.83, 0],
-
-      ['MarsT', 'EarthCE', 0.39, 2],
-      ['MarsT', 'MarsCE', 0.67, 1],
-      ['MarsCE', 'DeimosT', 0.34, 0],
-      ['DeimosT', 'PhobosT', 0.4, 0],
-      ['PhobosT', 'LMarsO', 0.7, 0],
-      ['LMarsO', 'Mars', 3.6, 1],
-
-      ['LDeimosO', 'Deimos', 0.004, 0],
-      ['DeimosCE', 'LDeimosO', 0.002, 0],
-      ['DeimosT', 'DeimosCE', 0.65, 0],
-
-      ['LPhobosO', 'Phobos', 0.006, 0],
-      ['PhobosCE', 'LPhobosO', 0.003, 0],
-      ['PhobosT', 'PhobosCE', 0.54, 0],
 
       ['LVestaO', 'Vesta', 0.16, 0],
       ['VestaCE', 'LVestaO', 0.1, 0],
@@ -338,5 +322,7 @@ export default {
       0.21, 50, 0.36,
       makemakeX, makemakeY, 7
     )
-  }
+  },
+  systemName: 'Solar',
+  star: 'Sun'
 }

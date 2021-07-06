@@ -123,6 +123,7 @@ describe('map', function () {
   })
 
   // TODO test click label
+  // TODO test phone
   // TODO test low orbit exists
   // TODO test transfer orbit exists
   // TODO test capture/escape orbit exists
@@ -130,4 +131,5 @@ describe('map', function () {
   // TODO test clear button
   // TODO test reverse button
   // TODO test about button
+
 })

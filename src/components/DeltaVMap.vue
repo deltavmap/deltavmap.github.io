@@ -19,11 +19,11 @@
           <stop offset="0%" style="stop-color:rgb(255,255,255); stop-opacity:1" />
           <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0" />
         </radialGradient>
-        <radialGradient id="gradient-sun" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+        <radialGradient id="gradient-star" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
           <stop offset="0%" style="stop-color:white; stop-opacity:1" />
           <stop offset="100%" style="stop-color:#bba; stop-opacity:1" />
         </radialGradient>
-        <radialGradient id="gradient-sun-corona" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+        <radialGradient id="gradient-star-corona" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
           <stop offset="0%" style="stop-color:white; stop-opacity:1" />
           <stop offset="5%" style="stop-color:white; stop-opacity:0.3" />
           <stop offset="100%" style="stop-color:white; stop-opacity:0" />
@@ -53,8 +53,9 @@
                  :key="locationIndex"
                 :location="location"
                 :radius="nodeRadius"
-                :sunX="calculateXPos(system.locationsObject.Sun.position.x)"
-                :sunY="calculateYPos(system.locationsObject.Sun.position.y)"
+                :starX="calculateXPos(system.locationsObject[system.star].position.x)"
+                :starY="calculateYPos(system.locationsObject[system.star].position.y)"
+                :star-id="system.star"
                 :node-on-path="isNodeOnPath(location.id)"
                 :is-origin-node="(location.id === path.origin.id)"
                 :is-destination-node="(location.id === path.destination.id)"
