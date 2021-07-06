@@ -85,8 +85,14 @@ export default {
       Solar: SolarSystem,
       Kerbol: KerbolSystem
     }
-    const localStorageSystemName = localStorage.getItem('system-name')
-    const currentSystemName = localStorageSystemName || 'Solar'
+    let currentSystemName
+    debugger
+    if (Utils.isDefined(this.$route.params.name)) {
+      currentSystemName = this.$route.params.name
+    } else {
+      const localStorageSystemName = localStorage.getItem('system-name')
+      currentSystemName = localStorageSystemName || 'Solar'
+    }
 
     // const currentSystemName = 'Solar'
     const dataObject = {
