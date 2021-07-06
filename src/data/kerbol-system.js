@@ -190,11 +190,11 @@ export default {
       false,
       'JoolT',
       true,
-      0.11,
-      2.7,
+      0.160,
+      null,
       '#372614',
       [],
-      0.31, 100, 0.89,
+      1.370, 10, 0.620,
       eelooX, eelooY, 6
     )
   },
