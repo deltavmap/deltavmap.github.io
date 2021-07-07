@@ -24,7 +24,7 @@
           <div class="ml-1 banner__icon banner__icon--warn"><div>⚠</div></div>
         </div>
       </div>
-      <div v-if="$parent.$parent.updateExists"
+      <div v-if="updateExists"
            class="mb-4 pa-4 rounded u-bg-color-warn"
            style="letter-spacing: .05em"
       >
@@ -149,6 +149,11 @@ export default {
     },
     pathDestinationId: function () {
       return (typeof this.path.destination === 'object') ? this.path.destination.id : ''
+    },
+    updateExists: function () {
+      const updateExists = this.$parent.$parent.updateExists
+      console.log('updateExists', updateExists)
+      return updateExists
     }
   },
   methods: {
@@ -193,7 +198,7 @@ export default {
       return system
     },
     displayBanner: function () {
-      return (this.$parent.$parent.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
+      return (this.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
     },
     handleOriginClick: function () {
       if (this.path.origin) { // TODO necessary?
@@ -723,7 +728,8 @@ export default {
       }, 250)
     },
     hardRefresh: function () {
-      this.$emit('refresh-app')
+      console.log('refresh app')
+      this.$parent.$parent.refreshApp()
     },
     calculateXPos: function (n) {
       const x = n * this.map.xDelta + this.map.globalXOffset
