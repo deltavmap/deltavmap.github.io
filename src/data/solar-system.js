@@ -17,7 +17,7 @@ export default {
     const transferX = 0
 
     const c = (nodeId, x, y) => {
-      const location = locations[nodeId]
+      const location = locations[nodeId.toLowerCase()]
       location.position = { x, y }
     }
     incY()
@@ -117,7 +117,7 @@ export default {
     // convert array to object
     const object = {}
     array.map(node => {
-      object[node.id] = node
+      object[node.id.toLowerCase()] = node
     })
 
     return object

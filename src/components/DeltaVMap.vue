@@ -42,10 +42,10 @@
         <delta :deltaData="edge"
                :source="getLocationById(edge.sourceId)"
                :target="getLocationById(edge.targetId)"
-               :x1="calculateXPos(system.locationsObject[edge.sourceId].position.x)"
-               :y1="calculateYPos(system.locationsObject[edge.sourceId].position.y)"
-               :x2="calculateXPos(system.locationsObject[edge.targetId].position.x)"
-               :y2="calculateYPos(system.locationsObject[edge.targetId].position.y)"
+               :x1="calculateXPos(getLocationById(edge.sourceId).position.x)"
+               :y1="calculateYPos(getLocationById(edge.sourceId).position.y)"
+               :x2="calculateXPos(getLocationById(edge.targetId).position.x)"
+               :y2="calculateYPos(getLocationById(edge.targetId).position.y)"
         >
         </delta>
       </g>
@@ -53,8 +53,8 @@
                  :key="locationIndex"
                 :location="location"
                 :radius="nodeRadius"
-                :starX="calculateXPos(system.locationsObject[system.star].position.x)"
-                :starY="calculateYPos(system.locationsObject[system.star].position.y)"
+                :starX="calculateXPos(getLocationById(system.star).position.x)"
+                :starY="calculateYPos(getLocationById(system.star).position.y)"
                 :star-id="system.star"
                 :node-on-path="isNodeOnPath(location.id)"
                 :is-origin-node="(location.id === path.origin.id)"
@@ -81,7 +81,8 @@ export default {
     'system',
     'path',
     'calculateXPos',
-    'calculateYPos'
+    'calculateYPos',
+    'getLocationById'
   ],
   data () {
     return {
@@ -100,9 +101,6 @@ export default {
     }
   },
   methods: {
-    getLocationById: function (nodeId) {
-      return this.system.locationsObject[nodeId]
-    },
     isNodeOnPath: function (nodeId) {
       return (Utils.isDefined(this.path.nodes[nodeId]) && this.path.nodes[nodeId])
     }

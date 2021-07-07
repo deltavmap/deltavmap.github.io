@@ -57,6 +57,7 @@
                  v-on:node-selected="nodeSelected($event)"
                  :calculate-x-pos="calculateXPos"
                  :calculate-y-pos="calculateYPos"
+                 :getLocationById="getLocationObject"
     ></delta-v-map>
     <div id="bottom-scroll-marker"></div>
   </div>
@@ -81,24 +82,30 @@ export default {
     SiteTitle
   },
   data () {
-    const systemBuilders = {
-      solar: SolarSystem,
-      kerbol: KerbolSystem
-    }
-    let currentSystemName
-    if (Utils.isDefined(this.$route.params.name)) {
-      // check that the system name is valid
-      currentSystemName = this.$route.params.name.toLowerCase()
-      if (Utils.isUndefined(systemBuilders[currentSystemName])) {
-        return this.$router.push('/system-not-found/' + this.$route.params.name)
+    const systemBuilders = this.getSystemBuilders()
+
+    // the default system name is Solar ...
+    let currentSystemName = 'Solar'
+
+    // .. try to get the system name from the URL ...
+    if (this.systemNameIsSupplied()) {
+      if (this.parameterSystemNameIsValid()) {
+        currentSystemName = this.$route.params.system
+      } else {
+        this.$router.push('/system-not-found/' + this.$route.params.system)
+        return {}
       }
     } else {
+      // ... or get the system name from local storage
       const localStorageSystemName = localStorage.getItem('system-name')
-      currentSystemName = localStorageSystemName || 'Solar'
+      if (localStorageSystemName) {
+        currentSystemName = localStorageSystemName
+      }
     }
+
+    // make system name lowercase
     currentSystemName = currentSystemName.toLowerCase()
 
-    // const currentSystemName = 'Solar'
     const dataObject = {
       pageLoaded: false,
       bannerTitle: 'banner-intro-hide',
@@ -145,6 +152,34 @@ export default {
     }
   },
   methods: {
+    getSystemBuilders: function () {
+      return {
+        solar: SolarSystem,
+        kerbol: KerbolSystem
+      }
+    },
+    getLocationObject: function (id) {
+      return this.system.locationsObject[id.toLowerCase()]
+    },
+    setLocationObject: function (locationId, locationData) {
+      this.system.locationsObject[locationId.toLowerCase()] = locationData
+    },
+    systemNameIsValid: function (systemName) {
+      const systemBuilders = this.getSystemBuilders()
+      return Utils.isDefined(systemBuilders[systemName])
+    },
+    systemNameIsSupplied: function () {
+      return Object.keys(this.$route.params).length > 0 &&
+        Utils.isDefined(this.$route.params.system)
+    },
+    parameterSystemNameIsValid: function () {
+      if (Utils.isDefined(this.$route.params.system)) {
+        const currentSystemName = this.$route.params.system.toLowerCase()
+        const systemNameIsValid = this.systemNameIsValid(currentSystemName)
+        return systemNameIsValid
+      }
+      return false
+    },
     resetSystemDataStructures: function (systemBuilder) {
       const system = {
         name: systemBuilder.systemName,
@@ -174,6 +209,7 @@ export default {
       this.clearPath()
       this.createData(systemName)
       this.moveToStartingPosition()
+      this.updateURL()
     },
     hasAtmosphere: function (nodeData) {
       if (Utils.isDefined(nodeData) && Utils.isDefined(nodeData.atmosphere)) {
@@ -183,10 +219,10 @@ export default {
       }
     },
     ancestorHasAtmosphere: function (nodeData) {
-      if (Utils.isUndefined(this.system.locationsObject[nodeData.parent])) {
+      if (Utils.isUndefined(this.getLocationObject(nodeData.parent))) {
         return false
       } else {
-        const ancestor = this.system.locationsObject[nodeData.parent]
+        const ancestor = this.getLocationObject(nodeData.parent)
         return this.hasAtmosphere(ancestor)
       }
     },
@@ -400,7 +436,7 @@ export default {
       return this.createDeltaObject(a[0], a[1], a[2], a[3])
     },
     addLocation: function (locationData) {
-      this.system.locationsObject[locationData.id] = locationData
+      this.setLocationObject(locationData.id, locationData)
     },
     addDeltaObject: function (deltaObject) {
       // record the delta object
@@ -455,6 +491,7 @@ export default {
       if (this.path.origin && this.path.destination) {
         this.computePath()
       }
+      this.updateURL()
     },
     testIfAeroBrakingIsAvailable: function (edge, previousNode) {
       if (edge.ab === 'both') {
@@ -508,7 +545,7 @@ export default {
       // let lastEdge
       shortestPath.forEach(nodeId => {
         // handle node
-        const node = self.system.locationsObject[nodeId]
+        const node = self.getLocationObject(nodeId)
         this.markNodeOnPath(nodeId)
 
         // handle edge
@@ -528,10 +565,21 @@ export default {
       self.path.aerobrakingAvailable = this.calculateIfAeroBrakingIsAvailable(originNodeData, destinationNodeData)
       self.path.deltaV = delta
     },
+    updateURL: function () {
+      let url = '/system/' + this.system.name
+      if (this.path.origin) {
+        url += '?origin=' + this.path.origin.id
+        if (this.path.destination) {
+          url += '&destination=' + this.path.destination.id
+        }
+      }
+      window.history.replaceState({}, document.title, url)
+    },
     handleReceivedDestinationTerminal: function (nodeData) {
       this.path.destination = nodeData
       if (this.path.origin && this.path.destination) {
         this.computePath()
+        this.updateURL()
       }
     },
     calculateIfAeroBrakingIsAvailable: function (originNodeData, destinationNodeData) {
@@ -607,6 +655,7 @@ export default {
           this.path.destination = false
           break
       }
+      this.updateURL()
     },
     clearSelectedOrigin: function () {
       this.clearPathCommon('path-origin')
@@ -636,10 +685,33 @@ export default {
       this.moveTo(x, y)
     },
     moveToStartingPosition: function () {
-      const po = this.system.star
-      const locationId = po + 'T'
+      // set the default location
+      let locationId = this.system.star + 'T'
+
+      // decide what the focus should be
+      if (this.systemNameIsSupplied() && this.parameterSystemNameIsValid()) {
+        // load origin
+        if (Utils.isDefined(this.$route.query.origin)) {
+          const originId = this.$route.query.origin
+          if (Utils.isDefined(this.getLocationObject(originId))) {
+            const origin = this.getLocationObject(originId)
+            this.path.origin = origin
+            locationId = originId
+          }
+        }
+
+        // load destination
+        if (Utils.isDefined(this.$route.query.destination)) {
+          const destinationId = this.$route.query.destination
+          if (Utils.isDefined(this.getLocationObject(destinationId))) {
+            const destination = this.getLocationObject(destinationId)
+            // this.path.destination = destination
+            this.nodeSelected(destination)
+          }
+        }
+      }
       this.panzoom.zoomAbs(0, 0, 0.3)
-      this.moveToNode(this.system.locationsObject[locationId])
+      this.moveToNode(this.getLocationObject(locationId))
       setTimeout(_ => {
         this.pageLoaded = true
       }, 1000)
@@ -697,6 +769,7 @@ export default {
       }
     })
     self.panzoom.zoomAbs(startX, startY, zoomLevel)
+
     self.moveToStartingPosition()
     setTimeout(_ => {
       this.pageLoaded = true

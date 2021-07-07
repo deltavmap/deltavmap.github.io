@@ -16,7 +16,7 @@ export default {
     }
   },
   mounted () {
-    this.systemName = this.$route.params.name
+    this.systemName = this.$route.params.system
   }
 }
 </script>

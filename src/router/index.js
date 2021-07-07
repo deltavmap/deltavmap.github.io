@@ -26,12 +26,12 @@ const calculators = {
 const routes = [
   home,
   {
-    path: '/system/:name',
+    path: '/system/:system',
     component: DeltaVMapPage
   },
   {
     name: 'system-not-found',
-    path: '/system-not-found/:name',
+    path: '/system-not-found/:system',
     component: SystemNotFound
   },
   about,
