@@ -5,18 +5,18 @@ describe('url tests', function () {
     expect(earth).toExist()
   })
   it('Kerbol system can be accessed via URL', function () {
-    browser.url('/system/kerbol')
+    browser.url('/?system=kerbol')
     const kerbin = $('#Kerbin')
     expect(kerbin).toExist()
   })
   it('Solar system can be accessed via URL', function () {
     // (and implicitly test that capitalization does not matter)
-    browser.url('/system/SOLAR')
+    browser.url('/?system=SOLAR')
     const earth2 = $('#Earth')
     expect(earth2).toExist()
   })
   it('Invalid system name leads to the system not found page', function () {
-    browser.url('/system/SOLARfoo')
+    browser.url('/?system=SOLARfoo')
     const earth3 = $('#Earth')
     expect(earth3.error.error).toEqual('no such element')
     const mainMessage = $('.main-message')
@@ -30,7 +30,7 @@ describe('url tests', function () {
   })
 
   it('Origin query parameter works', function () {
-    browser.url('/system/Solar?origin=Mercury')
+    browser.url('/?system=Solar&origin=Mercury')
     const mercury = $('#Mercury')
     expect(mercury).toExist()
     const controlOriginValue = $('.control--origin .control__value')
@@ -39,7 +39,7 @@ describe('url tests', function () {
   })
 
   it('Origin and destination query parameter works', function () {
-    browser.url('/system/Kerbol?origin=Jool&destination=Moho')
+    browser.url('/?system=Kerbol&origin=Jool&destination=Moho')
     const jool = $('#Jool')
     expect(jool).toExist()
     const controlOriginValue = $('.control--origin .control__value')

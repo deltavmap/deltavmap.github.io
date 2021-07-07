@@ -90,9 +90,9 @@ export default {
     // .. try to get the system name from the URL ...
     if (this.systemNameIsSupplied()) {
       if (this.parameterSystemNameIsValid()) {
-        currentSystemName = this.$route.params.system
+        currentSystemName = this.$route.query.system
       } else {
-        this.$router.push('/system-not-found/' + this.$route.params.system)
+        this.$router.push('/system-not-found/' + this.$route.query.system)
         return {}
       }
     } else {
@@ -169,12 +169,12 @@ export default {
       return Utils.isDefined(systemBuilders[systemName])
     },
     systemNameIsSupplied: function () {
-      return Object.keys(this.$route.params).length > 0 &&
-        Utils.isDefined(this.$route.params.system)
+      return Object.keys(this.$route.query).length > 0 &&
+        Utils.isDefined(this.$route.query.system)
     },
     parameterSystemNameIsValid: function () {
-      if (Utils.isDefined(this.$route.params.system)) {
-        const currentSystemName = this.$route.params.system.toLowerCase()
+      if (Utils.isDefined(this.$route.query.system)) {
+        const currentSystemName = this.$route.query.system.toLowerCase()
         const systemNameIsValid = this.systemNameIsValid(currentSystemName)
         return systemNameIsValid
       }
@@ -566,9 +566,9 @@ export default {
       self.path.deltaV = delta
     },
     updateURL: function () {
-      let url = '/system/' + this.system.name
+      let url = '?system=' + this.system.name
       if (this.path.origin) {
-        url += '?origin=' + this.path.origin.id
+        url += '&origin=' + this.path.origin.id
         if (this.path.destination) {
           url += '&destination=' + this.path.destination.id
         }
