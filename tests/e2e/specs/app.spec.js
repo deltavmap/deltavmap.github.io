@@ -131,5 +131,4 @@ describe('map', function () {
   // TODO test clear button
   // TODO test reverse button
   // TODO test about button
-
 })

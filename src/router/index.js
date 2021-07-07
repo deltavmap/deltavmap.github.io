@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import DeltaVMapPage from '../views/DeltaVMapPage'
+import SystemNotFound from '../views/SystemNotFound'
 
 Vue.use(VueRouter)
 const home = {
@@ -23,7 +24,18 @@ const calculators = {
 }
 
 const routes = [
-  home, about, calculators
+  home,
+  {
+    path: '/system/:name',
+    component: DeltaVMapPage
+  },
+  {
+    name: 'system-not-found',
+    path: '/system-not-found/:name',
+    component: SystemNotFound
+  },
+  about,
+  calculators
 ]
 const router = new VueRouter({
   mode: 'history',

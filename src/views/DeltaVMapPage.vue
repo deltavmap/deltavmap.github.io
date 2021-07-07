@@ -1,5 +1,5 @@
 <template>
-  <div id="page-container" :class="{'page-loaded': pageLoaded}">
+  <div class="u-page-container" :class="{'page-loaded': pageLoaded}">
     <site-title>Delta V Map</site-title>
     <controls :path="path"
               :system="system"
@@ -82,17 +82,21 @@ export default {
   },
   data () {
     const systemBuilders = {
-      Solar: SolarSystem,
-      Kerbol: KerbolSystem
+      solar: SolarSystem,
+      kerbol: KerbolSystem
     }
     let currentSystemName
-    debugger
     if (Utils.isDefined(this.$route.params.name)) {
-      currentSystemName = this.$route.params.name
+      // check that the system name is valid
+      currentSystemName = this.$route.params.name.toLowerCase()
+      if (Utils.isUndefined(systemBuilders[currentSystemName])) {
+        return this.$router.push('/system-not-found/' + this.$route.params.name)
+      }
     } else {
       const localStorageSystemName = localStorage.getItem('system-name')
       currentSystemName = localStorageSystemName || 'Solar'
     }
+    currentSystemName = currentSystemName.toLowerCase()
 
     // const currentSystemName = 'Solar'
     const dataObject = {
@@ -150,7 +154,7 @@ export default {
         edgeGraph: {}
       }
       this.system = system
-      localStorage.setItem('system-name', systemBuilder.systemName)
+      localStorage.setItem('system-name', systemBuilder.systemName.toLowerCase())
       return system
     },
     displayBanner: function () {
@@ -424,7 +428,7 @@ export default {
       this.addDeltaObject(deltaObject)
     },
     createData: function (systemName) {
-      const systemBuilder = this.systemBuilders[systemName]
+      const systemBuilder = this.systemBuilders[systemName.toLowerCase()]
       this.resetSystemDataStructures(systemBuilder)
 
       // load manual locations data
@@ -704,6 +708,7 @@ export default {
 @import '~vuetify/src/styles/styles.sass'
 @import '../sass/variables'
 @import '../sass/utils/shadow-box'
+@import '../sass/utils/page'
 
 html
   overflow-y: hidden !important
@@ -716,15 +721,12 @@ html
 
 *
   box-sizing: border-box
-  font-family: "Roboto", sans-serif
   transition: background-color .25s, border-color .25s, color .25s, opacity .25s, stroke .25s
   transition-timing-function: ease
 
-#page-container
-  background-color: $color-map-background
+.u-page-container
   display: grid
-  height: 100vh
-  width: 100vw
+  background-color: $color-map-background
 
   a
     color: $color-light
