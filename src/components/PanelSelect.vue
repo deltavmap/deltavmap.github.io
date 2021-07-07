@@ -56,8 +56,6 @@ export default {
   .v-messages
     min-height: 0
 
-  .theme--light
-
 .theme--dark
   &.v-select-list.v-list
     background-color: darken($color-panel-background, 5%)
