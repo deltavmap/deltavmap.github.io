@@ -15,7 +15,10 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-Z6Q0K6CB77');
+        gtag('config', 'G-RRGVY7LH0E', {
+          cookie_domain: 'deltavmap.github.io',
+          cookie_flags: 'SameSite=None;Secure'
+        });
     } else {
       console.log('no gtag')
     }
