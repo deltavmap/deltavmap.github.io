@@ -67,7 +67,7 @@
   </div>
 </template>
 <script>
-import Utils from './utils'
+import Utils from '../utils'
 import Delta from './Delta'
 import Location from './Location'
 
@@ -109,8 +109,8 @@ export default {
 </script>
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
-@import '../sass/variables'
-@import '../sass/utils/shadow-box.sass'
+@import '../../sass/variables'
+@import '../../sass/utils/shadow-box'
 
 .map-container
   background: $color-map-background

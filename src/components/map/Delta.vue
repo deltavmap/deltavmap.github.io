@@ -100,7 +100,7 @@ export default {
 }
 </script>
 <style lang="sass">
-@import '../sass/variables'
+@import '../../sass/variables'
 .map
   .edge
     &__line

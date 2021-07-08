@@ -70,7 +70,7 @@ import Utils from '../components/utils'
 import SolarSystem from '../data/solar-system'
 import KerbolSystem from '../data/kerbol-system'
 import Controls from '../components/Controls'
-import DeltaVMap from '../components/DeltaVMap'
+import DeltaVMap from '../components/map/DeltaVMap'
 import SiteTitle from '../components/SiteTitle'
 import Banner from '../components/Banner'
 
@@ -777,6 +777,8 @@ export default {
     self.panzoom.zoomAbs(startX, startY, zoomLevel)
 
     self.moveToStartingPosition()
+    console.log('process.env', process.env)
+
     setTimeout(_ => {
       this.pageLoaded = true
     }, 1000)
@@ -800,7 +802,7 @@ html
 
 *
   box-sizing: border-box
-  transition: background-color .25s, border-color .25s, color .25s, opacity .25s, stroke .25s
+  transition: background-color .25s, border-color .25s, color .25s, opacity .25s, stroke .25s, fill .25s
   transition-timing-function: ease
 
 .u-page-container

@@ -99,9 +99,9 @@ export default {
       { id: 'Moon', label: 'Moon', nodeType: 'body', parent: 'Earth', color: '#aaa' },
       { id: 'LMoonO', label: 'Low Moon Orbit', nodeType: 'orbit', parent: 'Moon' },
       { id: 'MoonCE', label: 'Moon Capture/Escape', nodeType: 'orbit-capture-escape', parent: 'Moon' },
-      { id: 'EarthMoonL1', label: 'Earth Moon L1', nodeType: 'orbit', parent: 'Moon' },
-      { id: 'EarthMoonL2', label: 'Earth Moon L2', nodeType: 'orbit', parent: 'Moon' },
-      { id: 'NRHO', label: 'Near Rectilinear Halo Orbit', nodeType: 'orbit', parent: 'Moon' },
+      { id: 'EarthMoonL1', label: 'Earth Moon L1', nodeType: 'orbit-l1', parent: 'Moon' },
+      { id: 'EarthMoonL2', label: 'Earth Moon L2', nodeType: 'orbit-l2', parent: 'Moon' },
+      { id: 'NRHO', label: 'Near Rectilinear Halo Orbit', nodeType: 'orbit-nrho', parent: 'Moon' },
 
       { id: 'Vesta', label: 'Vesta', nodeType: 'body', parent: 'Sun', color: 'grey' },
       { id: 'LVestaO', label: 'Low Vesta Orbit', nodeType: 'orbit', parent: 'Vesta', altitude: 20 },
