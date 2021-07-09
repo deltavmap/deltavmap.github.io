@@ -39,6 +39,10 @@
       </p>
       <h4>Some known issues</h4>
       <ul>
+        <li>The calculations are not accurate as is!
+          For every node on the path, the delta-v for a insertion burn is included in the final figure.
+          So for now only routes that originate from Earth (or Kerbin) should be considered somewhat accurate.
+        </li>
         <li>The high DeltaV for Venus is confusing</li>
         <li>No Earth transfer orbit</li>
       </ul>
