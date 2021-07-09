@@ -178,13 +178,8 @@ export default {
     return dataObject
   },
   watch: {
-    'userSettings.showIcons.value': function (newValue, oldValue) {
-      console.log('watch userSettings.showIcons.value', newValue, oldValue)
-      localStorage.setItem('user-settings.show-icons', newValue)
-    },
-    'userSettings.showBodyShadows.value': function (newValue, oldValue) {
-      localStorage.setItem('user-settings.show-body-shadows', newValue)
-    },
+    'userSettings.showIcons.value': function (newValue, oldValue) { localStorage.setItem('user-settings.show-icons', newValue) },
+    'userSettings.showBodyShadows.value': function (newValue, oldValue) { localStorage.setItem('user-settings.show-body-shadows', newValue) },
     'userSettings.fading.value': function (newValue, oldValue) { localStorage.setItem('user-settings.fading', newValue) },
     'userSettings.showAtmosphere.value': function (newValue, oldValue) { localStorage.setItem('user-settings.show-atmosphere', newValue) }
   },
