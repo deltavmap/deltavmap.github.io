@@ -21,8 +21,8 @@ html
 html, html > body, div.v-application.theme--dark
   @extend .u-bg-color-main
 
-.theme--dark.v-sheet
-  background-color: $color-purpley
+// .theme--dark.v-sheet
+//   background-color: $color-purpley
 
 </style>
 <script>
