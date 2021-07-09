@@ -92,6 +92,7 @@ export default {
     'isOriginNode',
     'nodeOnPath',
     'radius',
+    'userSettings',
     'starId',
     'starX',
     'starY',
@@ -140,35 +141,35 @@ export default {
 
 .location
   $radius: 40
+  background-color: darken($color-map-background, 7%)
+  border-color: $color-white
+  color: $color-white
   stroke: $color-map-light
+  transition: opacity $transition-standard, stroke $transition-standard, border-color $transition-standard
 
   &__icon
-    stroke: $color-white
     stroke-width: 4
     z-index: 2
 
   &.origin-node
-    opacity: 1
+    background-color: $color-origin
+    color: $color-white
     fill: $color-origin
+    opacity: 1
     stroke: $color-origin
     .body
       border-color: $color-origin
-    .location__icon
-      stroke: $color-origin
-    .icon-border
-      stroke: $color-origin
     .location__label
       color: $color-map-dark
       background-color: $color-origin
 
   &.destination-node
     opacity: 1
+    stroke: $color-destination
+    background-color: $color-destination
+    color: $color-white
     .body
       border-color: $color-destination
-    .location__icon
-      stroke: $color-destination
-    .icon-border
-      stroke: $color-destination
     .location__label
       color: $color-map-dark
       background-color: $color-destination
@@ -186,10 +187,7 @@ export default {
       opacity: 0 !important
 
   .node-on-path:not(.origin-node, .destination-node)
-    .location__icon
-      stroke: $color-map-dark
-    .icon-border
-      stroke: $color-map-dark
+    stroke: $color-map-dark
     .location__label
       background-color: $color-map-dark
       color: $color-map-light

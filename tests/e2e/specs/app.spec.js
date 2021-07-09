@@ -61,9 +61,10 @@ describe('map', function () {
     expect(deltaV).toHaveText('14.660 km/s')
     expect(aerobraking).toHaveText('UNAVAILABLE')
 
-    const buttons = $$('.v-btn__content')
-    expect(buttons).toExist()
-    const reverseButton = buttons[0]
+    // const buttons = $$('.v-btn__content')
+    // expect(buttons).toExist()
+
+    const reverseButton = $('.button-reverse')
     expect(reverseButton).toExist()
     expect(reverseButton).toHaveText('REVERSE')
     reverseButton.click()

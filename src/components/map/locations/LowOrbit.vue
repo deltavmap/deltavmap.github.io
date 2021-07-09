@@ -7,7 +7,8 @@
             :cx="xPos"
             :cy="yPos"
             :r="radius - 10"
-            :fill="fillColor"
+            fill="none"
+            v-if="$parent.userSettings.showIcons.value"
     ></circle>
   </g>
 </template>

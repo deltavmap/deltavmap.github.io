@@ -7,6 +7,7 @@
           :width="size"
           :height="size"
           fill="none"
+          v-if="$parent.userSettings.showIcons.value"
     ></rect>
   </g>
 </template>

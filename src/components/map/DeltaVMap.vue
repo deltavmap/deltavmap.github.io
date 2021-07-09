@@ -1,8 +1,12 @@
 <template>
-  <div class="map-container fade-in">
+  <div class="map-container">
     <svg id="map"
          class="map"
-         :class="{'path-selected' : path.isSelected}"
+         :class="{
+           'path-selected' : path.isSelected,
+           'fading-is-on' : userSettings.fading.value,
+           'map--is-visible': showMap
+         }"
          :width="mapWidth"
          height="9000px"
     >
@@ -62,6 +66,7 @@
                 v-on:node-selected="$emit('node-selected', location)"
                 :x-pos="calculateXPos(location.position.x)"
                 :y-pos="calculateYPos(location.position.y)"
+                :user-settings="userSettings"
       ></location>
     </svg>
   </div>
@@ -82,18 +87,14 @@ export default {
     'path',
     'calculateXPos',
     'calculateYPos',
-    'getLocationById'
+    'getLocationById',
+    'userSettings'
   ],
   data () {
     return {
-      nodeRadius: 40,
-      pageLoaded: false
+      showMap: false,
+      nodeRadius: 40
     }
-  },
-  mounted () {
-    setTimeout(() => {
-      this.pageLoaded = true
-    }, 2000)
   },
   computed: {
     mapWidth: function () {
@@ -103,6 +104,23 @@ export default {
   methods: {
     isNodeOnPath: function (nodeId) {
       return (Utils.isDefined(this.path.nodes[nodeId]) && this.path.nodes[nodeId])
+    },
+    triggerShowMap: function () {
+      const self = this
+      Utils.debounce(() => {
+        self.showMap = true
+      }, 1000, 'mapLoaded')
+    }
+  },
+  mounted () {
+    this.triggerShowMap()
+  },
+  watch: {
+    'system.name': function (newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.showMap = false
+        this.triggerShowMap()
+      }
     }
   }
 }
@@ -113,14 +131,11 @@ export default {
 @import '../../sass/utils/shadow-box'
 
 .map-container
-  background: $color-map-background
-  background-image: linear-gradient(175deg, $color-map-background, $color-map-background-darker)
   cursor: crosshair
   grid-row-start: 1
   grid-row-end: 3
   grid-column-start: 2
   grid-column-end: 2
-  opacity: 0
   overflow: hidden
   position: relative
   z-index: 1
@@ -132,8 +147,6 @@ export default {
     grid-row-end: 2
   &:hover
     cursor: hand
-  &--visible
-    opacity: 1
 
   &__prompt
     @extend .u-shadow
@@ -167,10 +180,16 @@ export default {
 .map
   min-height: 100%
   width: 100%
+  opacity: 0
   overflow: visible
   text-align: initial
 
-.path-selected
+  &--is-visible
+    opacity: 1
+    transition: opacity .25s
+
+.path-selected.fading-is-on
   .fadable
     opacity: $opacity
+    transition: opacity $transition-standard
 </style>

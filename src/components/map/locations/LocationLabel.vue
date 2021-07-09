@@ -31,14 +31,16 @@ export default {
 $border-radius: 4px
 
 .location__label
-  background-color: darken($color-map-background, 7%)
   border-radius: $border-radius
   padding: .5em 1em
   text-align: center
-  .theme--dark &
-    color: $color-white
+  transition: background-color $transition-standard, color $transition-standard // , stroke $transition-standard
+
+  .path-selected .node-on-path:not(.origin-node, .destination-node) &
+    transition: background-color $transition-standard, color $transition-standard
 
 .underlay-html-container
+  background-color: inherit
   position: relative
   &:before
     background-color: $color-map-background

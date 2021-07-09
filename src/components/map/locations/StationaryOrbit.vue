@@ -2,23 +2,25 @@
   <g class="location__icon location__icon--orbit-stationary fadable">
     <icon-border :xPos="xPos" :yPos="yPos" :radius="radius"
     ></icon-border>
-    <circle :cx="circle1x"
-            :cy="circle1y"
-            :r="smallRadius"
+    <g v-if="$parent.userSettings.showIcons.value">
+      <circle :cx="circle1x"
+              :cy="circle1y"
+              :r="smallRadius"
+              fill="none"
+      ></circle>
+      <circle :cx="circle2x"
+              :cy="circle2y"
+              :r="verySmallRadius"
+              fill="none"
+      ></circle>
+      <line :x1="lineX1"
+            :y1="lineY1"
+            :x2="lineX2"
+            :y2="lineY2"
             fill="none"
-    ></circle>
-    <circle :cx="circle2x"
-            :cy="circle2y"
-            :r="verySmallRadius"
-            fill="none"
-    ></circle>
-    <line :x1="lineX1"
-          :y1="lineY1"
-          :x2="lineX2"
-          :y2="lineY2"
-          fill="none"
-          class=""
-    ></line>
+            class=""
+      ></line>
+    </g>
   </g>
 </template>
 <script>

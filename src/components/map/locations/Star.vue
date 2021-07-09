@@ -5,6 +5,7 @@
             :cy="yPos"
             r="400"
             fill="url('#gradient-star-corona')"
+            v-if="$parent.userSettings.showAtmosphere.value"
     />
     <circle class="location__icon"
             :cx="xPos" :cy="yPos"
@@ -17,6 +18,7 @@
             :r="(this.radius - 2) + 'px'"
             stroke-width="0"
             fill="url('#gradient-star')"
+            v-if="$parent.userSettings.showBodyShadows.value"
     />
 
   </g>

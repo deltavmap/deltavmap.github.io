@@ -71,12 +71,14 @@
       </v-menu>
       <div>
         <v-btn small
-                  :disabled="!path.origin || !path.destination"
-                  @click="$emit('controls-reverse-selected-nodes')"
+               class="button-reverse"
+               :disabled="!path.origin || !path.destination"
+               @click="$emit('controls-reverse-selected-nodes')"
         >reverse</v-btn>
       </div>
       <div>
         <v-btn small
+               class="button-clear"
                :disabled="!path.origin && !path.destination"
                @click="$emit('controls-clear-path')"
         >clear</v-btn>

@@ -3,7 +3,7 @@
     <circle class="location__icon-atmosphere fadable"
             :cx="xPos" :cy="yPos"
             r="60"
-            v-if="atmosphere"
+            v-if="atmosphere && $parent.userSettings.showAtmosphere.value"
             fill="url('#gradient-atmosphere')"
     />
     <foreignObject :x="foreignObjectX"
@@ -15,7 +15,10 @@
       <body xmlns="http://www.w3.org/1999/xhtml">
       <div class="body fadable">
         <div class="body__surface" :style="'background-color: ' + fillColor"></div>
-        <div class="body__surface-shadow" :style="surfaceShadowPositionStyle"></div>
+        <div class="body__surface-shadow"
+             :style="surfaceShadowPositionStyle"
+             v-if="$parent.userSettings.showBodyShadows.value"
+        ></div>
         <div class="body__surface-haze" style=""></div>
       </div>
       </body>
@@ -54,6 +57,7 @@ export default {
 }
 </script>
 <style lang="sass">
+@import '../../../sass/variables'
 
 .location
   &__icon-atmosphere
@@ -69,6 +73,7 @@ export default {
   overflow: hidden
   position: relative
   width: 100%
+  transition: border-color $transition-standard
 
   &__container
     body

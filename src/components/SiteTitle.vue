@@ -1,40 +1,44 @@
 <template>
-  <h1 class="site-title fade-in">
-    <a href="/">
-      <span class="site-icon" style="">
-        <slot></slot>
-      </span>
-    </a>
-  </h1>
+  <div class="site-title__container">
+    <h1 class="site-title">
+      <a href="/">
+        <span class="site-icon" style="">
+          <slot></slot>
+        </span>
+      </a>
+    </h1>
+    <v-app-bar-nav-icon @click.stop="$parent.handleSettingButtonClick"></v-app-bar-nav-icon>
+  </div>
 </template>
 <script>
-
+export default {
+}
 </script>
-<style lang="sass">
+<style lang="sass" scoped>
 @import '~vuetify/src/styles/styles.sass'
 @import '@/sass/variables'
 @import '@/sass/utils/shadow-box.sass'
 
-.site-title
-  @extend .u-shadow
-  color: $color-panel-font-dark
+.site-title__container
+  align-items: center
   background-color: $color-panel-background
-  position: relative
-  text-transform: uppercase
+  @extend .u-shadow
+  display: flex
+  grid-row-start: 1
+  grid-row-end: 1
+  grid-column-start: 1
+  grid-column-end: 1
+  justify-content: space-between
+  padding: 0 1rem
   z-index: 2
 
-  @media #{map-get($display-breakpoints, 'sm-and-down')}
-    grid-row-start: 1
-    grid-row-end: 1
-    grid-column-start: 1
-    grid-column-end: 1
+  @media #{map-get($display-breakpoints, 'md-and-up')}
+    box-shadow: none
 
-  &-container
-    background-color: $color-light
-    display: flex
-    align-items: center
-    justify-content: space-between
-    z-index: 3
+.site-title
+  color: $color-panel-font-dark
+  position: relative
+  text-transform: uppercase
 
   @media #{map-get($display-breakpoints, 'sm-and-down')}
     font-size: 1.25rem
@@ -48,7 +52,6 @@
     padding: .5rem 1.5rem
 
   @media #{map-get($display-breakpoints, 'md-and-up')}
-    box-shadow: none
     font-size: 1.5rem
     grid-column-start: 1
     grid-column-end: 1
@@ -89,4 +92,11 @@
 
   @media #{map-get($display-breakpoints, 'sm-only')}
     margin-left: .1em
+
+.v-app-bar__nav-icon
+  @media #{map-get($display-breakpoints, 'md-and-up')}
+    position: absolute
+    right: 1rem
+.theme--dark.v-btn.v-btn--icon
+  color: $color-panel-font-light
 </style>

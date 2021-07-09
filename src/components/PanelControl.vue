@@ -68,25 +68,8 @@ $color-controls-light: lighten($color-purpley-red, 60%)
   @media #{map-get($display-breakpoints, 'md-and-up')}
     margin-top: .5rem
 
-  //&__label
-  //  font-size: .9em
-  //  font-weight: 400
-  //  letter-spacing: .1em
-  //  text-transform: uppercase
-  //
-  //  @media #{map-get($display-breakpoints, 'sm-and-down')}
-  //    display: flex
-  //    flex-direction: column
-  //    justify-content: center
-  //    margin: 0 .5rem
-  //
-  //  @media #{map-get($display-breakpoints, 'md-and-up')}
-  //    min-width: 6rem
-
   &__value
     $control-value: &
-    //border: 1px solid darken($color-panel-background, 2%)
-    //border-radius: .15rem
     @extend .u-border-subtle
     align-items: center
     color: $color-light
@@ -98,6 +81,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     position: relative
     text-align: center
     height: 2em
+    transition: color $transition-standard, background-color $transition-standard
 
     @media #{map-get($display-breakpoints, 'sm-and-down')}
       border-radius: .5rem
@@ -113,6 +97,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
       top: 0
       bottom: 0
       background-color: $color-panel-background
+      transition: background-color $transition-standard
 
       .control--origin.control--active &
         background-color: $color-origin

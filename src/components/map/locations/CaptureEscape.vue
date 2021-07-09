@@ -2,15 +2,17 @@
   <g class="location__icon location__icon-capture-escape fadable">
     <icon-border :xPos="xPos" :yPos="yPos" :radius="radius"
     ></icon-border>
-    <circle :cx="xPos"
-            :cy="yPos"
-            :r="smallRadius"
+    <g v-if="$parent.userSettings.showIcons.value">
+      <circle :cx="xPos"
+              :cy="yPos"
+              :r="smallRadius"
+              fill="none"
+              class=""
+      ></circle>
+      <path :d="arc"
             fill="none"
-            class=""
-    ></circle>
-    <path :d="arc"
-          fill="none"
-    ></path>
+      ></path>
+    </g>
   </g>
 </template>
 <script>

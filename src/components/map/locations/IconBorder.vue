@@ -17,8 +17,10 @@ export default {
 }
 </script>
 <style lang="sass">
+@import '../../../sass/variables'
+
 .icon-border
-  stroke: whitesmoke
   stroke-width: 4
   z-index: 2
+
 </style>

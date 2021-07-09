@@ -106,6 +106,8 @@ export default {
     &__line
       stroke: whitesmoke
       stroke-width: 4
+      transition: stroke $transition-standard
+
     &__label
       background-color: $color-map-light
       border-radius: 4px
@@ -114,15 +116,27 @@ export default {
       margin-bottom: 0
       padding: .25em
       text-align: center
+      transition: opacity $transition-standard, color $transition-standard, background-color $transition-standard
 
-.path-selected
-  .edge-on-path
-    .edge
-      &__line
-        stroke: $color-map-dark
-        opacity: 1
-      &__label
-        color: $color-map-light
-        background-color: $color-map-dark
-        opacity: 1
+  &.path-selected
+    .edge-on-path
+      .edge
+        &__line
+          stroke: $color-map-dark
+          transition: stroke $transition-standard
+
+        &__label
+          color: $color-map-light
+          background-color: $color-map-dark
+          transition: opacity $transition-standard, color $transition-standard, background-color $transition-standard
+
+    &.fading-is-on
+      .edge-on-path
+        .edge
+          &__line
+            opacity: 1
+
+          &__label
+            opacity: 1
+
 </style>

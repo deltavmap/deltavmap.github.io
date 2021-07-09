@@ -1,6 +1,6 @@
 <template>
   <div class="u-page-container" :class="{'page-loaded': pageLoaded}">
-    <site-title>Delta V Map</site-title>
+    <site-title class="fade-in">Delta V Map</site-title>
     <controls :path="path"
               :system="system"
               :systemNames="Object.keys(systemBuilders).map(x => systemBuilders[x].systemName)"
@@ -58,7 +58,23 @@
                  :calculate-x-pos="calculateXPos"
                  :calculate-y-pos="calculateYPos"
                  :getLocationById="getLocationObject"
+                 :user-settings="userSettings"
     ></delta-v-map>
+    <v-navigation-drawer v-model="navDrawerOpen"
+                         right temporary absolute
+                         :width="325"
+    >
+      <user-settings :user-settings="userSettings"></user-settings>
+      <v-btn style="position: absolute; top: 1rem; right: 1rem;"
+             class=""
+             small fab depressed plain
+             @click.stop="handleSettingButtonClick"
+      >
+        <v-icon>
+          mdi-close
+        </v-icon>
+      </v-btn>
+    </v-navigation-drawer>
     <div id="bottom-scroll-marker"></div>
   </div>
 </template>
@@ -73,13 +89,15 @@ import Controls from '../components/Controls'
 import DeltaVMap from '../components/map/DeltaVMap'
 import SiteTitle from '../components/SiteTitle'
 import Banner from '../components/Banner'
+import UserSettings from '../components/UserSettings'
 
 export default {
   components: {
     Banner,
     Controls,
     DeltaVMap,
-    SiteTitle
+    SiteTitle,
+    UserSettings
   },
   data () {
     const systemBuilders = this.getSystemBuilders()
@@ -108,9 +126,28 @@ export default {
 
     const dataObject = {
       pageLoaded: false,
+      navDrawerOpen: false,
       bannerTitle: 'banner-intro-hide',
       mapSVG: null,
       panzoom: null,
+      userSettings: {
+        showIcons: {
+          value: localStorage.getItem('user-settings.show-icons') !== 'false',
+          label: 'icons'
+        },
+        showBodyShadows: {
+          value: localStorage.getItem('user-settings.show-body-shadows') !== 'false',
+          label: 'shadows'
+        },
+        fading: {
+          value: localStorage.getItem('user-settings.fading') !== 'false',
+          label: 'fading'
+        },
+        showAtmosphere: {
+          value: localStorage.getItem('user-settings.show-atmosphere') !== 'false',
+          label: 'atmosphere'
+        }
+      },
       // system data
       systemBuilders,
       currentSystemBuilder: systemBuilders[currentSystemName],
@@ -140,6 +177,17 @@ export default {
 
     return dataObject
   },
+  watch: {
+    'userSettings.showIcons.value': function (newValue, oldValue) {
+      console.log('watch userSettings.showIcons.value', newValue, oldValue)
+      localStorage.setItem('user-settings.show-icons', newValue)
+    },
+    'userSettings.showBodyShadows.value': function (newValue, oldValue) {
+      localStorage.setItem('user-settings.show-body-shadows', newValue)
+    },
+    'userSettings.fading.value': function (newValue, oldValue) { localStorage.setItem('user-settings.fading', newValue) },
+    'userSettings.showAtmosphere.value': function (newValue, oldValue) { localStorage.setItem('user-settings.show-atmosphere', newValue) }
+  },
   computed: {
     pathDestinationText: function () {
       return (this.path.destination) ? this.path.destination.label : ''
@@ -157,6 +205,9 @@ export default {
     }
   },
   methods: {
+    handleSettingButtonClick: function () {
+      this.navDrawerOpen = !this.navDrawerOpen
+    },
     getSystemBuilders: function () {
       return {
         solar: SolarSystem,
@@ -211,6 +262,8 @@ export default {
       }
     },
     handleSystemChange: function (systemName) {
+      this.system.name = false
+      // this.mapLoaded = false
       this.clearPath()
       this.createData(systemName)
       this.moveToStartingPosition()
@@ -786,28 +839,21 @@ export default {
 }
 </script>
 <style lang="sass">
-@import '~vuetify/src/styles/styles.sass'
 @import '../sass/variables'
 @import '../sass/utils/shadow-box'
 @import '../sass/utils/page'
 
-html
-  overflow-y: hidden !important
-
-.u-bg-color-main
-  background-color: $color-map-background
-
-.u-bg-color-warn
-  background-color: lighten($color-purpley-red, 0%)
-
 *
   box-sizing: border-box
-  transition: background-color .25s, border-color .25s, color .25s, opacity .25s, stroke .25s, fill .25s
-  transition-timing-function: ease
+  // transition: background-color .25s, border-color .25s, color .25s, opacity .25s, stroke .25s, fill .25s
+  // transition: stroke .25s
+  // transition: all .25s
+  // transition-timing-function: ease
 
 .u-page-container
   display: grid
   background-color: $color-map-background
+  background-image: linear-gradient(175deg, $color-map-background, $color-map-background-darker)
 
   a
     color: $color-light
@@ -847,4 +893,25 @@ html
 .page-loaded
   .fade-in
     opacity: 1
+
+.v-app-bar
+  .v-toolbar__content
+    padding: 0
+
+.theme--dark.v-app-bar.v-toolbar.v-sheet
+  background-color: $color-panel-background
+  .v-toolbar__content
+    background-color: $color-panel-background
+.v-navigation-drawer.theme--dark
+  // $background-color: darken($color-purpley, 12%)
+  $background-color: $color-map-background-darker
+  .v-navigation-drawer__content
+    background-color: $background-color
+  .v-sheet
+    background-color: $background-color
+    color: $color-white
+  .v-btn
+    color: $color-white
+.theme--dark.v-navigation-drawer:not(.v-navigation-drawer--floating) .v-navigation-drawer__border
+  background-color: rgba(0,0,0,.1) !important
 </style>
