@@ -82,7 +82,7 @@
 import panzoom from 'panzoom'
 import dijkstrajs from 'dijkstrajs'
 
-import Utils from '../components/utils'
+import Utils from '../utils'
 import SolarSystem from '../data/solar-system'
 import KerbolSystem from '../data/kerbol-system'
 import Controls from '../components/Controls'

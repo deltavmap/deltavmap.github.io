@@ -96,7 +96,7 @@
   </div>
 </template>
 <script>
-import Utils from './utils'
+import Utils from '../utils'
 
 import AboutDialog from './AboutDialog'
 import PanelControl from './PanelControl'
