@@ -72,4 +72,13 @@ export default {
 .v-list-item .v-list-item__title, .v-list-item .v-list-item__subtitle
   text-transform: uppercase
   letter-spacing: .1em
+
+.theme--dark .mdi-menu-down::before
+  color: darken($color-white, 10%)
+
+.theme--dark.v-menu__content
+  margin-top: -.7rem
+  margin-left: -.7rem
+  .v-sheet
+    background-color: darken($color-map-background-darker, 10%)
 </style>
