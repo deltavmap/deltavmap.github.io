@@ -5,6 +5,7 @@
     <v-select :items="['Solar', 'Kerbol']"
               :value="value"
               @change="handleChange"
+              :menu-props="{contentClass: 'panel-select__menu panel-select__menu--' + type}"
     ></v-select>
   </div>
 </template>
@@ -56,9 +57,10 @@ export default {
   .v-messages
     min-height: 0
 
-.theme--dark
-  &.v-select-list.v-list
-    background-color: darken($color-panel-background, 5%)
+  &__menu
+    .theme--dark
+      &.v-select-list.v-list
+        background-color: darken($color-panel-background, 10%)
 
   .v-select__slot
     background-color: $color-dark
@@ -76,9 +78,4 @@ export default {
 .theme--dark .mdi-menu-down::before
   color: darken($color-white, 10%)
 
-.theme--dark.v-menu__content
-  margin-top: -.7rem
-  margin-left: -.7rem
-  .v-sheet
-    background-color: darken($color-map-background-darker, 10%)
 </style>
