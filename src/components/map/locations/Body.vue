@@ -60,7 +60,6 @@ export default {
 @import '../../../sass/variables'
 
 .location
-  &__icon-atmosphere
   stroke-width: 0
   z-index: -1
 
