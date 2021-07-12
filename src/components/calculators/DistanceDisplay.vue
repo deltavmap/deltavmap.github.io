@@ -20,9 +20,6 @@ export default {
   computed: {
     distanceKilometers: function () { return d(this.distanceMeters).div(1000).toFixed(1) },
     distanceMillionKilometers: function () { return d(this.distanceMeters).div(1000).div(1000000).toFixed(1) }
-  },
-  mounted () {
-    console.log('distance', this.distanceMeters)
   }
 }
 </script>

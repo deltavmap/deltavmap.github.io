@@ -85,9 +85,6 @@ export default {
   mounted () {
     this.computeOrbitalVelocity()
     this.computeEscapeVelocity()
-    console.log(d('9').squareRoot().toString())
-    console.log(d('27').cubeRoot().toString())
-    console.log(d('32').pow(2 / 5).toString())
   }
 }
 </script>
