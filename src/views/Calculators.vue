@@ -104,6 +104,8 @@ export default {
 }
 </script>
 <style lang="sass">
+html
+  overflow-y: auto !important
 $margin: 1rem
 h1
   margin-bottom: $margin

@@ -48,8 +48,10 @@
         top
         offset-y
         v-if="$vuetify.breakpoint.smAndDown"
+        content-class="v-menu--system-select"
       >
-        <template v-slot:activator="{ on, attrs }">
+        <template v-slot:activator="{ on, attrs }"
+        >
           <v-btn
             class=""
             small
@@ -255,4 +257,12 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     opacity: 0.2
     &:hover
       opacity: 1
+
+.v-menu--system-select
+  margin-top: -.7rem
+  margin-left: -.7rem
+  .v-sheet
+    &.theme--dark
+      background-color: darken($color-map-background-darker, 10%)
+
 </style>
