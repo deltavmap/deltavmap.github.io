@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <h1>Calculators</h1>
+    <hohmann-transfer></hohmann-transfer>
     <div class="calculators">
       <div class="calculator__container">
       <h2>Orbital velocity</h2>
@@ -23,7 +24,7 @@
           <span>G : {{ G }}</span>
           <v-text-field v-model="ev.ev" label="Escape velocity (km/s)"></v-text-field>
           <v-text-field v-model="ev.m" label="Body Mass (kg)"></v-text-field>
-          <v-text-field v-model="ev.r" label="Body Radius (m)"></v-text-field>
+          <v-text-field v-model="ev.r" label="Body Radius (km)"></v-text-field>
         </div>
       </div>
       <sphere-of-influence></sphere-of-influence>
@@ -33,12 +34,15 @@
 <script>
 // import bn from 'bignumber.js'
 import Decimal from 'decimal.js'
+import OM from '../orital-mechanics'
 
+import HohmannTransfer from '../components/calculators/HohmannTransfer'
 import SphereOfInfluence from '../components/calculators/SphereOfInfluence'
 Decimal.set({ precision: 10 })
 const d = Decimal
 export default {
   components: {
+    HohmannTransfer,
     SphereOfInfluence
   },
   data () {
@@ -60,29 +64,13 @@ export default {
   methods: {
     computeOrbitalVelocity: function () {
       if (this.ov.alt) {
-        const effectiveRadius = this.ov.r.times('1000').add(d(this.ov.alt).times('1000'))
-        console.log('effective radius', effectiveRadius.toString())
-
-        const gtimesm = this.ov.ov = this.G.times(this.ov.m)
-        console.log('g times m', gtimesm.toString())
-
-        const fraction = gtimesm.div(effectiveRadius)
-        console.log('fraction', fraction.toString())
-
-        const sqrt = fraction.sqrt()
-        console.log('sqrt', sqrt.toString())
-
-        const final = sqrt.div('1000').toFixed(3)
+        const final = OM.orbitalMeanVelocity(this.ov.r, this.ov.alt, this.ov.m)
         this.ov.ov = final
       }
     },
     computeEscapeVelocity: function () {
-      this.ev.ev = this.G
-        .times(this.ev.m)
-        .dividedBy(this.ev.r.times('1000'))
-        .times(2)
-        .squareRoot()
-        .dividedBy(1000).toFixed(3)
+      const ev = OM.escapeVelocity(this.ev.m, this.ev.r)
+      this.ev.ev = ev
     }
   },
   watch: {
@@ -112,7 +100,7 @@ h1
 .calculators
   display: flex
   flex-wrap: wrap
-  margin: 0 -$margin
+  margin: 1rem -$margin
 .calculator__container
   max-width: 350px
   // min-width: 350px

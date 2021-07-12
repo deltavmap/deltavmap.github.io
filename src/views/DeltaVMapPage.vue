@@ -1,5 +1,5 @@
 <template>
-  <div class="u-page-container" :class="{'page-loaded': pageLoaded}">
+  <div class="u-page-container delta-v-map-page" :class="{'page-loaded': pageLoaded}">
     <site-title class="fade-in">Delta V Map</site-title>
     <controls :path="path"
               :system="system"
@@ -84,7 +84,7 @@ import dijkstrajs from 'dijkstrajs'
 
 import Utils from '../utils'
 import SolarSystem from '../data/solar-system'
-import KerbolSystem from '../data/kerbol-system'
+import KerbolSystem from '../data/systems/kerbol-system'
 import Controls from '../components/Controls'
 import DeltaVMap from '../components/map/DeltaVMap'
 import SiteTitle from '../components/SiteTitle'
@@ -833,7 +833,7 @@ export default {
   }
 }
 </script>
-<style lang="sass">
+<style lang="sass" scoped>
 @import '../sass/variables'
 @import '../sass/utils/shadow-box'
 @import '../sass/utils/page'

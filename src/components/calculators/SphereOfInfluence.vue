@@ -12,7 +12,7 @@
 </template>
 <script>
 // https://en.wikipedia.org/wiki/Sphere_of_influence_%28astrodynamics%29
-
+import OM from '../../orital-mechanics'
 import Decimal from 'decimal.js'
 Decimal.set({ precision: 10 })
 const d = Decimal
@@ -28,14 +28,8 @@ export default {
   },
   methods: {
     computeSphereOfInfluence: function () {
-      // semi-major axis of body A in meters
-      const smaam = this.smaa.times('1000')
-      // sphere of influence of body in meters
-      const soiam = this.ma
-        .dividedBy(this.mb)
-        .pow(2 / 5)
-        .times(smaam)
-      this.r = soiam.dividedBy('1000')
+      const r = OM.sphereOfInfluence(this.smaa, this.ma, this.mb)
+      this.r = r
     }
   },
   watch: {

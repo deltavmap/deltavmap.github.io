@@ -15,14 +15,11 @@
 .u-bg-color-warn
   background-color: lighten($color-purpley-red, 0%)
 
-html
-  overflow-y: hidden !important
-
 html, html > body, div.v-application.theme--dark
   @extend .u-bg-color-main
 
-// .theme--dark.v-sheet
-//   background-color: $color-purpley
+html
+  overflow-y: hidden !important
 
 </style>
 <script>
