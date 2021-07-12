@@ -8,28 +8,28 @@
                 outlined dense clearable
       ></v-select>
       <v-row>
-        <v-col class="body-column">
+        <v-col class="orbit-column">
           <v-container>
-            <v-combobox label="auto-fill body A values"
-                        v-model="body.A.name"
-                        :items="bodyNames"
+            <v-combobox label="auto-fill orbit A values"
+                        v-model="orbit.A.name"
+                        :items="orbitNames"
                         outlined dense clearable
             ></v-combobox>
-            <distance-display label="mean orbit radius" :distance-meters="body.A.orbit.radius"></distance-display>
-            <time-display label="orbit period" :seconds="body.A.orbit.period"></time-display>
-            <velocity-display label="mean orbital velocity" :velocity-meters-second="body.A.orbit.velocity"></velocity-display>
+            <distance-display label="mean orbit radius" :distance-meters="orbit.A.meanRadius"></distance-display>
+            <time-display label="orbit period" :seconds="orbit.A.period"></time-display>
+            <velocity-display label="mean orbital velocity" :velocity-meters-second="orbit.A.velocity"></velocity-display>
           </v-container>
         </v-col>
-        <v-col class="body-column">
+        <v-col class="orbit-column">
           <v-container>
-            <v-combobox label="auto-fill body B values"
-                        v-model="body.B.name"
-                        :items="bodyNames"
+            <v-combobox label="auto-fill orbit B values"
+                        v-model="orbit.B.name"
+                        :items="orbitNames"
                         outlined dense clearable
             ></v-combobox>
-            <distance-display label="mean orbit radius" :distance-meters="body.B.orbit.radius"></distance-display>
-            <time-display label="orbit period" :seconds="body.B.orbit.period"></time-display>
-            <velocity-display label="mean orbital velocity" :velocity-meters-second="body.B.orbit.velocity"></velocity-display>
+            <distance-display label="mean orbit radius" :distance-meters="orbit.B.meanRadius"></distance-display>
+            <time-display label="orbit period" :seconds="orbit.B.period"></time-display>
+            <velocity-display label="mean orbital velocity" :velocity-meters-second="orbit.B.velocity"></velocity-display>
           </v-container>
         </v-col>
       </v-row>
@@ -79,26 +79,20 @@ export default {
     const data = {
       system: systems.solar,
       systems,
-      body: {
+      orbit: {
         A: {
-          mass: d(0),
-          name: this.$route.query.bodyAName || '',
-          orbit: {
-            period: d(0),
-            radius: d(0),
-            velocity: d(0)
-          },
-          radius: d(0)
+          name: this.$route.query.orbitAName || '',
+          object: { mass: d(0) },
+          period: d(0),
+          meanRadius: d(0),
+          velocity: d(0)
         },
         B: {
-          mass: d(0),
-          name: this.$route.query.bodyBName || '',
-          orbit: {
-            period: d(0),
-            radius: d(0),
-            velocity: d(0)
-          },
-          radius: d(0)
+          name: this.$route.query.orbitBName || '',
+          object: { mass: d(0) },
+          period: d(0),
+          meanRadius: d(0),
+          velocity: d(0)
         }
       },
       transferOrbit: {
@@ -131,61 +125,58 @@ export default {
       system.childrenObject = {}
       system.children.forEach(c => { system.childrenObject[c.name] = c })
       system.primary = {
-        name: system.name,
-        mass: system.mass,
-        radius: system.radius,
-        type: system.type
+        object: system.object
       }
       return system
     },
     computeTransOrbitSemiMajorAxis: function () {
-      if (parseInt(this.body.A.orbit.radius.toString()) !== 0 && parseInt(this.body.B.orbit.radius) !== 0) {
-        this.transferOrbit.semiMajAxis = OM.transferOrbitSemiMajorAxis(this.body.A.orbit.radius, this.body.B.orbit.radius)
-        if (this.body.A.orbit.radius > this.body.B.orbit.radius) {
-          this.transferOrbit.smallOrbit = this.body.B.orbit
-          this.transferOrbit.largeOrbit = this.body.A.orbit
+      if (parseInt(this.orbit.A.meanRadius.toString()) !== 0 && parseInt(this.orbit.B.meanRadius) !== 0) {
+        this.transferOrbit.semiMajAxis = OM.transferOrbitSemiMajorAxis(this.orbit.A.meanRadius, this.orbit.B.meanRadius)
+        if (this.orbit.A.meanRadius > this.orbit.B.meanRadius) {
+          this.transferOrbit.smallOrbit = this.orbit.B
+          this.transferOrbit.largeOrbit = this.orbit.A
         } else {
-          this.transferOrbit.smallOrbit = this.body.A.orbit
-          this.transferOrbit.largeOrbit = this.body.B.orbit
+          this.transferOrbit.smallOrbit = this.orbit.A
+          this.transferOrbit.largeOrbit = this.orbit.B
         }
       }
     },
     computePeriodOfTransferOrbit: function () {
-      this.transferOrbit.full.pSecs = OM.periodOfOrbit(this.system.primary.mass, this.transferOrbit.semiMajAxis)
+      this.transferOrbit.full.pSecs = OM.periodOfOrbit(this.system.primary.object.mass, this.transferOrbit.semiMajAxis)
     },
-    handleBodyMeanRadiusChange: function (body, newValue) {
-      this.body[body].orbit.radius = newValue
-      this.body[body].orbit.period = OM.periodOfOrbit(this.system.primary.mass, newValue)
-      this.body[body].orbit.velocity = OM.orbitMeanVelocity(newValue, this.system.primary.mass)
+    handleOrbitMeanRadiusChange: function (orbit, newValue) {
+      this.orbit[orbit].meanRadius = newValue
+      this.orbit[orbit].period = OM.periodOfOrbit(this.system.primary.object.mass, newValue)
+      this.orbit[orbit].velocity = OM.orbitMeanVelocity(newValue, this.system.primary.object.mass)
     },
-    handleBodyAMeanRadiusChange: function (newValue) {
-      this.handleBodyMeanRadiusChange('A', newValue)
+    handleOrbitAMeanRadiusChange: function (newValue) {
+      this.handleOrbitMeanRadiusChange('A', newValue)
     },
-    handleBodyBMeanRadiusChange: function (newValue) {
-      this.handleBodyMeanRadiusChange('B', newValue)
+    handleOrbitBMeanRadiusChange: function (newValue) {
+      this.handleOrbitMeanRadiusChange('B', newValue)
     },
-    handleBodyNameChange: function (bodyName) {
-      const name = this.body[bodyName].name
+    handleOrbitNameChange: function (orbitName) {
+      const name = this.orbit[orbitName].name
       if (name) {
-        const bodyDetails = this.system.childrenObject[name]
-        const radius = bodyDetails.orbit.radius
-        this.handleBodyMeanRadiusChange(bodyName, radius)
+        const orbitDetails = this.system.childrenObject[name]
+        const radius = orbitDetails.meanRadius
+        this.handleOrbitMeanRadiusChange(orbitName, radius)
       }
     }
   },
   computed: {
-    bodyNames: function () { return Object.keys(this.system.childrenObject) },
+    orbitNames: function () { return Object.keys(this.system.childrenObject) },
     planetMasses: function () { return this.system.children.map(b => { return b.mass }) },
     systemNames: function () { return Object.keys(this.systems).map(s => { return { header: '', text: this.systems[s].name, value: this.systems[s].name } }) },
-    bodyAOrbitRadiusKm: function () { return this.body.A.orbit.radius / 1000 },
-    bodyBOrbitRadiusKm: function () { return this.body.B.orbit.radius / 1000 },
+    orbitAOrbitRadiusKm: function () { return this.orbit.A.meanRadius / 1000 },
+    orbitBOrbitRadiusKm: function () { return this.orbit.B.meanRadius / 1000 },
     transferSemiMajorAxisKm: function () { return this.transferOrbit.semiMajAxis / 1000 }
   },
   watch: {
-    'body.A.orbit.radius': function () { this.computeTransOrbitSemiMajorAxis() },
-    'body.B.orbit.radius': function () { this.computeTransOrbitSemiMajorAxis() },
-    'body.A.name': function () { this.handleBodyNameChange('A') },
-    'body.B.name': function () { this.handleBodyNameChange('B') },
+    'orbit.A.meanRadius': function () { this.computeTransOrbitSemiMajorAxis() },
+    'orbit.B.meanRadius': function () { this.computeTransOrbitSemiMajorAxis() },
+    'orbit.A.name': function () { this.handleOrbitNameChange('A') },
+    'orbit.B.name': function () { this.handleOrbitNameChange('B') },
     'transferOrbit.semiMajAxis': function () {
       this.computePeriodOfTransferOrbit()
       const days = d(this.transferOrbit.full.pSecs.div(86400).toFixed(1))
@@ -195,8 +186,8 @@ export default {
       to.half.pSecs = to.full.pSecs.div(2)
       to.half.pDays = to.full.pDays.div(2)
       to.half.pYears = to.full.pDays.div(365).div(2).toFixed(1)
-      to.velocityAtPerigee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.smallOrbit.radius)
-      to.velocityAtApogee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.largeOrbit.radius)
+      to.velocityAtPerigee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.smallOrbit.meanRadius)
+      to.velocityAtApogee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.largeOrbit.meanRadius)
       to.dv.apogee = to.largeOrbit.velocity.minus(to.velocityAtApogee)
       to.dv.perigee = to.velocityAtPerigee.minus(to.smallOrbit.velocity)
       to.dv.total = to.dv.apogee.add(to.dv.perigee)
@@ -205,8 +196,8 @@ export default {
   mounted () {
     this.computeTransOrbitSemiMajorAxis()
     this.computePeriodOfTransferOrbit()
-    this.handleBodyNameChange('A')
-    this.handleBodyNameChange('B')
+    this.handleOrbitNameChange('A')
+    this.handleOrbitNameChange('B')
   }
 }
 </script>
@@ -219,7 +210,7 @@ export default {
 .hohmann-transfer-calculator
   h2
     margin: 1rem 0
-  .body-column
+  .orbit-column
     .container
       @extend .u-border
   .v-subheader
