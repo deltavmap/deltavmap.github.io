@@ -10,23 +10,16 @@ const constants = {
 class OrbitalMechanics {
   /**
    * @param semiMajAxis - ie the 'larger radius' or the ellipse of bodyA
-   * @param massAKg - mass of bodyA in KG eg. Earth
-   * @param massBKg - mass of bodyA in KG eg. Sun
+   * @param massA - mass of bodyA in KG eg. Earth
+   * @param massB - mass of bodyA in KG eg. Sun
    * @returns {Decimal}
    */
-  static sphereOfInfluence (semiMajAxisKm, massAKg, massBKg) {
-    // semi-major axis of body A in meters
-    const semiMajAxisMeters = semiMajAxisKm.times('1000')
-
+  static sphereOfInfluence (semiMajAxis, massA, massB) {
     // sphere of influence of body in meters
-    const sphereInfA = massAKg
-      .dividedBy(massBKg)
+    return d(massA)
+      .div(massB)
       .pow(2 / 5)
-      .times(semiMajAxisMeters)
-
-    // convert to kilometers
-    const sphereInfAKm = sphereInfA.dividedBy('1000')
-    return sphereInfAKm
+      .times(semiMajAxis)
   }
 
   static escapeVelocity (bodyMassKg, bodyRadiusKm) {
@@ -63,20 +56,29 @@ class OrbitalMechanics {
   }
 
   /**
-   * @param commonBodyMassKg - eg the mass of the Sun
+   * @param commonBodyMass - eg the mass of the Sun
    * @param orbitSemiMajorAxisM - eg the SMA of the transfer orbit from Earth to Mars
    * @returns {Decimal} - the period, ie the length of time in seconds for one cycle of the transfer orbit
    */
-  static periodOfOrbit (commonBodyMassKg, orbitSemiMajorAxisM) {
+  static periodOfOrbit (commonBodyMass, orbitSemiMajorAxisM) {
     const piSquared = pi.pow(2)
     const fourTimesPiSquared = d(4).times(piSquared)
     const transferCubed = d(orbitSemiMajorAxisM).pow(3)
-    const GM = d(commonBodyMassKg).times(constants.G)
+    const GM = d(commonBodyMass).times(constants.G)
     const periodSquared = fourTimesPiSquared
       .times(transferCubed)
       .div(GM)
     const period = periodSquared.pow(1 / 2)
     return period
+  }
+
+  static semiMajorAxis (period, combinedMass) {
+    const periodSquared = d(period).pow(2)
+    const GM = d(constants.G).times(combinedMass)
+    const fourPiSquared = pi.pow(2).times(4)
+    const fraction = periodSquared.times(GM).div(fourPiSquared)
+    const cubeRoot = fraction.pow(1 / 3)
+    return cubeRoot
   }
 
   static velocityAtRadius (semiMajorAxis, orbitPeriod, smallerOrbitMeanRadius) {

@@ -2,9 +2,10 @@
   <div class="distance">
     <div class="distance__label" v-if="label">{{ label }}</div>
     <v-row>
-      <v-col><v-text-field readonly v-model="distanceMeters" label="meters"></v-text-field></v-col>
-      <v-col><v-text-field readonly v-model="distanceKilometers" label="kilometers"></v-text-field></v-col>
-      <v-col><v-text-field readonly v-model="distanceMillionKilometers" label="million kilometers"></v-text-field></v-col>
+      <v-col><v-text-field readonly v-model="distanceMetersFormatted" label="meters"></v-text-field></v-col>
+      <v-col><v-text-field readonly v-model="distanceKilometers" label="km"></v-text-field></v-col>
+      <v-col><v-text-field readonly v-model="distanceThousandKilometers" label="thousand km"></v-text-field></v-col>
+      <v-col><v-text-field readonly v-model="distanceMillionKilometers" label="million km"></v-text-field></v-col>
     </v-row>
   </div>
 </template>
@@ -13,13 +14,35 @@ import Decimal from 'decimal.js'
 Decimal.set({ precision: 10 })
 const d = Decimal
 export default {
-  props: [
-    'distanceMeters',
-    'label'
-  ],
+  props: {
+    distanceMeters: {
+      default: 0
+    },
+    label: {
+      default: ''
+    }
+  },
+  methods: {
+    blankIfZero: function (value) {
+      // console.log('distance display blankIfZero', value)
+      if (this.distanceMeters && d(this.distanceMeters).gt(0)) {
+        return value
+      } else return ''
+    }
+  },
   computed: {
-    distanceKilometers: function () { return d(this.distanceMeters).div(1000).toFixed(1) },
-    distanceMillionKilometers: function () { return d(this.distanceMeters).div(1000).div(1000000).toFixed(1) }
+    distanceMetersFormatted: function () {
+      return this.blankIfZero(d(this.distanceMeters).toFixed(2))
+    },
+    distanceKilometers: function () {
+      return this.blankIfZero(d(this.distanceMeters).div(1000).toFixed(2))
+    },
+    distanceThousandKilometers: function () {
+      return this.blankIfZero(d(this.distanceMeters).div(1000).div(1000).toFixed(2))
+    },
+    distanceMillionKilometers: function () {
+      return this.blankIfZero(d(this.distanceMeters).div(1000).div(1000000).toFixed(2))
+    }
   }
 }
 </script>
@@ -30,4 +53,6 @@ export default {
     opacity: .7
     text-transform: uppercase
     letter-spacing: .1em
+  .col
+    min-width: 100px
 </style>

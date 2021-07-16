@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1>Calculators</h1>
+    <h1><a href="/calculators">Calculators</a></h1>
     <hohmann-transfer></hohmann-transfer>
     <div class="calculators">
       <div class="calculator__container">
@@ -93,7 +93,16 @@ html
   overflow-y: auto !important
 $margin: 1rem
 h1
-  margin-bottom: $margin
+  a
+    margin-bottom: $margin
+    text-decoration: none
+    letter-spacing: .08em
+    text-transform: uppercase
+    font-weight: 400
+h2
+  letter-spacing: .05em
+  font-weight: 400
+
 .calculators
   display: flex
   flex-wrap: wrap

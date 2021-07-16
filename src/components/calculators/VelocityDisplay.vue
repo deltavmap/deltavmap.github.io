@@ -12,13 +12,24 @@ import Decimal from 'decimal.js'
 Decimal.set({ precision: 10 })
 const d = Decimal
 export default {
-  props: [
-    'velocity-meters-second',
-    'label'
-  ],
+  props: {
+    velocityMetersSecond: { default: 0 },
+    label: { default: '' }
+  },
+  methods: {
+    blankIfZero: function (value) {
+      if (this.velocityMetersSecond && this.velocityMetersSecond > 0) {
+        return value
+      } else return ''
+    }
+  },
   computed: {
-    velocityMetersSecondFormatted: function () { return d(this.velocityMetersSecond).toFixed(1) },
-    velocityKilometersSecond: function () { return d(this.velocityMetersSecond).div(1000).toFixed(3) }
+    velocityMetersSecondFormatted: function () {
+      return this.blankIfZero(d(this.velocityMetersSecond).toFixed(7))
+    },
+    velocityKilometersSecond: function () {
+      return this.blankIfZero(d(this.velocityMetersSecond).div(1000).toFixed(3))
+    }
   }
 }
 </script>
