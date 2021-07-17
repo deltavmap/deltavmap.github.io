@@ -2,33 +2,33 @@
   <v-container>
     <h1><a href="/calculators">Calculators</a></h1>
     <hohmann-transfer></hohmann-transfer>
-    <div class="calculators">
-      <div class="calculator__container">
-      <h2>Orbital velocity</h2>
-        <div class="calculator">
-          <div class="my-4">
-            Orbital Velocity = Sqrt(Gravitational Constant * Mass / Radius)
-            <br>
-            <span>G : {{ G }}</span>
-          </div>
-          <v-text-field v-model="ov.ov" label="Orbital velocity (km/s)"></v-text-field>
-          <v-text-field v-model="ov.m" label="Body Mass (kg)"></v-text-field>
-          <v-text-field v-model="ov.r" label="Body Radius (km)"></v-text-field>
-          <v-text-field v-model="ov.alt" label="Altitude (km)"></v-text-field>
-        </div>
-      </div>
-      <div class="calculator__container">
-        <h2>Escape velocity</h2>
-        <div class="calculator">
-          <div class="my-4">Vorbit = Sqrt(Gravity * Mass / radius)</div>
-          <span>G : {{ G }}</span>
-          <v-text-field v-model="ev.ev" label="Escape velocity (km/s)"></v-text-field>
-          <v-text-field v-model="ev.m" label="Body Mass (kg)"></v-text-field>
-          <v-text-field v-model="ev.r" label="Body Radius (km)"></v-text-field>
-        </div>
-      </div>
-      <sphere-of-influence></sphere-of-influence>
-    </div>
+<!--    <div class="calculators">-->
+<!--      <div class="calculator__container">-->
+<!--      <h2>Orbital velocity</h2>-->
+<!--        <div class="calculator">-->
+<!--          <div class="my-4">-->
+<!--            Orbital Velocity = Sqrt(Gravitational Constant * Mass / Radius)-->
+<!--            <br>-->
+<!--            <span>G : {{ G }}</span>-->
+<!--          </div>-->
+<!--          <v-text-field v-model="ov.ov" label="Orbital velocity (km/s)"></v-text-field>-->
+<!--          <v-text-field v-model="ov.m" label="Body Mass (kg)"></v-text-field>-->
+<!--          <v-text-field v-model="ov.r" label="Body Radius (km)"></v-text-field>-->
+<!--          <v-text-field v-model="ov.alt" label="Altitude (km)"></v-text-field>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="calculator__container">-->
+<!--        <h2>Escape velocity</h2>-->
+<!--        <div class="calculator">-->
+<!--          <div class="my-4">Vorbit = Sqrt(Gravity * Mass / radius)</div>-->
+<!--          <span>G : {{ G }}</span>-->
+<!--          <v-text-field v-model="ev.ev" label="Escape velocity (km/s)"></v-text-field>-->
+<!--          <v-text-field v-model="ev.m" label="Body Mass (kg)"></v-text-field>-->
+<!--          <v-text-field v-model="ev.r" label="Body Radius (km)"></v-text-field>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <sphere-of-influence></sphere-of-influence>-->
+<!--    </div>-->
   </v-container>
 </template>
 <script>
@@ -37,13 +37,13 @@ import Decimal from 'decimal.js'
 import OM from '../orital-mechanics'
 
 import HohmannTransfer from '../components/calculators/HohmannTransfer'
-import SphereOfInfluence from '../components/calculators/SphereOfInfluence'
+// import SphereOfInfluence from '../components/calculators/SphereOfInfluence'
 Decimal.set({ precision: 10 })
 const d = Decimal
 export default {
   components: {
-    HohmannTransfer,
-    SphereOfInfluence
+    HohmannTransfer
+    // SphereOfInfluence
   },
   data () {
     return {
