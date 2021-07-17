@@ -37,7 +37,11 @@ export default {
     },
     handleVelocityMetersSecondChange: function () {
       this.$set(this, 'kms', d(this.velocityMetersSecond).div(1000).floor())
-      this.$set(this, 'ms', d(this.velocityMetersSecond).mod(1000))
+      let ms = d(this.velocityMetersSecond).mod(1000)
+      if (this.kms.lt(0)) {
+        ms = ms.abs()
+      }
+      this.$set(this, 'ms', ms)
     }
   },
   computed: {

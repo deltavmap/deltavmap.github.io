@@ -33,53 +33,10 @@
           ></orbit-details>
         </v-col>
       </v-row>
-      <div class="u-border pa-4 mt-4" v-if="showHohmannTransferOrbitDetails">
-        <h3>Hohmann Transfer Orbit</h3>
-        <!-- <div class="mb-4">Semi Major Axis of transfer ellipse = R1 + R2 / 2</div> -->
-        <distance-display readonly
-                          :distance-meters="transferOrbit.semiMajAxis"
-                          label="Semi-major axis of transfer ellipse (km)">
-        </distance-display>
-        <v-row>
-          <v-col>
-            <time-display label='transfer orbit period'
-                          :seconds="transferOrbit.full.pSecs">
-            </time-display>
-          </v-col>
-          <v-col>
-            <time-display label="half transfer orbit period"
-                          :seconds="transferOrbit.half.pSecs">
-            </time-display>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <div class="u-border">
-              <h4>Perigee</h4>
-              <velocity-display label="velocity at perigee"
-                                :velocity-meters-second="transferOrbit.velocityAtPerigee">
-              </velocity-display>
-              <velocity-display label="dv required at perigee"
-                                :velocity-meters-second="transferOrbit.dv.perigee">
-              </velocity-display>
-            </div>
-          </v-col>
-          <v-col>
-            <div class="u-border">
-              <h4>Apogee</h4>
-              <velocity-display label="velocity at apogee"
-                                :velocity-meters-second="transferOrbit.velocityAtApogee">
-              </velocity-display>
-              <velocity-display label="dv required at apogee"
-                                :velocity-meters-second="transferOrbit.dv.apogee">
-              </velocity-display>
-            </div>
-          </v-col>
-        </v-row>
-        <velocity-display label="total dv required"
-                          :velocity-meters-second="transferOrbit.dv.total">
-        </velocity-display>
-      </div>
+      <hohmann-transfer-orbit :origin-orbit="orbit.origin"
+                              :destination-orbit="orbit.destination"
+                              :primary-system-mass="currentSystem.primary.object.mass"
+      ></hohmann-transfer-orbit>
     </div>
   </div>
 </template>
@@ -89,10 +46,8 @@ import u from '../../utils'
 import Solar from '../../data/systems/solar'
 import OM from '../../orital-mechanics'
 import OrbitDetails from './OrbitDetails'
-import DistanceDisplay from './DistanceDisplay'
-import TimeDisplay from './TimeDisplay'
-import VelocityDisplay from './VelocityDisplay'
 import SystemSelector from './SystemSelector'
+import HohmannTransferOrbit from './HohmannTransferOrbit'
 
 Decimal.set({ precision: 10 })
 const d = Decimal
@@ -100,57 +55,42 @@ const d = Decimal
 export default {
   components: {
     OrbitDetails,
-    TimeDisplay,
-    DistanceDisplay,
-    VelocityDisplay,
-    SystemSelector
+    SystemSelector,
+    HohmannTransferOrbit
   },
   data () {
     const systems = {}
     this.processSystem(systems, Solar, 'sun')
     const currentSystemName = this.$route.query.system || ''
-    const currentSystem = systems[currentSystemName] || {}
+    const currentSystem = systems[currentSystemName] || this.createDefaultSystem()
 
     const orbitA = this.createDefaultOrbitObject('origin', this.$route.query.origin || '')
     const orbitB = this.createDefaultOrbitObject('destination', this.$route.query.destination || '')
-    // const orbitNames = this.generateOrbitNamesArray(currentSystemName, systems)
-    const transferOrbit = this.createDefaultTransferOrbit()
+
     return {
-      primaryBodyMass: d(0),
       currentSystemName,
       currentSystem,
       systems,
       orbit: {
         origin: orbitA,
         destination: orbitB
-      },
-      transferOrbit
+      }
     }
   },
   methods: {
     createSystemNameObject: function (name) {
       return { header: '', text: name, value: name }
     },
+    createDefaultSystem: function () {
+      return { primary: { object: { mass: d(0) } } }
+    },
     createDefaultOrbitObject: function (orbit = '', name = '') {
-      // console.log('createDefaultOrbitObject', orbit, name)
       return {
         name,
         object: { mass: d(0) },
         period: d(0),
         semiMajorAxis: d(0),
         velocity: d(0)
-      }
-    },
-    createDefaultTransferOrbit: function () {
-      return {
-        semiMajAxis: d(0),
-        velocityAtPerigee: d(0),
-        velocityAtApogee: d(0),
-        originOrbit: { semiMajorAxis: d(0), velocity: d(0) },
-        destinationOrbit: { semiMajorAxis: d(0), velocity: d(0) },
-        dv: { apogee: d(0), perigee: d(0), total: d(0) },
-        full: { pSecs: d(0), pDays: d(0), pYears: d(0) },
-        half: { pSecs: d(0), pDays: d(0), pYears: d(0) }
       }
     },
     addChild: function (system, name, child) {
@@ -230,37 +170,6 @@ export default {
         })
       }
     },
-    computeTransOrbitSemiMajorAxis: function () {
-      // abort if the semi major axis has not been specified for both orbits
-      if (u.undefined(this.orbit.origin.semiMajorAxis) ||
-        u.undefined(this.orbit.destination.semiMajorAxis)) {
-        return
-      }
-
-      const aSemiMajorAxis = parseFloat(this.orbit.origin.semiMajorAxis.toString())
-      const bSemiMajorAxis = parseFloat(this.orbit.destination.semiMajorAxis.toString())
-
-      if (aSemiMajorAxis !== 0 && bSemiMajorAxis !== 0) {
-        // compute the semi-major axis of the transfer orbit
-        this.transferOrbit.semiMajAxis = OM.transferOrbitSemiMajorAxis(
-          this.orbit.origin.semiMajorAxis,
-          this.orbit.destination.semiMajorAxis
-        )
-        // work out which orbit is bigger and smaller and record it as such
-        // if (d(this.orbit.origin.semiMajorAxis).greaterThan(this.orbit.destination.semiMajorAxis)) {
-        //  this.transferOrbit.originOrbit = this.orbit.destination
-        //  this.transferOrbit.destinationOrbit = this.orbit.origin
-        // } else {
-        this.transferOrbit.originOrbit = this.orbit.origin
-        this.transferOrbit.destinationOrbit = this.orbit.destination
-        // }
-      }
-    },
-    computePeriodOfTransferOrbit: function () {
-      if (u.defined(this.currentSystem) && u.defined(this.currentSystem.primary)) {
-        this.transferOrbit.full.pSecs = OM.periodOfOrbit(this.currentSystem.primary.object.mass, this.transferOrbit.semiMajAxis)
-      }
-    },
     handleOrbitSemiMajorAxisChange: function (orbit, newValue) {
       this.$set(this.orbit[orbit], 'semiMajorAxis', newValue)
       this.$set(this.orbit[orbit], 'period', OM.periodOfOrbit(this.currentSystem.primary.object.mass, newValue))
@@ -292,11 +201,10 @@ export default {
         }
       } else {
         this.currentSystemName = ''
-        this.currentSystem = ''
+        this.currentSystem = this.createDefaultSystem()
       }
       this.$set(this.orbit, 'origin', this.createDefaultOrbitObject('origin'))
       this.$set(this.orbit, 'destination', this.createDefaultOrbitObject('destination'))
-      this.$set(this, 'transferOrbit', this.createDefaultTransferOrbit())
 
       this.updateURL()
     },
@@ -314,39 +222,9 @@ export default {
     }
   },
   computed: {
-    planetMasses: function () { return this.currentSystem.children.map(b => { return b.mass }) },
-    showHohmannTransferOrbitDetails: function () {
-      return this.orbit.origin.semiMajorAxis.valueOf() !== '0' && this.orbit.destination.semiMajorAxis.valueOf() !== '0'
-    }
-  },
-  watch: {
-    'orbit.origin.semiMajorAxis': function () { this.computeTransOrbitSemiMajorAxis() },
-    'orbit.destination.semiMajorAxis': function () { this.computeTransOrbitSemiMajorAxis() },
-    'transferOrbit.semiMajAxis': function () {
-      // console.log('watch transferOrbit.semiMajAxis')
-      this.computePeriodOfTransferOrbit()
-      const days = d(this.transferOrbit.full.pSecs.div(86400).toFixed(1))
-      const to = this.transferOrbit
-      to.full.pDays = days
-      to.full.pYears = days.div(365).toFixed(1)
-      to.half.pSecs = to.full.pSecs.div(2)
-      to.half.pDays = to.full.pDays.div(2)
-      to.half.pYears = to.full.pDays.div(365).div(2).toFixed(1)
-      debugger
-      to.velocityAtPerigee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.originOrbit.semiMajorAxis)
-      console.log('velocityAtPerigee', to.velocityAtPerigee.valueOf())
-      to.velocityAtApogee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.destinationOrbit.semiMajorAxis)
-      console.log('velocityAtApogee', to.velocityAtApogee.valueOf())
-      to.dv.apogee = to.destinationOrbit.velocity.minus(to.velocityAtApogee)
-      console.log('to.dv.apogee', to.dv.apogee.valueOf())
-      to.dv.perigee = to.velocityAtPerigee.minus(to.originOrbit.velocity)
-      console.log('to.dv.perigee', to.dv.perigee.valueOf())
-      to.dv.total = to.dv.apogee.abs().add(to.dv.perigee.abs())
-    }
+    planetMasses: function () { return this.currentSystem.children.map(b => { return b.mass }) }
   },
   mounted () {
-    this.computeTransOrbitSemiMajorAxis()
-    this.computePeriodOfTransferOrbit()
     this.handleOrbitNameChange('origin', this.$route.query.origin || '')
     this.handleOrbitNameChange('destination', this.$route.query.destination || '')
   }
