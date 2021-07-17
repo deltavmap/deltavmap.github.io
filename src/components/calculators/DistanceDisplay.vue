@@ -1,11 +1,32 @@
 <template>
-  <div class="distance">
-    <div class="distance__label" v-if="label">{{ label }}</div>
+  <div class="distance u-border my-4">
+    <div class="distance__label"
+    >{{ label }}</div>
     <v-row>
-      <v-col><v-text-field readonly v-model="distanceMetersFormatted" label="meters"></v-text-field></v-col>
-      <v-col><v-text-field readonly v-model="distanceKilometers" label="km"></v-text-field></v-col>
-      <v-col><v-text-field readonly v-model="distanceThousandKilometers" label="thousand km"></v-text-field></v-col>
-      <v-col><v-text-field readonly v-model="distanceMillionKilometers" label="million km"></v-text-field></v-col>
+      <v-col v-if="distanceMillionKilometersFormatted">
+        <v-text-field readonly hide-details
+                      v-model="distanceMillionKilometersFormatted"
+                      label="million">
+        </v-text-field>
+      </v-col>
+      <v-col v-if="distanceThousandKilometersFormatted || distanceMillionKilometersFormatted">
+        <v-text-field readonly hide-details
+                      v-model="distanceThousandKilometersFormatted"
+                      label="thousand"
+        ></v-text-field>
+      </v-col>
+      <v-col v-if="distanceKilometersFormatted || distanceMetersFormatted">
+        <v-text-field readonly hide-details
+                      v-model="distanceKilometersFormatted"
+                      label="km">
+        </v-text-field>
+      </v-col>
+      <v-col v-if="distanceMetersFormatted">
+        <v-text-field readonly hide-details
+                      v-model="distanceMetersFormatted"
+                      label="meters">
+        </v-text-field>
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -22,28 +43,59 @@ export default {
       default: ''
     }
   },
+  data () {
+    return { m: '', km: '', tkm: '', mkm: '' }
+  },
   methods: {
     blankIfZero: function (value) {
-      // console.log('distance display blankIfZero', value)
-      if (this.distanceMeters && d(this.distanceMeters).gt(0)) {
+      if (value && d(value).gt(0)) {
         return value
       } else return ''
+    },
+    handleDistanceMetersChange: function () {
+      const kilometers = 1000
+      const thousandKilometers = kilometers * 1000
+      const millionKilometers = thousandKilometers * 1000
+
+      const meters = d(this.distanceMeters)
+      const mkm = meters.div(millionKilometers).floor().valueOf()
+      let remainingMeters = meters.mod(millionKilometers)
+      const tkm = remainingMeters.div(thousandKilometers).floor().valueOf()
+      remainingMeters = meters.mod(thousandKilometers)
+      const km = remainingMeters.div(kilometers).floor().valueOf()
+      remainingMeters = meters.mod(kilometers)
+
+      this.$set(this, 'mkm', mkm)
+      this.$set(this, 'tkm', tkm)
+      this.$set(this, 'km', km)
+      this.$set(this, 'm', remainingMeters)
     }
   },
   computed: {
     distanceMetersFormatted: function () {
-      return this.blankIfZero(d(this.distanceMeters).toFixed(2))
+      if (this.blankIfZero(this.m)) {
+        return this.m.toFixed(2)
+      } else return ''
     },
-    distanceKilometers: function () {
-      return this.blankIfZero(d(this.distanceMeters).div(1000).toFixed(2))
+    distanceKilometersFormatted: function () {
+      return this.blankIfZero(this.km)
     },
-    distanceThousandKilometers: function () {
-      return this.blankIfZero(d(this.distanceMeters).div(1000).div(1000).toFixed(2))
+    distanceThousandKilometersFormatted: function () {
+      return this.blankIfZero(this.tkm)
     },
-    distanceMillionKilometers: function () {
-      return this.blankIfZero(d(this.distanceMeters).div(1000).div(1000000).toFixed(2))
+    distanceMillionKilometersFormatted: function () {
+      return this.blankIfZero(this.mkm)
     }
+  },
+  watch: {
+    distanceMeters: function () {
+      this.handleDistanceMetersChange()
+    }
+  },
+  mounted () {
+    this.handleDistanceMetersChange()
   }
+
 }
 </script>
 <style lang="sass">
@@ -54,5 +106,6 @@ export default {
     text-transform: uppercase
     letter-spacing: .1em
   .col
-    min-width: 100px
+    max-width: 100px
+
 </style>

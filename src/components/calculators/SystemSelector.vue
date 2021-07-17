@@ -25,19 +25,14 @@ export default {
   },
   computed: {
     systemNameObjects: function () {
-      console.log('systemNameObjects')
       if (this.systems) {
         return Object.keys(this.systems).map(name => {
-          console.log('  - ' + name)
           return this.createItem(name)
         })
       } else {
         return [this.createItem()]
       }
     }
-  },
-  mounted () {
-    console.log('mounted system selector', this.systems)
   }
 }
 </script>

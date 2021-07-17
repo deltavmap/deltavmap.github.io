@@ -2,31 +2,87 @@
   <v-container>
     <h3>{{ header }}</h3>
     <v-combobox label="auto-fill origin orbit values"
-              v-model="orbit.name"
+              v-model="orbitName"
               :items="orbitNames"
-              outlined dense clearable
+              outlined dense clearable hide-details
               :disabled="!currentSystemName"
     ></v-combobox>
-    <distance-display label="semi major axis"
-                      :distance-meters="orbit.semiMajorAxis"></distance-display>
+<!--    -->
+    <distance-display label="semi major axis km"
+                      v-if="showSMA"
+                      :distance-meters="orbitSemiMajorAxis"></distance-display>
     <time-display label="orbit period"
-                  :seconds="orbit.period"></time-display>
+                  v-if="showPeriod"
+                  :seconds="orbitPeriod"></time-display>
     <velocity-display label="mean orbital velocity"
-                      :velocity-meters-second="orbit.velocity"></velocity-display>
+                      v-if="showVelocity"
+                      :velocity-meters-second="orbitVelocity"></velocity-display>
   </v-container>
 </template>
 <script>
+import u from '../../utils'
 import DistanceDisplay from './DistanceDisplay'
 import TimeDisplay from './TimeDisplay'
 import VelocityDisplay from './VelocityDisplay'
 
+import Decimal from 'decimal.js'
+Decimal.set({ precision: 10 })
+const d = Decimal
 export default {
   components: {
     DistanceDisplay,
     TimeDisplay,
     VelocityDisplay
   },
-  props: ['header', 'orbit', 'orbitNames', 'currentSystemName']
+  props: {
+    header: {
+      default: ''
+    },
+    initialOrbitName: {
+      default: ''
+    },
+    orbitVelocity: {
+      default: 0
+    },
+    orbitPeriod: {
+      default: 0
+    },
+    orbitSemiMajorAxis: {
+      default: 0
+    },
+    system: {
+      default: {}
+    },
+    currentSystemName: {
+      default: ''
+    }
+  },
+  data () {
+    return {
+      orbitName: this.initialOrbitName
+    }
+  },
+  watch: {
+    initialOrbitName: function (newValue) {
+      this.$set(this, 'orbitName', newValue)
+    },
+    orbitName: function (newValue) {
+      this.$emit('orbit-value-changed', newValue)
+    }
+  },
+  computed: {
+    showSMA: function () { return d(this.orbitSemiMajorAxis).gt(0) },
+    showPeriod: function () { return d(this.orbitPeriod).gt(0) },
+    showVelocity: function () { return d(this.orbitVelocity).gt(0) },
+    orbitNames: function () {
+      if (this.system) {
+        if (u.defined(this.system.children)) {
+          return Object.keys(this.system.children)
+        }
+      }
+      return []
+    }
+  }
 }
 </script>
 <style lang="sass" scoped>
