@@ -111,4 +111,7 @@ h2
   max-width: 350px
   // min-width: 350px
   margin: $margin
+
+.theme--dark.v-text-field > .v-input__control > .v-input__slot:before
+  border-color: rgba(255, 255, 255, 0.2)
 </style>
