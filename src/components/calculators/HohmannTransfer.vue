@@ -146,8 +146,8 @@ export default {
         semiMajAxis: d(0),
         velocityAtPerigee: d(0),
         velocityAtApogee: d(0),
-        smallOrbit: { semiMajorAxis: d(0), velocity: d(0) },
-        largeOrbit: { semiMajorAxis: d(0), velocity: d(0) },
+        originOrbit: { semiMajorAxis: d(0), velocity: d(0) },
+        destinationOrbit: { semiMajorAxis: d(0), velocity: d(0) },
         dv: { apogee: d(0), perigee: d(0), total: d(0) },
         full: { pSecs: d(0), pDays: d(0), pYears: d(0) },
         half: { pSecs: d(0), pDays: d(0), pYears: d(0) }
@@ -247,13 +247,13 @@ export default {
           this.orbit.destination.semiMajorAxis
         )
         // work out which orbit is bigger and smaller and record it as such
-        if (d(this.orbit.origin.semiMajorAxis).greaterThan(this.orbit.destination.semiMajorAxis)) {
-          this.transferOrbit.smallOrbit = this.orbit.destination
-          this.transferOrbit.largeOrbit = this.orbit.origin
-        } else {
-          this.transferOrbit.smallOrbit = this.orbit.origin
-          this.transferOrbit.largeOrbit = this.orbit.destination
-        }
+        // if (d(this.orbit.origin.semiMajorAxis).greaterThan(this.orbit.destination.semiMajorAxis)) {
+        //  this.transferOrbit.originOrbit = this.orbit.destination
+        //  this.transferOrbit.destinationOrbit = this.orbit.origin
+        // } else {
+        this.transferOrbit.originOrbit = this.orbit.origin
+        this.transferOrbit.destinationOrbit = this.orbit.destination
+        // }
       }
     },
     computePeriodOfTransferOrbit: function () {
@@ -332,11 +332,16 @@ export default {
       to.half.pSecs = to.full.pSecs.div(2)
       to.half.pDays = to.full.pDays.div(2)
       to.half.pYears = to.full.pDays.div(365).div(2).toFixed(1)
-      to.velocityAtPerigee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.smallOrbit.semiMajorAxis)
-      to.velocityAtApogee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.largeOrbit.semiMajorAxis)
-      to.dv.apogee = to.largeOrbit.velocity.minus(to.velocityAtApogee)
-      to.dv.perigee = to.velocityAtPerigee.minus(to.smallOrbit.velocity)
-      to.dv.total = to.dv.apogee.add(to.dv.perigee)
+      debugger
+      to.velocityAtPerigee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.originOrbit.semiMajorAxis)
+      console.log('velocityAtPerigee', to.velocityAtPerigee.valueOf())
+      to.velocityAtApogee = OM.velocityAtRadius(to.semiMajAxis, to.full.pSecs, to.destinationOrbit.semiMajorAxis)
+      console.log('velocityAtApogee', to.velocityAtApogee.valueOf())
+      to.dv.apogee = to.destinationOrbit.velocity.minus(to.velocityAtApogee)
+      console.log('to.dv.apogee', to.dv.apogee.valueOf())
+      to.dv.perigee = to.velocityAtPerigee.minus(to.originOrbit.velocity)
+      console.log('to.dv.perigee', to.dv.perigee.valueOf())
+      to.dv.total = to.dv.apogee.abs().add(to.dv.perigee.abs())
     }
   },
   mounted () {

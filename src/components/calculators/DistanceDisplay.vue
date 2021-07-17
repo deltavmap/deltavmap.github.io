@@ -48,7 +48,7 @@ export default {
   },
   methods: {
     blankIfZero: function (value) {
-      if (value && d(value).gt(0)) {
+      if (value && !d(value).eq(0)) {
         return value
       } else return ''
     },
