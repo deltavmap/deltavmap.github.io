@@ -1,11 +1,16 @@
 <template>
-  <div class="u-border pa-4 mt-4" v-if="showHohmannTransferOrbitDetails">
+  <div class="u-border px-4 py-2 mt-4" v-if="showHohmannTransferOrbitDetails">
     <h3>Hohmann Transfer Orbit</h3>
     <!-- <div class="mb-4">Semi Major Axis of transfer ellipse = R1 + R2 / 2</div> -->
-    <distance-display readonly
-                      :distance-meters="semiMajAxis"
-                      label="Semi-major axis of transfer ellipse (km)">
-    </distance-display>
+    <v-row>
+      <v-col>
+        <distance-display readonly
+                          :distance-meters="semiMajAxis"
+                          label="Semi-major axis of transfer ellipse (km)">
+        </distance-display>
+      </v-col>
+      <v-col></v-col>
+    </v-row>
     <v-row>
       <v-col>
         <time-display label='transfer orbit period'
@@ -26,6 +31,7 @@
                             :velocity-meters-second="velocityAtPerigee">
           </velocity-display>
           <velocity-display label="dv required at perigee"
+                            class="mt-4"
                             :velocity-meters-second="dv.perigee">
           </velocity-display>
         </div>
@@ -37,14 +43,19 @@
                             :velocity-meters-second="velocityAtApogee">
           </velocity-display>
           <velocity-display label="dv required at apogee"
+                            class="mt-4"
                             :velocity-meters-second="dv.apogee">
           </velocity-display>
         </div>
       </v-col>
     </v-row>
-    <velocity-display label="total dv required"
-                      :velocity-meters-second="dv.total">
-    </velocity-display>
+    <v-row>
+      <v-col>
+        <velocity-display label="total dv required"
+                          :velocity-meters-second="dv.total">
+        </velocity-display>
+      </v-col>
+    </v-row>
   </div>
 </template>
 <script>
@@ -69,9 +80,7 @@ export default {
   props: ['originOrbit', 'destinationOrbit', 'primarySystemMass'],
   data () {
     const defaults = this.createDefaultTransferOrbit()
-    return {
-      ...defaults
-    }
+    return { ...defaults }
   },
   computed: {
     showHohmannTransferOrbitDetails: function () {
@@ -144,3 +153,7 @@ export default {
   }
 }
 </script>
+<style lang="sass">
+  .row + .row
+    margin-top: .25rem
+</style>

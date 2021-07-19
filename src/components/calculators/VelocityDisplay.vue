@@ -1,5 +1,5 @@
 <template>
-  <div class="velocity u-border my-4 mx-0">
+  <div class="velocity u-border u-value-display mx-0">
     <div class="velocity__label">{{ label }}</div>
     <v-row>
       <v-col v-if="kmsFormatted">

@@ -9,12 +9,15 @@
     ></v-combobox>
 <!--    -->
     <distance-display label="semi major axis km"
+                      class="my-4"
                       v-if="showSMA"
                       :distance-meters="orbitSemiMajorAxis"></distance-display>
     <time-display label="orbit period"
+                  class="my-4"
                   v-if="showPeriod"
                   :seconds="orbitPeriod"></time-display>
     <velocity-display label="mean orbital velocity"
+                      class="my-4"
                       v-if="showVelocity"
                       :velocity-meters-second="orbitVelocity"></velocity-display>
   </v-container>

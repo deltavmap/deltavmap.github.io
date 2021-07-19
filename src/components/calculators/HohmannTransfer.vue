@@ -42,8 +42,9 @@
 </template>
 <script>
 import Decimal from 'decimal.js'
+import axios from 'axios'
 import u from '../../utils'
-import Solar from '../../data/systems/solar'
+// import Solar from '../../data/systems/solar'
 import OM from '../../orital-mechanics'
 import OrbitDetails from './OrbitDetails'
 import SystemSelector from './SystemSelector'
@@ -60,14 +61,14 @@ export default {
   },
   data () {
     const systems = {}
-    this.processSystem(systems, Solar, 'sun')
-    const currentSystemName = this.$route.query.system || ''
-    const currentSystem = systems[currentSystemName] || this.createDefaultSystem()
 
-    const orbitA = this.createDefaultOrbitObject('origin', this.$route.query.origin || '')
-    const orbitB = this.createDefaultOrbitObject('destination', this.$route.query.destination || '')
+    const currentSystemName = ''
+    const currentSystem = this.createDefaultSystem()
+    const orbitA = this.createDefaultOrbitObject('origin')
+    const orbitB = this.createDefaultOrbitObject('destination')
 
     return {
+      temp: 0,
       currentSystemName,
       currentSystem,
       systems,
@@ -111,7 +112,7 @@ export default {
     },
     createSyncOrbit: function (system) {
       const object = system.object
-      if (u.defined(object.siderealRotationPeriod)) {
+      if (u.defined(object.siderealRotationPeriod) && u.defined(object.mass)) {
         const combinedMass = d(object.mass)
         const semiMajorAxis = OM.semiMajorAxis(object.siderealRotationPeriod, combinedMass)
         this.addChild(system, 'sync', { semiMajorAxis })
@@ -144,12 +145,19 @@ export default {
         this.createOrbit(system, 2, 3)
         this.createOrbit(system, 5, 3)
         this.createOrbit(system, 10, 3)
+        this.createOrbit(system, 100, 3)
+        this.createOrbit(system, 200, 3)
+        this.createOrbit(system, 500, 3)
+        this.createOrbit(system, 1000, 3)
+        this.createOrbit(system, 2000, 3)
+        this.createOrbit(system, 5000, 3)
       }
     },
     processSystem: function (allSystemsObject, newSystem, newSystemName) {
       if (u.defined(allSystemsObject[newSystemName])) {
-        throw Error('duplicate body name in system')
+        return console.error(this.temp++, 'duplicate body name in system', newSystemName)
       }
+
       this.$set(allSystemsObject, newSystemName, newSystem)
 
       // create an alias for the primary system object
@@ -194,19 +202,26 @@ export default {
     },
     handleSystemNameChange: function (newSystemName) {
       if (newSystemName) {
-        const newSystem = this.systems[newSystemName]
+        const newSystem = this.getSystem(newSystemName)
         if (newSystem) {
           this.currentSystemName = newSystemName
           this.currentSystem = newSystem
+        } else {
+          this.currentSystemName = ''
+          this.currentSystem = this.createDefaultSystem()
         }
-      } else {
-        this.currentSystemName = ''
-        this.currentSystem = this.createDefaultSystem()
+        this.$set(this.orbit, 'origin', this.createDefaultOrbitObject('origin'))
+        this.$set(this.orbit, 'destination', this.createDefaultOrbitObject('destination'))
+        this.updateURL()
       }
-      this.$set(this.orbit, 'origin', this.createDefaultOrbitObject('origin'))
-      this.$set(this.orbit, 'destination', this.createDefaultOrbitObject('destination'))
-
-      this.updateURL()
+    },
+    getSystem: function (systemName) {
+      if (u.defined(this.systems[systemName])) {
+        return this.systems[systemName]
+      } else {
+        console.error('system name not recognized: ', systemName)
+        return false
+      }
     },
     updateURL: function () {
       if (u.defined(this.currentSystemName)) {
@@ -219,14 +234,128 @@ export default {
         }
         window.history.replaceState({}, document.title, url)
       }
+    },
+    handleDataLoaded: function () {
+      this.$set(this, 'currentSystemName', this.$route.query.system || '')
+      if (this.currentSystemName) {
+        this.$set(this, 'currentSystem', this.getSystem(this.currentSystemName))
+      }
+      this.handleOrbitNameChange('origin', this.$route.query.origin || '')
+      this.handleOrbitNameChange('destination', this.$route.query.destination || '')
     }
   },
   computed: {
     planetMasses: function () { return this.currentSystem.children.map(b => { return b.mass }) }
   },
   mounted () {
-    this.handleOrbitNameChange('origin', this.$route.query.origin || '')
-    this.handleOrbitNameChange('destination', this.$route.query.destination || '')
+    this.handleOrbitNameChange('origin', '')
+    this.handleOrbitNameChange('destination', '')
+    const planetsApiUrl = 'https://api.le-systeme-solaire.net/rest/bodies?data=id,name,englishName,semimajorAxis,mass,massValue,massExponent,meanRadius,sideralRotation,isPlanet,aroundPlanet,planet,moons,moon'
+
+    const system = {
+      name: 'sun',
+      object: {
+        mass: '1.988e30',
+        type: 'body-star',
+        meanRadius: '695.700e6',
+        siderealRotationPeriod: '2192832'
+      },
+      children: {}
+    }
+    const planets = []
+    const planetsObject = {}
+    const planetsFrench = {}
+    const moons = []
+    const asteroids = []
+
+    axios.get(planetsApiUrl).then(res => {
+      const bodies = res.data.bodies
+      bodies.forEach(body => {
+        const bodyOrbit = {}
+
+        let id = (body.englishName) ? body.englishName : body.name
+        id = id.replace(/\s/gi, '').toLowerCase()
+
+        const object = {}
+        if (u.allDefinedAndNotNull(body, 'mass', 'massValue') && u.allDefinedAndNotNull(body, 'mass', 'massExponent')) {
+          object.mass = body.mass.massValue + 'e' + body.mass.massExponent
+        } else {
+          console.error('body has no mass value: ', body.name)
+          return
+        }
+        if (u.defined(body.meanRadius)) {
+          object.meanRadius = body.meanRadius * 1000
+        }
+        if (u.defined(body.sideralRotation)) {
+          object.siderealRotationPeriod = body.sideralRotation * 3600
+        }
+
+        if (u.defined(body.isPlanet)) {
+          // handle planet
+          if (body.isPlanet === true) {
+            // strip numbers from planet name
+            id = id.replace(/[^a-zA-Z]/gi, '')
+            object.type = 'body-planet'
+            planets.push(bodyOrbit)
+            planetsObject[id] = bodyOrbit
+            planetsFrench[body.id] = bodyOrbit
+          } else {
+            if (u.definedAndNotNull(body.aroundPlanet) && Object.keys(body.aroundPlanet).length > 0) {
+              // handle moon
+              object.type = 'body-moon'
+              bodyOrbit.parentFrenchId = body.aroundPlanet.planet
+              moons.push(bodyOrbit)
+            } else {
+              // handle asteroid
+              object.type = 'body-asteroid'
+              asteroids.push(bodyOrbit)
+            }
+          }
+        }
+        bodyOrbit.id = id
+        bodyOrbit.name = id
+        bodyOrbit.frenchId = body.id
+        bodyOrbit.object = object
+        bodyOrbit.semiMajorAxis = body.semimajorAxis * 1000
+
+        // if the body has moons, record their french Id
+        if (u.allDefinedAndNotNull(body, 'moons')) {
+          body.moons.forEach(moon => {
+            if (u.undefined(bodyOrbit.childrenFrench)) {
+              bodyOrbit.childrenFrench = []
+            }
+            bodyOrbit.childrenFrench.push(moon.moon.toLowerCase())
+          })
+        }
+      })
+      // sort the planets in order of size of orbit (distance from sun)
+      planets.sort((a, b) => a.semiMajorAxis - b.semiMajorAxis)
+
+      moons.forEach(moon => {
+        const planetId = moon.parentFrenchId
+        if (u.allDefinedAndNotNull(planetsFrench, planetId, 'name')) {
+          // add parent planet name to the moon's name
+          moon.name = '' + planetsFrench[planetId].name + ' / ' + moon.name
+
+          // add moons to planets
+          const planet = planetsFrench[planetId]
+          if (u.undefined(planet.children)) {
+            planet.children = {}
+          }
+          planet.children[moon.id] = moon
+        }
+      })
+      const allBodies = [...planets, ...asteroids]
+      system.children = {}
+      allBodies.forEach(c => { system.children[c.name] = c })
+      console.log('typeof systems', typeof this.systems)
+      this.processSystem(this.systems, system, 'sun')
+      Object.keys(this.systems).forEach(k => {
+        const s = this.getSystem(k)
+        console.log(s.name, s.primary.object.mass)
+      })
+      this.handleDataLoaded()
+    })
   }
 }
 </script>
@@ -237,9 +366,20 @@ export default {
   border-radius: .2rem
   padding: .5rem 1rem 1rem
 
+.u-value-display
+  $spacing: .25rem
+  > .row
+    justify-content: flex-end
+    margin-left: - $spacing
+    margin-right: - $spacing
+    > .col
+      max-width: 100px
+      padding-left: $spacing
+      padding-right: $spacing
+
 .hohmann-transfer-calculator
-  h2,h3
-    margin: 0 0 1em
+  h2,h3,h4
+    margin: 0 0 .75em
   .orbit-column
     .container
       @extend .u-border

@@ -1,5 +1,5 @@
 <template>
-  <div class="time u-border my-4">
+  <div class="time u-border u-value-display">
     <div class="time__label">{{ label }}</div>
     <v-row>
       <v-col v-if="yearsFormatted">

@@ -1,5 +1,5 @@
 <template>
-  <div class="distance u-border my-4">
+  <div class="distance u-border u-value-display">
     <div class="distance__label"
     >{{ label }}</div>
     <v-row>
@@ -105,7 +105,5 @@ export default {
     opacity: .7
     text-transform: uppercase
     letter-spacing: .1em
-  .col
-    max-width: 100px
 
 </style>

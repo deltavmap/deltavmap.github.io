@@ -38,7 +38,7 @@ export default {
       children: {
         moon: {
           object: {
-            type: 'body-planet',
+            type: 'body-moon',
             mass: '7.342e22',
             meanRadius: '1737.4e3',
             siderealRotationPeriod: '2360620.8'
@@ -72,7 +72,8 @@ export default {
         phobos: {
           object: {
             mass: '10.659e15',
-            meanRadius: '11.2667e3'
+            meanRadius: '11.2667e3',
+            type: 'body-moon'
           },
           semiMajorAxis: '9376e3'
         }
