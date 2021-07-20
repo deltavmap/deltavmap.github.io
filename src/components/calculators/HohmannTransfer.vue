@@ -42,7 +42,7 @@
 </template>
 <script>
 import Decimal from 'decimal.js'
-import u from '../../utils'
+import u from '../../utils/utils'
 import OM from '../../orital-mechanics'
 import OrbitDetails from './OrbitDetails'
 import SystemSelector from './SystemSelector'

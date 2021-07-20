@@ -64,7 +64,7 @@
 import Decimal from 'decimal.js'
 // import { VueMathjax } from 'vue-mathjax'
 
-import u from '../../utils'
+import u from '../../utils/utils'
 import OM from '../../orital-mechanics'
 
 import DistanceDisplay from './DistanceDisplay'

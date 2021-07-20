@@ -72,7 +72,7 @@
   </div>
 </template>
 <script>
-import Utils from '../../utils'
+import Utils from '../../utils/utils'
 import Delta from './Delta'
 import Location from './Location'
 

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import u from '../utils'
+import u from './utils'
 export default {
   getPlanetData: function (system, callback) {
     const planets = []

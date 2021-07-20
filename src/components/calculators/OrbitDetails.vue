@@ -23,7 +23,7 @@
   </v-container>
 </template>
 <script>
-import u from '../../utils'
+import u from '../../utils/utils'
 import DistanceDisplay from './DistanceDisplay'
 import TimeDisplay from './TimeDisplay'
 import VelocityDisplay from './VelocityDisplay'
