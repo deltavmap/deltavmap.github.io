@@ -63,5 +63,11 @@ class Utils {
     const urlParams = new URLSearchParams(window.location.search)
     return urlParams.get(queryName)
   }
+
+  static setIfUndefined (object, propertyName, value) {
+    if (Utils.undefined(object[propertyName])) {
+      object[propertyName] = value
+    }
+  }
 }
 export default Utils

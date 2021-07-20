@@ -42,14 +42,12 @@
 </template>
 <script>
 import Decimal from 'decimal.js'
-import axios from 'axios'
 import u from '../../utils'
-// import Solar from '../../data/systems/solar'
 import OM from '../../orital-mechanics'
 import OrbitDetails from './OrbitDetails'
 import SystemSelector from './SystemSelector'
 import HohmannTransferOrbit from './HohmannTransferOrbit'
-
+import SolarSystemAPI from '../../utils/solar-system-api'
 Decimal.set({ precision: 10 })
 const d = Decimal
 
@@ -98,6 +96,7 @@ export default {
       if (u.undefined(system.children)) {
         this.$set(system, 'children', {})
       }
+      u.setIfUndefined(system, 'children', {})
       this.$set(system.children, name, child)
     },
     createSOIOrbit: function (system, parentMass) {
@@ -255,7 +254,6 @@ export default {
   mounted () {
     this.handleOrbitNameChange('origin', '')
     this.handleOrbitNameChange('destination', '')
-    const planetsApiUrl = 'https://api.le-systeme-solaire.net/rest/bodies?data=id,name,englishName,semimajorAxis,mass,massValue,massExponent,meanRadius,sideralRotation,isPlanet,aroundPlanet,planet,moons,moon'
 
     const system = {
       name: 'sun',
@@ -267,99 +265,10 @@ export default {
       },
       children: {}
     }
-    const planets = []
-    const planetsObject = {}
-    const planetsFrench = {}
-    const moons = []
-    const asteroids = []
-
-    axios.get(planetsApiUrl).then(res => {
-      const bodies = res.data.bodies
-      bodies.forEach(body => {
-        const bodyOrbit = {}
-
-        let id = (body.englishName) ? body.englishName : body.name
-        id = id.replace(/\s/gi, '').toLowerCase()
-
-        const object = {}
-        if (u.allDefinedAndNotNull(body, 'mass', 'massValue') && u.allDefinedAndNotNull(body, 'mass', 'massExponent')) {
-          object.mass = body.mass.massValue + 'e' + body.mass.massExponent
-        } else {
-          // don't record bodies that have no mass value
-          return
-        }
-        if (u.defined(body.meanRadius)) {
-          object.meanRadius = body.meanRadius * 1000
-        }
-        if (u.defined(body.sideralRotation)) {
-          object.siderealRotationPeriod = body.sideralRotation * 3600
-        }
-
-        if (u.defined(body.isPlanet)) {
-          // handle planet
-          if (body.isPlanet === true) {
-            // strip numbers from planet name
-            id = id.replace(/[^a-zA-Z]/gi, '')
-            object.type = 'body-planet'
-            planets.push(bodyOrbit)
-            planetsObject[id] = bodyOrbit
-            planetsFrench[body.id] = bodyOrbit
-          } else {
-            if (u.definedAndNotNull(body.aroundPlanet) && Object.keys(body.aroundPlanet).length > 0) {
-              // handle moon
-              object.type = 'body-moon'
-              bodyOrbit.parentFrenchId = body.aroundPlanet.planet
-              moons.push(bodyOrbit)
-            } else {
-              // handle asteroid
-              object.type = 'body-asteroid'
-              asteroids.push(bodyOrbit)
-            }
-          }
-        }
-        bodyOrbit.id = id
-        bodyOrbit.name = id
-        bodyOrbit.frenchId = body.id
-        bodyOrbit.object = object
-        bodyOrbit.semiMajorAxis = body.semimajorAxis * 1000
-
-        // if the body has moons, record their french Id
-        if (u.allDefinedAndNotNull(body, 'moons')) {
-          body.moons.forEach(moon => {
-            if (u.undefined(bodyOrbit.childrenFrench)) {
-              bodyOrbit.childrenFrench = []
-            }
-            bodyOrbit.childrenFrench.push(moon.moon.toLowerCase())
-          })
-        }
-      })
-      // sort the planets in order of size of orbit (distance from sun)
-      planets.sort((a, b) => a.semiMajorAxis - b.semiMajorAxis)
-
-      moons.forEach(moon => {
-        const planetId = moon.parentFrenchId
-        if (u.allDefinedAndNotNull(planetsFrench, planetId, 'name')) {
-          // add parent planet name to the moon's name
-          moon.name = '' + planetsFrench[planetId].name + ' / ' + moon.name
-
-          // add moons to planets
-          const planet = planetsFrench[planetId]
-          if (u.undefined(planet.children)) {
-            planet.children = {}
-          }
-          planet.children[moon.id] = moon
-        }
-      })
-      const allBodies = [...planets, ...asteroids]
-      system.children = {}
-      allBodies.forEach(c => { system.children[c.name] = c })
-      // console.log('typeof systems', typeof this.systems)
-      this.processSystem(this.systems, system, 'sun')
-      // Object.keys(this.systems).forEach(k => {
-      //   const s = this.getSystem(k)
-      //   console.log(s.name, s.primary.object.mass)
-      // })
-      this.handleDataLoaded()
+    const self = this
+    SolarSystemAPI.getPlanetData(system, function () {
+      self.processSystem(self.systems, system, 'sun')
+      self.handleDataLoaded()
     })
   }
 }
