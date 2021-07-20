@@ -58,5 +58,10 @@ class Utils {
   static l () {
     console.log(...arguments)
   }
+
+  static getQuery (queryName) {
+    const urlParams = new URLSearchParams(window.location.search)
+    return urlParams.get(queryName)
+  }
 }
 export default Utils

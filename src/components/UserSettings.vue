@@ -20,9 +20,3 @@ export default {
   ]
 }
 </script>
-<style lang="sass">
-.v-input .v-label
-  font-size: smaller
-  text-transform: uppercase
-  letter-spacing: 1px
-</style>

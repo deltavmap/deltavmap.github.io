@@ -32,7 +32,6 @@
   </v-container>
 </template>
 <script>
-// import bn from 'bignumber.js'
 import Decimal from 'decimal.js'
 import OM from '../orital-mechanics'
 
@@ -43,7 +42,6 @@ const d = Decimal
 export default {
   components: {
     HohmannTransfer
-    // SphereOfInfluence
   },
   data () {
     return {

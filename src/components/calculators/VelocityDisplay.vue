@@ -47,9 +47,11 @@ export default {
   computed: {
     msFormatted: function () {
       if (this.blankIfZero(this.ms)) {
-        const value = this.ms.toFixed(2).valueOf()
-        const padded = value.padStart(6, '0')
-        return padded
+        let value = this.ms.toFixed(2).valueOf()
+        if (this.blankIfZero(this.km)) {
+          value = value.padStart(6, '0')
+        }
+        return value
       } else return ''
     },
     kmsFormatted: function () {

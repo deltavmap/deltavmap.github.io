@@ -1,22 +1,22 @@
 <template>
   <v-container>
     <h3>{{ header }}</h3>
-    <v-combobox label="auto-fill origin orbit values"
+    <v-combobox label="select orbit"
               v-model="orbitName"
               :items="orbitNames"
               outlined dense clearable hide-details
               :disabled="!currentSystemName"
     ></v-combobox>
 <!--    -->
-    <distance-display label="semi major axis km"
+    <distance-display label="semi major axis (km)"
                       class="my-4"
                       v-if="showSMA"
                       :distance-meters="orbitSemiMajorAxis"></distance-display>
-    <time-display label="orbit period"
+    <time-display label="period"
                   class="my-4"
                   v-if="showPeriod"
                   :seconds="orbitPeriod"></time-display>
-    <velocity-display label="mean orbital velocity"
+    <velocity-display label="mean velocity"
                       class="my-4"
                       v-if="showVelocity"
                       :velocity-meters-second="orbitVelocity"></velocity-display>

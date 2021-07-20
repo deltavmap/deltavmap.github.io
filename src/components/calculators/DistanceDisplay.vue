@@ -2,6 +2,7 @@
   <div class="distance u-border u-value-display">
     <div class="distance__label"
     >{{ label }}</div>
+<!--    <vue-mathjax :formula="formula"></vue-mathjax>-->
     <v-row>
       <v-col v-if="distanceMillionKilometersFormatted">
         <v-text-field readonly hide-details
@@ -32,9 +33,14 @@
 </template>
 <script>
 import Decimal from 'decimal.js'
+// import { VueMathjax } from 'vue-mathjax'
+
 Decimal.set({ precision: 10 })
 const d = Decimal
 export default {
+  components: {
+    // 'vue-mathjax': VueMathjax
+  },
   props: {
     distanceMeters: {
       default: 0
@@ -44,7 +50,13 @@ export default {
     }
   },
   data () {
-    return { m: '', km: '', tkm: '', mkm: '' }
+    return {
+      // formula: '$$x = { r1 + r2 \\over 2}$$',
+      m: '',
+      km: '',
+      tkm: '',
+      mkm: ''
+    }
   },
   methods: {
     blankIfZero: function (value) {

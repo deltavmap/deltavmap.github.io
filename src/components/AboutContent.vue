@@ -125,8 +125,6 @@ export default {
 .theme--dark
   p, li
     color: $color-light
-  h2,h3,h4,h5,h6
-    color: lighten($color-purpley, 20%)
   h3, h4
     border-top-color: lighten($color-black, 10%)
   .u-highlight

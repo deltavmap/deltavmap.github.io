@@ -6,19 +6,19 @@
       <v-col>
         <distance-display readonly
                           :distance-meters="semiMajAxis"
-                          label="Semi-major axis of transfer ellipse (km)">
+                          label="Semi-major axis (km)">
         </distance-display>
       </v-col>
       <v-col></v-col>
     </v-row>
     <v-row>
       <v-col>
-        <time-display label='transfer orbit period'
+        <time-display label='period'
                       :seconds="full.pSecs">
         </time-display>
       </v-col>
       <v-col>
-        <time-display label="half transfer orbit period"
+        <time-display label="half period"
                       :seconds="half.pSecs">
         </time-display>
       </v-col>
@@ -50,8 +50,10 @@
       </v-col>
     </v-row>
     <v-row>
+      <v-col></v-col>
       <v-col>
         <velocity-display label="total dv required"
+                          class="ml-auto"
                           :velocity-meters-second="dv.total">
         </velocity-display>
       </v-col>
@@ -60,6 +62,7 @@
 </template>
 <script>
 import Decimal from 'decimal.js'
+// import { VueMathjax } from 'vue-mathjax'
 
 import u from '../../utils'
 import OM from '../../orital-mechanics'
@@ -75,7 +78,8 @@ export default {
   components: {
     TimeDisplay,
     DistanceDisplay,
-    VelocityDisplay
+    VelocityDisplay // ,
+    // 'vue-mathjax': VueMathjax
   },
   props: ['originOrbit', 'destinationOrbit', 'primarySystemMass'],
   data () {
@@ -124,7 +128,6 @@ export default {
       }
     },
     handleSemiMajorAxisChange: function () {
-      console.log('watch semiMajAxis')
       this.computePeriodOfTransferOrbit()
       const days = d(this.full.pSecs.div(86400).toFixed(1))
       this.full.pDays = days

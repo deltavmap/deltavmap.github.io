@@ -17,11 +17,11 @@ const about = {
   // which is lazy-loaded when the route is visited.
   component: () => import(/* webpackChunkName: "about" */ '../views/AboutPage.vue')
 }
-const calculators = {
-  path: '/calculators',
-  name: 'Calculators',
-  component: () => import(/* webpackChunkName: "about" */ '../views/Calculators.vue')
-}
+// const calculators = {
+//   path: '/calculators',
+//   name: 'Calculators',
+//   component: () => import(/* webpackChunkName: "about" */ '../views/Calculators.vue')
+// }
 
 const routes = [
   home,
@@ -34,8 +34,8 @@ const routes = [
     path: '/system-not-found/:system',
     component: SystemNotFound
   },
-  about,
-  calculators
+  about // ,
+  // calculators
 ]
 const router = new VueRouter({
   mode: 'history',

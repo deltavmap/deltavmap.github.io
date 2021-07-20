@@ -8,15 +8,7 @@
 <style lang="sass">
 @import '~vuetify/src/styles/styles.sass'
 @import './sass/variables'
-
-.u-bg-color-main
-  background-color: $color-map-background
-
-.u-bg-color-warn
-  background-color: lighten($color-purpley-red, 0%)
-
-html, html > body, div.v-application.theme--dark
-  @extend .u-bg-color-main
+@import './sass/pages-common'
 
 html
   overflow-y: hidden !important

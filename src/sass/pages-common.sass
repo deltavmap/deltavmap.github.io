@@ -1,0 +1,20 @@
+.v-list-item .v-list-item__title, .v-list-item .v-list-item__subtitle
+  text-transform: uppercase
+  letter-spacing: .1em
+
+.u-bg-color-main
+  background-color: $color-map-background
+
+.u-bg-color-warn
+  background-color: lighten($color-purpley-red, 0%)
+
+html, html > body, div.v-application.theme--dark
+  @extend .u-bg-color-main
+
+h2,h3,h4,h5,h6
+  color: lighten($color-purpley, 20%)
+
+.v-input .v-label
+  font-size: smaller
+  text-transform: uppercase
+  letter-spacing: 1px

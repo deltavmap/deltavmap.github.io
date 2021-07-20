@@ -6,7 +6,7 @@
       <system-selector label="select system"
                        :initial-system-name="currentSystemName"
                        :systems="systems"
-                       v-on:system-name-change="handleSystemNameChange($event)"
+                       v-on:system-name-change="handleSystemNameChange($event, true)"
       ></system-selector>
       <v-row v-if="currentSystemName">
         <v-col class="orbit-column">
@@ -17,7 +17,7 @@
                          :orbit-semi-major-axis="orbit.origin.semiMajorAxis"
                          :system="currentSystem"
                          :current-system-name="currentSystemName"
-                         v-on:orbit-value-changed="handleOrbitNameChange('origin', $event)"
+                         v-on:orbit-value-changed="handleOrbitNameChange('origin', $event, true)"
           ></orbit-details>
         </v-col>
         <v-col class="orbit-column">
@@ -29,7 +29,7 @@
                          :orbit-semi-major-axis="orbit.destination.semiMajorAxis"
                          :system="currentSystem"
                          :current-system-name="currentSystemName"
-                         v-on:orbit-value-changed="handleOrbitNameChange('destination', $event)"
+                         v-on:orbit-value-changed="handleOrbitNameChange('destination', $event, true)"
           ></orbit-details>
         </v-col>
       </v-row>
@@ -182,9 +182,8 @@ export default {
       this.$set(this.orbit[orbit], 'semiMajorAxis', newValue)
       this.$set(this.orbit[orbit], 'period', OM.periodOfOrbit(this.currentSystem.primary.object.mass, newValue))
       this.$set(this.orbit[orbit], 'velocity', OM.orbitMeanVelocity(newValue, this.currentSystem.primary.object.mass))
-      this.updateURL()
     },
-    handleOrbitNameChange: function (orbit, name) {
+    handleOrbitNameChange: function (orbit, name, updateURL = false) {
       if (name) {
         this.orbit[orbit].name = name
         const orbitDetails = this.currentSystem.children[name]
@@ -194,54 +193,60 @@ export default {
         } else {
           console.error('no orbit details for', name)
         }
-        this.updateURL()
       } else {
         this.orbit[orbit] = this.createDefaultOrbitObject(orbit)
         this.orbit[orbit].name = name
       }
+      if (updateURL) {
+        this.updateURL()
+      }
     },
-    handleSystemNameChange: function (newSystemName) {
-      if (newSystemName) {
-        const newSystem = this.getSystem(newSystemName)
-        if (newSystem) {
-          this.currentSystemName = newSystemName
-          this.currentSystem = newSystem
-        } else {
-          this.currentSystemName = ''
-          this.currentSystem = this.createDefaultSystem()
-        }
-        this.$set(this.orbit, 'origin', this.createDefaultOrbitObject('origin'))
-        this.$set(this.orbit, 'destination', this.createDefaultOrbitObject('destination'))
+    handleSystemNameChange: function (newSystemName, updateURL = false) {
+      const newSystem = this.getSystem(newSystemName)
+      if (newSystem) {
+        this.currentSystemName = newSystemName
+        this.currentSystem = newSystem
+      } else {
+        this.currentSystemName = ''
+        this.currentSystem = this.createDefaultSystem()
+      }
+      this.$set(this.orbit, 'origin', this.createDefaultOrbitObject('origin'))
+      this.$set(this.orbit, 'destination', this.createDefaultOrbitObject('destination'))
+      if (updateURL) {
         this.updateURL()
       }
     },
     getSystem: function (systemName) {
-      if (u.defined(this.systems[systemName])) {
-        return this.systems[systemName]
-      } else {
-        console.error('system name not recognized: ', systemName)
-        return false
+      if (systemName) {
+        if (u.defined(this.systems[systemName])) {
+          return this.systems[systemName]
+        } else {
+          console.error('system name not recognized: ', systemName)
+        }
       }
+      return false
     },
     updateURL: function () {
-      if (u.defined(this.currentSystemName)) {
-        let url = '?system=' + this.currentSystemName
+      let url = ''
+      if (u.defined(this.currentSystemName) && this.currentSystemName) {
+        url = '?system=' + this.currentSystemName
         if (this.orbit.origin.name) {
           url += '&origin=' + this.orbit.origin.name
         }
         if (this.orbit.destination.name) {
           url += '&destination=' + this.orbit.destination.name
         }
-        window.history.replaceState({}, document.title, url)
       }
+      window.history.replaceState({}, document.title, url)
     },
     handleDataLoaded: function () {
-      this.$set(this, 'currentSystemName', this.$route.query.system || '')
+      this.$set(this, 'currentSystemName', u.getQuery('system') || '')
       if (this.currentSystemName) {
         this.$set(this, 'currentSystem', this.getSystem(this.currentSystemName))
       }
-      this.handleOrbitNameChange('origin', this.$route.query.origin || '')
-      this.handleOrbitNameChange('destination', this.$route.query.destination || '')
+      this.handleOrbitNameChange('origin', u.getQuery('origin') || '')
+      this.handleOrbitNameChange('destination', u.getQuery('destination') || '')
+      this.updateURL()
     }
   },
   computed: {
@@ -280,7 +285,7 @@ export default {
         if (u.allDefinedAndNotNull(body, 'mass', 'massValue') && u.allDefinedAndNotNull(body, 'mass', 'massExponent')) {
           object.mass = body.mass.massValue + 'e' + body.mass.massExponent
         } else {
-          console.error('body has no mass value: ', body.name)
+          // don't record bodies that have no mass value
           return
         }
         if (u.defined(body.meanRadius)) {
@@ -348,12 +353,12 @@ export default {
       const allBodies = [...planets, ...asteroids]
       system.children = {}
       allBodies.forEach(c => { system.children[c.name] = c })
-      console.log('typeof systems', typeof this.systems)
+      // console.log('typeof systems', typeof this.systems)
       this.processSystem(this.systems, system, 'sun')
-      Object.keys(this.systems).forEach(k => {
-        const s = this.getSystem(k)
-        console.log(s.name, s.primary.object.mass)
-      })
+      // Object.keys(this.systems).forEach(k => {
+      //   const s = this.getSystem(k)
+      //   console.log(s.name, s.primary.object.mass)
+      // })
       this.handleDataLoaded()
     })
   }
