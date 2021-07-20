@@ -85,8 +85,10 @@ export default {
       })
       const allBodies = [...planets, ...asteroids]
       u.setIfUndefined(system, 'children', {})
+
+      // merge the pre-existing planet data into the API planet data
       allBodies.forEach(c => {
-        system.children[c.name] = c
+        system.children[c.name] = u.deepMerge(c, system.children[c.name])
       })
       callback()
     })

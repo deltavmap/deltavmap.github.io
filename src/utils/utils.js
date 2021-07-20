@@ -1,10 +1,10 @@
-class Utils {
+class u {
   static isUndefined (thing) {
     return typeof thing === 'undefined'
   }
 
   static undefined (thing) {
-    return Utils.isUndefined(thing)
+    return u.isUndefined(thing)
   }
 
   static isDefined (thing) {
@@ -23,7 +23,7 @@ class Utils {
     let obj = arguments[0]
     for (let i = 1; i < arguments.length; i++) {
       const thing = obj[arguments[i]]
-      if (Utils.isUndefined(thing)) {
+      if (u.isUndefined(thing)) {
         return false
       }
       obj = obj[arguments[i]]
@@ -35,7 +35,7 @@ class Utils {
     let obj = arguments[0]
     for (let i = 1; i < arguments.length; i++) {
       const thing = obj[arguments[i]]
-      if (Utils.isUndefined(thing)) {
+      if (u.isUndefined(thing)) {
         return false
       }
       if (thing === null) {
@@ -47,7 +47,7 @@ class Utils {
   }
 
   static debounce (fn, wait, id) {
-    if (Utils.isUndefined(window.deltaVMap_debounceIds)) {
+    if (u.isUndefined(window.deltaVMap_debounceIds)) {
       window.deltaVMap_debounceIds = {}
     }
     clearTimeout(window.deltaVMap_debounceIds[id])
@@ -65,9 +65,22 @@ class Utils {
   }
 
   static setIfUndefined (object, propertyName, value) {
-    if (Utils.undefined(object[propertyName])) {
+    if (u.undefined(object[propertyName])) {
       object[propertyName] = value
     }
   }
+
+  static deepMerge (objA, objB) {
+    if (u.defined(objA) && u.defined(objB)) {
+      Object.keys(objB).map(k => {
+        if (typeof objB[k] === 'object') {
+          u.deepMerge(objA[k], objB[k])
+        } else {
+          objA[k] = objB[k]
+        }
+      })
+    }
+    return objA
+  }
 }
-export default Utils
+export default u

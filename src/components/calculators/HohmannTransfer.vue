@@ -263,7 +263,20 @@ export default {
         meanRadius: '695.700e6',
         siderealRotationPeriod: '2192832'
       },
-      children: {}
+      children: {
+        venus: { object: { atmosphere: true } },
+        earth: { object: { atmosphere: true } },
+        mars: { object: { atmosphere: true } },
+        jupiter: { object: { atmosphere: true } },
+        saturn: {
+          object: { atmosphere: true },
+          children: {
+            titan: { object: { atmosphere: true } }
+          }
+        },
+        uranus: { object: { atmosphere: true } },
+        neptune: { object: { atmosphere: true } }
+      }
     }
     const self = this
     SolarSystemAPI.getPlanetData(system, function () {
