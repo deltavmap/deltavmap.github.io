@@ -9,7 +9,7 @@
       <template v-slot:activator="{ on, attrs }">
         <v-btn
           class="about-dialog__button u-button"
-          color="lighten-2"
+          outlined
           dark
           elevation="0"
           v-bind="attrs"
@@ -482,8 +482,11 @@ export default {
     p,ul,ol
       letter-spacing: .1em
   &__button.v-btn
-    &.theme--dark.v-btn.v-btn--has-bg
-      background-color: $color-map-background-darker
+    &.theme--dark.v-btn
+      color: rgba(255,255,255,.2)
+      transition: color .1s, border-color .1s
+      &:hover
+        color: rgba(255,255,255,1)
     position: absolute
     right: 0
     top: 0
