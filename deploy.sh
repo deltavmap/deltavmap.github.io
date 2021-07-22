@@ -33,8 +33,8 @@ current_branch=$(git branch --show-current)
 
 echo "==================="
 echo "==== DEPLOYING ===="
-echo
-echo "deploying to >>> $remote_branch <<<"
+echo "==================="
+echo "deploying to branch >>> $remote_branch <<<"
 
 printf "\nGIT STASH\n"
 gitstash "$date_stamp"
