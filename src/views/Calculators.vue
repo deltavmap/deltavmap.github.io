@@ -33,7 +33,7 @@
 </template>
 <script>
 import Decimal from 'decimal.js'
-import OM from '../orital-mechanics'
+import OM from '../utils/orbital-mechanics'
 import HohmannTransfer from '../components/calculators/HohmannTransfer'
 
 Decimal.set({ precision: 10 })

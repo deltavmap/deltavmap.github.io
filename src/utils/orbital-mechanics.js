@@ -81,6 +81,18 @@ class OrbitalMechanics {
     return cubeRoot
   }
 
+  static semiMinorAxis (semiMajorAxis, eccentricity) {
+    const smaSquared = d(semiMajorAxis).pow(2)
+    const eccSquared = d(eccentricity).pow(2)
+    const minorSquared = smaSquared.times(eccSquared).minus(1)
+    const minor = minorSquared.pow(0.5)
+    return minor
+  }
+
+  static meanRadius (semiMajorAxis, semiMinorAxis) {
+    return d(semiMajorAxis).times(2).plus(semiMinorAxis).div(3)
+  }
+
   static velocityAtRadius (semiMajorAxis, orbitPeriod, smallerOrbitMeanRadius) {
     // V(perihelion) = (2π x a(transfer) / P(transfer) ) x √( (2a(transfer) / R1) - 1)
     const twoPi = pi.times(2)

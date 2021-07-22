@@ -1,5 +1,6 @@
 import axios from 'axios'
 import u from './utils'
+
 export default {
   getPlanetData: function (system, callback) {
     const planets = []
@@ -7,7 +8,7 @@ export default {
     const planetsFrench = {}
     const moons = []
     const asteroids = []
-    const planetsApiUrl = 'https://api.le-systeme-solaire.net/rest/bodies?data=id,name,englishName,semimajorAxis,mass,massValue,massExponent,meanRadius,sideralRotation,isPlanet,aroundPlanet,planet,moons,moon'
+    const planetsApiUrl = 'https://api.le-systeme-solaire.net/rest/bodies?data=id,name,englishName,semimajorAxis,eccentricity,mass,massValue,massExponent,meanRadius,sideralRotation,isPlanet,aroundPlanet,planet,moons,moon'
     axios.get(planetsApiUrl).then(res => {
       const bodies = res.data.bodies
       bodies.forEach(body => {
@@ -59,6 +60,11 @@ export default {
         bodyOrbit.frenchId = body.id
         bodyOrbit.object = object
         bodyOrbit.semiMajorAxis = body.semimajorAxis * 1000
+        if (body.eccentricity) {
+          bodyOrbit.eccentricity = body.eccentricity
+        } else {
+          // console.error('eccentricity not defined for', id)
+        }
 
         // if the body has moons, record their french Id
         if (u.allDefinedAndNotNull(body, 'moons')) {

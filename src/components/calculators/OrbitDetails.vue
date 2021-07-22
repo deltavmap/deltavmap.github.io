@@ -1,12 +1,12 @@
 <template>
   <v-container>
     <h3>{{ header }}</h3>
-    <v-combobox label="select orbit"
+    <v-autocomplete label="select orbit"
               v-model="orbitName"
               :items="orbitNames"
               outlined dense clearable hide-details
               :disabled="!currentSystemName"
-    ></v-combobox>
+    ></v-autocomplete>
 <!--    -->
     <distance-display label="semi major axis (km)"
                       class="my-4"
@@ -53,6 +53,9 @@ export default {
     orbitSemiMajorAxis: {
       default: 0
     },
+    orbitEccentricity: {
+      default: 0
+    },
     system: {
       default: {}
     },
@@ -80,7 +83,14 @@ export default {
     orbitNames: function () {
       if (this.system) {
         if (u.defined(this.system.children)) {
-          return Object.keys(this.system.children)
+          return Object.keys(this.system.children).map(k => {
+            const c = this.system.children[k]
+            const text = (u.defined(c.label)) ? c.label : k
+            return {
+              text,
+              value: k
+            }
+          })
         }
       }
       return []

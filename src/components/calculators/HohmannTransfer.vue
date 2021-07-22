@@ -1,6 +1,71 @@
 <template>
   <div class="hohmann-transfer-calculator">
     <h2>Hohmann Transfer</h2>
+    <v-dialog
+      class="about-dialog"
+      v-model="aboutDialog"
+      width="500"
+    >
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn
+          class="about-dialog__button u-button"
+          color="lighten-2"
+          dark
+          elevation="0"
+          v-bind="attrs"
+          v-on="on"
+        >
+          About
+        </v-btn>
+      </template>
+
+      <v-card class="about-dialog__body">
+        <v-card-title class="text-h5 dark">
+          About
+        </v-card-title>
+
+        <v-card-text>
+          <div class="mb-4 pa-4" style>
+            <v-row>
+              <v-col>
+                <p>The following tool calculates the delta-v requirements for a Hohmann transfer orbit.</p>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <p>Approximations:
+                <ul>
+                  <li>Orbits are circular</li>
+                  <li>Period and velocity computed from the semi-major axis</li>
+                  <li>Orbit inclinations not considered</li>
+                </ul>
+                </p>
+              </v-col>
+              <v-col>
+                To use:
+                <ol>
+                  <li>Select a system</li>
+                  <li>Select an origin orbit</li>
+                  <li>Select a destination orbit</li>
+                </ol>
+              </v-col>
+            </v-row>
+          </div>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            @click="aboutDialog = false"
+          >
+            close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <div class="calculator">
 <!--      <v-text-field v-model="primaryBodyMass" label="primary body mass"></v-text-field>-->
       <system-selector label="select system"
@@ -43,7 +108,7 @@
 <script>
 import Decimal from 'decimal.js'
 import u from '../../utils/utils'
-import OM from '../../orital-mechanics'
+import OM from '../../utils/orbital-mechanics'
 import OrbitDetails from './OrbitDetails'
 import SystemSelector from './SystemSelector'
 import HohmannTransferOrbit from './HohmannTransferOrbit'
@@ -73,7 +138,8 @@ export default {
       orbit: {
         origin: orbitA,
         destination: orbitB
-      }
+      },
+      aboutDialog: false
     }
   },
   methods: {
@@ -92,9 +158,9 @@ export default {
         velocity: d(0)
       }
     },
-    addChild: function (system, name, child) {
-      if (u.undefined(system.children)) {
-        this.$set(system, 'children', {})
+    addChild: function (system, name, child, label = '') {
+      if (label) {
+        this.$set(child, 'label', label)
       }
       u.setIfUndefined(system, 'children', {})
       this.$set(system.children, name, child)
@@ -123,7 +189,7 @@ export default {
         const combinedMass = d(object.mass)
         const semiMajorAxis = OM.semiMajorAxis(object.siderealRotationPeriod, combinedMass)
         if (d(semiMajorAxis).lt(system.children.soi.semiMajorAxis)) {
-          this.addChild(system, 'sync', { semiMajorAxis })
+          this.addChild(system, 'sync', { semiMajorAxis }, 'synchronous orbit')
         }
       }
     },
@@ -183,14 +249,24 @@ export default {
       // create an alias for the primary system object
       newSystem.primary = { object: newSystem.object }
 
+      if (u.defined(newSystem.eccentricity)) {
+        // compute semiMinorAxis
+        newSystem.semiMinorAxis = OM.semiMinorAxis(newSystem.semiMajorAxis, newSystem.eccentricity)
+        // compute meanRadius of orbit
+        newSystem.meanRadius = OM.meanRadius(newSystem.semiMajorAxis, newSystem.semiMinorAxis)
+      }
+
       if (u.defined(newSystem.children)) {
         // process children
         Object.keys(newSystem.children).forEach(name => {
           const child = newSystem.children[name]
 
           if (u.defined(child.object)) {
-            // find subsystems
             this.createSOIOrbit(child, newSystem.object.mass)
+            // if an object does not have an SOI it is because
+            // the theoretical SOI would be within the radius of the body
+            // ie no stable orbits are possible for this body
+            // so don't try to create any
             if (u.allDefined(child, 'children', 'soi')) {
               this.createSyncOrbit(child)
               this.createVariousOrbits(child)
@@ -380,6 +456,8 @@ export default {
       padding-right: $spacing
 
 .hohmann-transfer-calculator
+  position: relative
+  letter-spacing: .1em
   h2,h3,h4
     margin: 0 0 .75em
   .orbit-column
@@ -398,4 +476,18 @@ export default {
 
   .orbit-column
     min-width: 350px
+
+.about-dialog
+  &__body.v-card
+    p,ul,ol
+      letter-spacing: .1em
+  &__button.v-btn
+    &.theme--dark.v-btn.v-btn--has-bg
+      background-color: $color-map-background-darker
+    position: absolute
+    right: 0
+    top: 0
+
+.velocity-display--total-dv-required
+  box-shadow: 0 0 8px 0 rgba(0,0,0,.2)
 </style>

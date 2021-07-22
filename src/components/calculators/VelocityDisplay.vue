@@ -1,5 +1,7 @@
 <template>
-  <div class="velocity u-border u-value-display mx-0">
+  <div class="velocity u-border u-value-display mx-0"
+       :class="labelAsClass"
+  >
     <div class="velocity__label">{{ label }}</div>
     <v-row>
       <v-col v-if="kmsFormatted">
@@ -56,6 +58,9 @@ export default {
     },
     kmsFormatted: function () {
       return this.blankIfZero(this.kms)
+    },
+    labelAsClass: function () {
+      return 'velocity-display--' + this.label.replaceAll(' ', '-')
     }
   },
   watch: {

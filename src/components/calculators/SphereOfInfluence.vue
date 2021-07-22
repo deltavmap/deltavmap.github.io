@@ -12,7 +12,7 @@
 </template>
 <script>
 // https://en.wikipedia.org/wiki/Sphere_of_influence_%28astrodynamics%29
-import OM from '../../orital-mechanics'
+import OM from '../../utils/orbital-mechanics'
 import Decimal from 'decimal.js'
 Decimal.set({ precision: 10 })
 const d = Decimal
