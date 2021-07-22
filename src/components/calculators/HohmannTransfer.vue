@@ -28,7 +28,7 @@
           <div class="mb-4 pa-4" style>
             <v-row>
               <v-col>
-                <p>The following tool calculates the delta-v requirements for a Hohmann transfer orbit.</p>
+                <p>This tool calculates the delta-v requirements for a Hohmann transfer orbit.</p>
               </v-col>
             </v-row>
             <v-row>
