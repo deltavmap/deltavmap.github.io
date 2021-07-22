@@ -34,9 +34,8 @@
 <script>
 import Decimal from 'decimal.js'
 import OM from '../orital-mechanics'
-
 import HohmannTransfer from '../components/calculators/HohmannTransfer'
-// import SphereOfInfluence from '../components/calculators/SphereOfInfluence'
+
 Decimal.set({ precision: 10 })
 const d = Decimal
 export default {

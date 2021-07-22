@@ -74,6 +74,9 @@ class u {
     if (u.defined(objA) && u.defined(objB)) {
       Object.keys(objB).map(k => {
         if (typeof objB[k] === 'object') {
+          if (u.undefined(objA[k])) {
+            objA[k] = {}
+          }
           u.deepMerge(objA[k], objB[k])
         } else {
           objA[k] = objB[k]

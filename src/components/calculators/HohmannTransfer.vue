@@ -106,51 +106,72 @@ export default {
           system.object.mass,
           parentMass
         )
-        this.addChild(system, 'soi', { semiMajorAxis })
+        // only create an SOI orbit if the SOI is greater than the
+        // mean radius of the body
+        if (d(semiMajorAxis).gt(system.object.meanRadius)) {
+          this.addChild(system, 'soi', { semiMajorAxis })
+        }
       }
     },
     createSyncOrbit: function (system) {
       const object = system.object
-      if (u.defined(object.siderealRotationPeriod) && u.defined(object.mass)) {
+      if (u.defined(object.siderealRotationPeriod) &&
+        object.siderealRotationPeriod &&
+        u.defined(object.mass) &&
+        object.mass
+      ) {
         const combinedMass = d(object.mass)
         const semiMajorAxis = OM.semiMajorAxis(object.siderealRotationPeriod, combinedMass)
-        this.addChild(system, 'sync', { semiMajorAxis })
+        if (d(semiMajorAxis).lt(system.children.soi.semiMajorAxis)) {
+          this.addChild(system, 'sync', { semiMajorAxis })
+        }
       }
     },
-    createOrbit: function (system, altitude, exponent = 0) {
-      const object = system.object
-      altitude = '' + altitude
-      let label
-      if (exponent === 0) {
-        exponent = ''
-        label = 'M'
+    createOrbit: function (system, altitude) {
+      altitude = d(altitude)
+      let name
+      if (altitude.lt(1000)) {
+        name = altitude + 'M'
+      } else {
+        const value = parseInt(altitude.div(1000).valueOf())
+        name = value.toLocaleString('en-US') + 'K'
       }
-      if (exponent === 3) {
-        exponent = 'e3'
-        label = 'K'
-      }
-      if (u.defined(object.meanRadius)) {
-        const semiMajorAxis = d(object.meanRadius).plus(altitude + exponent)
-        this.addChild(system, altitude + label, { semiMajorAxis })
+
+      if (u.defined(system.object.meanRadius)) {
+        const semiMajorAxis = d(system.object.meanRadius).plus(altitude)
+        this.addChild(system, name, { semiMajorAxis })
       } else {
         console.error('object has no meanRadius')
       }
     },
     createVariousOrbits: function (system) {
-      if (u.allDefined(system, 'children', 'soi')) {
-        this.createOrbit(system, 100)
-        this.createOrbit(system, 500)
-        this.createOrbit(system, 1, 3)
-        this.createOrbit(system, 2, 3)
-        this.createOrbit(system, 5, 3)
-        this.createOrbit(system, 10, 3)
-        this.createOrbit(system, 100, 3)
-        this.createOrbit(system, 200, 3)
-        this.createOrbit(system, 500, 3)
-        this.createOrbit(system, 1000, 3)
-        this.createOrbit(system, 2000, 3)
-        this.createOrbit(system, 5000, 3)
-      }
+      const altitudes = [
+        100, 200, 500, // 100M
+        1000, 2000, 5000, // 1K
+        10000, 20000, 50000, // 10K
+        100000, 200000, 500000, // 100K
+        1000000, 2000000, 5000000, // 1000K
+        10000000, 20000000, 50000000, // 10,000K
+        100000000, 200000000, 500000000, // 100,000K
+        1000000000, 2000000000, 5000000000, // 1,000,000K
+        10000000000, 20000000000, 50000000000, // 10,000,000K
+        100000000000, 200000000000, 500000000000 // 100,000,000K
+      ]
+      const soi = d(system.children.soi.semiMajorAxis)
+      altitudes.forEach(altitude => {
+        const orbitRadius = d(system.object.meanRadius).plus(altitude)
+        const orbitWithinSOI = orbitRadius.lte(soi)
+
+        if (orbitWithinSOI) {
+          if (u.allDefined(system, 'object', 'atmosphere', 'karman')) {
+            if (d(system.object.meanRadius).plus(system.object.atmosphere.karman).lte(orbitRadius)) {
+              this.createOrbit(system, altitude)
+            }
+          } else {
+            this.createOrbit(system, altitude)
+          }
+        }
+      })
     },
     processSystem: function (allSystemsObject, newSystem, newSystemName) {
       if (u.defined(allSystemsObject[newSystemName])) {
@@ -169,10 +190,12 @@ export default {
 
           if (u.defined(child.object)) {
             // find subsystems
-            this.processSystem(allSystemsObject, child, name)
-            this.createSyncOrbit(child)
             this.createSOIOrbit(child, newSystem.object.mass)
-            this.createVariousOrbits(child)
+            if (u.allDefined(child, 'children', 'soi')) {
+              this.createSyncOrbit(child)
+              this.createVariousOrbits(child)
+              this.processSystem(allSystemsObject, child, name)
+            }
           }
         })
       }
@@ -185,9 +208,8 @@ export default {
     handleOrbitNameChange: function (orbit, name, updateURL = false) {
       if (name) {
         this.orbit[orbit].name = name
-        const orbitDetails = this.currentSystem.children[name]
-        if (u.defined(orbitDetails)) {
-          const radius = orbitDetails.semiMajorAxis
+        if (u.allDefined(this.currentSystem, 'children', name, 'semiMajorAxis')) {
+          const radius = this.currentSystem.children[name].semiMajorAxis
           this.handleOrbitSemiMajorAxisChange(orbit, radius)
         } else {
           console.error('no orbit details for', name)
@@ -264,18 +286,71 @@ export default {
         siderealRotationPeriod: '2192832'
       },
       children: {
-        venus: { object: { atmosphere: true } },
-        earth: { object: { atmosphere: true } },
-        mars: { object: { atmosphere: true } },
-        jupiter: { object: { atmosphere: true } },
-        saturn: {
-          object: { atmosphere: true },
-          children: {
-            titan: { object: { atmosphere: true } }
+        venus: {
+          object: {
+            atmosphere: {
+              karman: '280e3'
+            },
+            type: 'body-planet-rocky'
           }
         },
-        uranus: { object: { atmosphere: true } },
-        neptune: { object: { atmosphere: true } }
+        earth: {
+          object: {
+            atmosphere: {
+              karman: '100e3'
+            },
+            type: 'body-planet-rocky'
+          }
+        },
+        mars: {
+          object: {
+            atmosphere: {
+              karman: '80e3'
+            },
+            type: 'body-planet-rocky'
+          }
+        },
+        jupiter: {
+          object: {
+            atmosphere: {
+              karman: '500e3'
+            },
+            type: 'body-planet-gas'
+          }
+        },
+        saturn: {
+          object: {
+            atmosphere: {
+              karman: '500e3'
+            },
+            type: 'body-planet-gas'
+          },
+          children: {
+            titan: {
+              object: {
+                atmosphere: {
+                  karman: '50e3'
+                }
+              }
+            }
+          }
+        },
+        uranus: {
+          object: {
+            atmosphere: {
+              karman: '500e3'
+            },
+            type: 'body-planet-gas'
+          }
+        },
+        neptune: {
+          object: {
+            atmosphere: {
+              karman: '500e3'
+            },
+            type: 'body-planet-gas'
+          }
+        }
       }
     }
     const self = this

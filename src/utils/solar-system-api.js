@@ -37,7 +37,7 @@ export default {
           if (body.isPlanet === true) {
             // strip numbers from planet name
             id = id.replace(/[^a-zA-Z]/gi, '')
-            object.type = 'body-planet'
+            object.type = 'body-planet-rocky'
             planets.push(bodyOrbit)
             planetsObject[id] = bodyOrbit
             planetsFrench[body.id] = bodyOrbit
@@ -87,8 +87,8 @@ export default {
       u.setIfUndefined(system, 'children', {})
 
       // merge the pre-existing planet data into the API planet data
-      allBodies.forEach(c => {
-        system.children[c.name] = u.deepMerge(c, system.children[c.name])
+      allBodies.forEach(body => {
+        system.children[body.name] = u.deepMerge(body, system.children[body.name])
       })
       callback()
     })
