@@ -35,50 +35,49 @@ echo "==================="
 echo "==== DEPLOYING ===="
 echo
 echo "deploying to >>> $remote_branch <<<"
-echo ""
 
-echo "GIT STASH"
+printf "\nGIT STASH\n"
 gitstash "$date_stamp"
 
-echo "GIT CHECKOUT MAIN"
+printf "\nGIT CHECKOUT MAIN\n"
 git checkout main
 
-echo "GIT DELETE BRANCH $temp_local_branch"
+printf "\nGIT DELETE BRANCH $temp_local_branch\n"
 git branch -D $temp_local_branch
 
-echo "GIT CHECKOUT $temp_local_branch"
+printf "\nGIT CHECKOUT $temp_local_branch\n"
 git checkout -b $temp_local_branch
 
-echo "BUILD DIST"
+printf "\nBUILD DIST\n"
 npm run build
 
-echo "CD DIST"
+printf "\nCD DIST\n"
 cd dist
 
-echo "GIT INIT";
+printf "\nGIT INIT\n";
 git init
 
-echo "GIT ADD REMOTE"
+printf "\nGIT ADD REMOTE\n"
 git remote add origin git@github.com:deltavmap/deltavmap.github.io.git
 
-echo "GIT ADD ."
+printf "\nGIT ADD .\n"
 git add .
 
-echo "GIT COMMIT"
+printf \n"\nGIT COMMIT\n"
 git commit -am "deploy"
 
-echo "GIT PUSH"
+printf "\nGIT PUSH\n"
 git push --force origin "master:$remote_branch"
 
-echo "RM -RF"
+printf "\nRM -RF\n"
 rm -rf .git
 cd ..
 
-echo "RETURN TO MAIN BRANCH"
+printf "\nRETURN TO MAIN BRANCH\n"
 git checkout "$current_branch"
 
-echo "GIT RESET HEAD"
+printf "\nGIT RESET HEAD\n"
 git reset HEAD --hard
 
-echo "GIT STASH APPLY"
+printf "\nGIT STASH APPLY\n"
 gitstashapply "$date_stamp"
