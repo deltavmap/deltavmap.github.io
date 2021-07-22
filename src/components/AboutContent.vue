@@ -48,6 +48,10 @@
       </ul>
     </div>
     <div>
+      <h3>Progress</h3>
+      <p>Currently working on a <a href="/calculators.html">tool</a> to compute the DV values myself.</p>
+    </div>
+    <div>
       <h3>Credits</h3>
       <p>The values used for this map are based on the values from this map:
         <a href="https://imgur.com/a/6bb3a">KSP Delta-v map for Real Solar System</a>.
@@ -127,6 +131,8 @@ export default {
     color: $color-light
   h3, h4
     border-top-color: lighten($color-black, 10%)
+  h2,h3,h4,h5,h6
+    margin-top: .5em
   .u-highlight
     background-color: darken($color-black, 1%)
   .u-button
