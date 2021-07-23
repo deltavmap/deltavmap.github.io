@@ -1,16 +1,7 @@
 <template>
-  <div class="u-border px-4 py-2 mt-4" v-if="showHohmannTransferOrbitDetails">
+  <div class="u-border px-4 pt-2 pb-4 mt-6" v-if="showHohmannTransferOrbitDetails">
     <h3>Hohmann Transfer Orbit</h3>
     <!-- <div class="mb-4">Semi Major Axis of transfer ellipse = R1 + R2 / 2</div> -->
-    <v-row>
-      <v-col>
-        <distance-display readonly
-                          :distance-meters="semiMajAxis"
-                          label="Semi-major axis (km)">
-        </distance-display>
-      </v-col>
-      <v-col></v-col>
-    </v-row>
     <v-row>
       <v-col>
         <time-display label='period'
@@ -27,30 +18,45 @@
       <v-col>
         <div class="u-border">
           <h4>Perigee</h4>
-          <velocity-display label="velocity at perigee"
-                            :velocity-meters-second="velocityAtPerigee">
-          </velocity-display>
-          <velocity-display label="dv required at perigee"
-                            class="mt-4"
-                            :velocity-meters-second="dv.perigee">
-          </velocity-display>
+          <v-row>
+            <v-col class="pr-2">
+              <velocity-display label="velocity at perigee"
+                                :velocity-meters-second="velocityAtPerigee">
+              </velocity-display>
+            </v-col>
+            <v-col class="pl-2">
+              <velocity-display label="dv required at perigee"
+                                :velocity-meters-second="dv.perigee">
+              </velocity-display>
+            </v-col>
+          </v-row>
         </div>
       </v-col>
       <v-col>
         <div class="u-border">
           <h4>Apogee</h4>
-          <velocity-display label="velocity at apogee"
-                            :velocity-meters-second="velocityAtApogee">
-          </velocity-display>
-          <velocity-display label="dv required at apogee"
-                            class="mt-4"
-                            :velocity-meters-second="dv.apogee">
-          </velocity-display>
+          <v-row>
+            <v-col class="pr-2">
+              <velocity-display label="velocity at apogee"
+                                :velocity-meters-second="velocityAtApogee">
+              </velocity-display>
+            </v-col>
+            <v-col class="pl-2">
+              <velocity-display label="dv required at apogee"
+                                :velocity-meters-second="dv.apogee">
+              </velocity-display>
+            </v-col>
+          </v-row>
         </div>
       </v-col>
     </v-row>
     <v-row>
-      <v-col></v-col>
+      <v-col>
+        <distance-display readonly
+                          :distance-meters="semiMajAxis"
+                          label="Semi-major axis">
+        </distance-display>
+      </v-col>
       <v-col>
         <velocity-display label="total dv required"
                           class="ml-auto"

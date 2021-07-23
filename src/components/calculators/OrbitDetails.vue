@@ -8,18 +8,25 @@
               :disabled="!currentSystemName"
     ></v-autocomplete>
 <!--    -->
-    <distance-display label="semi major axis (km)"
-                      class="my-4"
-                      v-if="showSMA"
-                      :distance-meters="orbitSemiMajorAxis"></distance-display>
+    <v-row>
+      <v-col class="pr-2">
+        <distance-display label="semi-major axis"
+                          class="mt-4"
+                          v-if="showSMA"
+                          :distance-meters="orbitSemiMajorAxis"></distance-display>
+      </v-col>
+      <v-col class="pl-2">
+        <velocity-display label="mean velocity"
+                          class="mt-4"
+                          v-if="showVelocity"
+                          :velocity-meters-second="orbitVelocity"></velocity-display>
+      </v-col>
+    </v-row>
     <time-display label="period"
-                  class="my-4"
+                  class="mt-4 mb-0"
                   v-if="showPeriod"
                   :seconds="orbitPeriod"></time-display>
-    <velocity-display label="mean velocity"
-                      class="my-4"
-                      v-if="showVelocity"
-                      :velocity-meters-second="orbitVelocity"></velocity-display>
+
   </v-container>
 </template>
 <script>
@@ -107,8 +114,6 @@ export default {
 }
 </script>
 <style lang="sass" scoped>
-.container
-  padding: .5rem 1rem
 h3
   margin: 0 0 1em
   text-transform: uppercase
