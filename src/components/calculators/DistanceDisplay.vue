@@ -2,45 +2,18 @@
   <div class="distance u-border u-value-display">
     <div class="distance__label"
     >{{ label }}</div>
-<!--    <vue-mathjax :formula="formula"></vue-mathjax>-->
-    <v-row>
-      <v-col v-if="distanceMillionKilometersFormatted">
-        <v-text-field readonly hide-details
-                      v-model="distanceMillionKilometersFormatted"
-                      label="million">
-        </v-text-field>
-      </v-col>
-      <v-col v-if="distanceThousandKilometersFormatted || distanceMillionKilometersFormatted">
-        <v-text-field readonly hide-details
-                      v-model="distanceThousandKilometersFormatted"
-                      label="thousand"
-        ></v-text-field>
-      </v-col>
-      <v-col v-if="distanceKilometersFormatted || distanceMetersFormatted">
-        <v-text-field readonly hide-details
-                      v-model="distanceKilometersFormatted"
-                      label="km">
-        </v-text-field>
-      </v-col>
-      <v-col v-if="distanceMetersFormatted">
-        <v-text-field readonly hide-details
-                      v-model="distanceMetersFormatted"
-                      label="meters">
-        </v-text-field>
-      </v-col>
-    </v-row>
+    <v-text-field readonly hide-details
+                  v-model="distanceValue"
+                  :label="distanceLabel">
+    </v-text-field>
   </div>
 </template>
 <script>
 import Decimal from 'decimal.js'
-// import { VueMathjax } from 'vue-mathjax'
 
 Decimal.set({ precision: 10 })
 const d = Decimal
 export default {
-  components: {
-    // 'vue-mathjax': VueMathjax
-  },
   props: {
     distanceMeters: {
       default: 0
@@ -51,52 +24,35 @@ export default {
   },
   data () {
     return {
-      // formula: '$$x = { r1 + r2 \\over 2}$$',
-      m: '',
-      km: '',
-      tkm: '',
-      mkm: ''
+      distanceLabel: '',
+      distanceValue: ''
     }
   },
   methods: {
-    blankIfZero: function (value) {
-      if (value && !d(value).eq(0)) {
-        return value
-      } else return ''
-    },
     handleDistanceMetersChange: function () {
-      const kilometers = 1000
-      const thousandKilometers = kilometers * 1000
-      const millionKilometers = thousandKilometers * 1000
-
-      const meters = d(this.distanceMeters)
-      const mkm = meters.div(millionKilometers).floor().valueOf()
-      let remainingMeters = meters.mod(millionKilometers)
-      const tkm = remainingMeters.div(thousandKilometers).floor().valueOf()
-      remainingMeters = meters.mod(thousandKilometers)
-      const km = remainingMeters.div(kilometers).floor().valueOf()
-      remainingMeters = meters.mod(kilometers)
-
-      this.$set(this, 'mkm', mkm)
-      this.$set(this, 'tkm', tkm)
-      this.$set(this, 'km', km)
-      this.$set(this, 'm', remainingMeters)
-    }
-  },
-  computed: {
-    distanceMetersFormatted: function () {
-      if (this.blankIfZero(this.m)) {
-        return this.m.toFixed(2)
-      } else return ''
-    },
-    distanceKilometersFormatted: function () {
-      return this.blankIfZero(this.km)
-    },
-    distanceThousandKilometersFormatted: function () {
-      return this.blankIfZero(this.tkm)
-    },
-    distanceMillionKilometersFormatted: function () {
-      return this.blankIfZero(this.mkm)
+      const dist = d(this.distanceMeters)
+      let distanceLabel = ''
+      let distanceValue = ''
+      if (dist.lt(1000)) {
+        distanceLabel = 'm'
+        distanceValue = dist
+      } else {
+        if (dist.lt(1000000)) {
+          distanceLabel = 'km'
+          distanceValue = dist.div(1000)
+        } else {
+          if (dist.lt(1000000000)) {
+            distanceLabel = 'thousand km'
+            distanceValue = dist.div(1000000)
+          } else {
+            distanceLabel = 'million km'
+            distanceValue = dist.div(1000000000)
+          }
+        }
+      }
+      distanceValue = distanceValue.toFixed(3)
+      this.distanceLabel = distanceLabel
+      this.distanceValue = distanceValue
     }
   },
   watch: {
@@ -112,6 +68,7 @@ export default {
 </script>
 <style lang="sass">
 .distance
+  max-width: 200px
   &__label
     font-size: x-small
     opacity: .7
