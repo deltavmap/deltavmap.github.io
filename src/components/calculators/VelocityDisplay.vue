@@ -1,22 +1,10 @@
 <template>
-  <div class="velocity u-border u-value-display mx-0"
-       :class="labelAsClass"
-  >
+  <div class="velocity u-border u-value-display mx-0">
     <div class="velocity__label">{{ label }}</div>
-    <v-row>
-      <v-col v-if="kmsFormatted">
-        <v-text-field readonly hide-details
-                      reverse v-model="kmsFormatted"
-                      label="km/s">
-        </v-text-field>
-      </v-col>
-      <v-col v-if="msFormatted">
-        <v-text-field readonly hide-details
-                      v-model="msFormatted"
-                      label="m/s">
-        </v-text-field>
-      </v-col>
-    </v-row>
+      <v-text-field readonly hide-details
+                    reverse v-model="velocityValue"
+                    :label="velocityLabel">
+      </v-text-field>
   </div>
 </template>
 <script>
@@ -29,38 +17,26 @@ export default {
     label: { default: '' }
   },
   data () {
-    return { kms: '', ms: '' }
-  },
-  methods: {
-    blankIfZero: function (value) {
-      if (value && !d(value).eq(0)) {
-        return value
-      } else return ''
-    },
-    handleVelocityMetersSecondChange: function () {
-      this.$set(this, 'kms', d(this.velocityMetersSecond).div(1000).floor())
-      let ms = d(this.velocityMetersSecond).mod(1000)
-      if (this.kms.lt(0)) {
-        ms = ms.abs()
-      }
-      this.$set(this, 'ms', ms)
+    return {
+      velocityLabel: '',
+      velocityValue: ''
     }
   },
-  computed: {
-    msFormatted: function () {
-      if (this.blankIfZero(this.ms)) {
-        let value = this.ms.toFixed(2).valueOf()
-        if (this.blankIfZero(this.km)) {
-          value = value.padStart(6, '0')
-        }
-        return value
-      } else return ''
-    },
-    kmsFormatted: function () {
-      return this.blankIfZero(this.kms)
-    },
-    labelAsClass: function () {
-      return 'velocity-display--' + this.label.replaceAll(' ', '-')
+  methods: {
+    handleVelocityMetersSecondChange: function () {
+      const velocity = d(this.velocityMetersSecond)
+      let velocityLabel = ''
+      let velocityValue = ''
+      if (velocity.lt(1000)) {
+        velocityValue = velocity
+        velocityLabel = 'm/s'
+      } else {
+        velocityLabel = 'km/s'
+        velocityValue = velocity.div(1000)
+      }
+      velocityValue = velocityValue.toFixed(3)
+      this.velocityLabel = velocityLabel
+      this.velocityValue = velocityValue
     }
   },
   watch: {
