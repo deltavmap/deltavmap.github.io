@@ -16,10 +16,20 @@ export default {
       const bodies = res.data.bodies
       bodies.forEach(body => {
         const bodyOrbit = {}
-        let id = (body.englishName) ? body.englishName : body.name
-        const label = id
-        id = id.replace(/\s/gi, '').toLowerCase()
 
+        // u.l(body.englishName)
+        if (u.undefined(body.englishName)) {
+          u.l('no englishName', body.name)
+          return
+        }
+
+        let id = (body.englishName) ? body.englishName : body.name
+        if (body.aroundPlanet === null) {
+          // replace leading numbers for planets and minor planets
+          id = id.replace(/^[0-9]+ /, '')
+        }
+        const label = '' + id
+        id = id.replace(/\s/gi, '').toLowerCase()
         bodyOrbit.id = id
         bodyOrbit.label = label
         bodyOrbit.name = id
@@ -91,7 +101,7 @@ export default {
         const planetId = moon.parentFrenchId
         if (u.allDefinedAndNotNull(planetsFrench, planetId, 'name')) {
           // add parent planet name to the moon's name
-          moon.name = '' + planetsFrench[planetId].name + ' / ' + moon.name
+          moon.label = '' + planetsFrench[planetId].name + ' / ' + moon.name
 
           // add moons to planets
           const planet = planetsFrench[planetId]

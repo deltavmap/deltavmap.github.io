@@ -366,6 +366,7 @@ export default {
 
     const system = {
       name: 'sun',
+      label: 'Sun',
       object: {
         mass: '1.988e30',
         type: 'body-star',
@@ -502,6 +503,4 @@ export default {
     right: 0
     top: 0
 
-.velocity-display--total-dv-required
-  box-shadow: 0 0 8px 0 rgba(0,0,0,.2)
 </style>

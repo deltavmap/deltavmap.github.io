@@ -35,7 +35,7 @@ export default {
       if (this.systems) {
         return Object.keys(this.systems).map(id => {
           return {
-            text: this.systems[id].name,
+            text: this.systems[id].label,
             value: id
           }
         })
