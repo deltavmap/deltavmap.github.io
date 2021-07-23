@@ -1,5 +1,8 @@
+import Decimal from 'decimal.js'
 import axios from 'axios'
 import u from './utils'
+Decimal.set({ precision: 10 })
+const d = Decimal
 
 export default {
   getPlanetData: function (system, callback) {
@@ -13,9 +16,20 @@ export default {
       const bodies = res.data.bodies
       bodies.forEach(body => {
         const bodyOrbit = {}
-
         let id = (body.englishName) ? body.englishName : body.name
+        const label = id
         id = id.replace(/\s/gi, '').toLowerCase()
+
+        bodyOrbit.id = id
+        bodyOrbit.label = label
+        bodyOrbit.name = id
+        bodyOrbit.frenchId = body.id
+
+        if (u.defined(body.semimajorAxis) && body.semimajorAxis > 0) {
+          bodyOrbit.semiMajorAxis = body.semimajorAxis * 1000
+        } else {
+          return
+        }
 
         const object = {}
         if (u.allDefinedAndNotNull(body, 'mass', 'massValue') && u.allDefinedAndNotNull(body, 'mass', 'massExponent')) {
@@ -55,11 +69,9 @@ export default {
             }
           }
         }
-        bodyOrbit.id = id
-        bodyOrbit.name = id
-        bodyOrbit.frenchId = body.id
+
         bodyOrbit.object = object
-        bodyOrbit.semiMajorAxis = body.semimajorAxis * 1000
+
         if (body.eccentricity) {
           bodyOrbit.eccentricity = body.eccentricity
         } else {
@@ -74,8 +86,6 @@ export default {
           })
         }
       })
-      // sort the planets in order of size of orbit (distance from sun)
-      planets.sort((a, b) => a.semiMajorAxis - b.semiMajorAxis)
 
       moons.forEach(moon => {
         const planetId = moon.parentFrenchId
@@ -89,6 +99,10 @@ export default {
           planet.children[moon.id] = moon
         }
       })
+
+      // sort the planets in order of size of orbit (distance from sun)
+      planets.sort((a, b) => { return parseInt(d(a.semiMajorAxis).minus(b.semiMajorAxis).valueOf()) })
+
       const allBodies = [...planets, ...asteroids]
       u.setIfUndefined(system, 'children', {})
 

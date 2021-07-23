@@ -158,10 +158,7 @@ export default {
         velocity: d(0)
       }
     },
-    addChild: function (system, name, child, label = '') {
-      if (label) {
-        this.$set(child, 'label', label)
-      }
+    addChild: function (system, name, child) {
       u.setIfUndefined(system, 'children', {})
       this.$set(system.children, name, child)
     },
@@ -175,7 +172,11 @@ export default {
         // only create an SOI orbit if the SOI is greater than the
         // mean radius of the body
         if (d(semiMajorAxis).gt(system.object.meanRadius)) {
-          this.addChild(system, 'soi', { semiMajorAxis })
+          this.addChild(system, 'soi', {
+            name: 'soi',
+            label: 'sphere of influence',
+            semiMajorAxis
+          })
         }
       }
     },
@@ -189,7 +190,11 @@ export default {
         const combinedMass = d(object.mass)
         const semiMajorAxis = OM.semiMajorAxis(object.siderealRotationPeriod, combinedMass)
         if (d(semiMajorAxis).lt(system.children.soi.semiMajorAxis)) {
-          this.addChild(system, 'sync', { semiMajorAxis }, 'synchronous orbit')
+          this.addChild(system, 'sync', {
+            name: 'sync',
+            label: 'synchronous orbit',
+            semiMajorAxis
+          })
         }
       }
     },
@@ -205,7 +210,10 @@ export default {
 
       if (u.defined(system.object.meanRadius)) {
         const semiMajorAxis = d(system.object.meanRadius).plus(altitude)
-        this.addChild(system, name, { semiMajorAxis })
+        this.addChild(system, name, {
+          name,
+          semiMajorAxis
+        })
       } else {
         console.error('object has no meanRadius')
       }
@@ -243,7 +251,10 @@ export default {
       if (u.defined(allSystemsObject[newSystemName])) {
         return console.error(this.temp++, 'duplicate body name in system', newSystemName)
       }
-
+      if (newSystem.name !== 'sun' && (u.undefined(newSystem.semiMajorAxis) || !newSystem.semiMajorAxis)) {
+        console.error('semi-major axis not defined for', newSystem.name)
+        return
+      }
       this.$set(allSystemsObject, newSystemName, newSystem)
 
       // create an alias for the primary system object

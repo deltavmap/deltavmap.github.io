@@ -83,12 +83,20 @@ export default {
     orbitNames: function () {
       if (this.system) {
         if (u.defined(this.system.children)) {
-          return Object.keys(this.system.children).map(k => {
-            const c = this.system.children[k]
-            const text = (u.defined(c.label)) ? c.label : k
+          const children = Object.values(this.system.children)
+          children.sort((a, b) => {
+            return parseInt(d(a.semiMajorAxis).minus(b.semiMajorAxis).valueOf())
+          })
+          return children.map(c => {
+            let text
+            if (u.defined(c.label)) {
+              text = c.label
+            } else {
+              text = c.name
+            }
             return {
               text,
-              value: k
+              value: c.name
             }
           })
         }
