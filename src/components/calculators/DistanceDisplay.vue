@@ -68,7 +68,6 @@ export default {
 </script>
 <style lang="sass">
 .distance
-  max-width: 200px
   &__label
     font-size: x-small
     opacity: .7

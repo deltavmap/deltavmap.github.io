@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container style="max-width: 960px">
     <h1><a href="/calculators">Calculators</a></h1>
     <hohmann-transfer></hohmann-transfer>
 <!--    <div class="calculators">-->
