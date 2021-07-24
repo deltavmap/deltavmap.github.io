@@ -57,13 +57,8 @@ export default {
   .v-messages
     min-height: 0
 
-  &__menu
-    .theme--dark
-      &.v-select-list.v-list
-        background-color: darken($color-panel-background, 10%)
-
   .v-select__slot
-    background-color: $color-dark
+    background-color: darken($color-map-background-darker, 7%)
 
 .panel-select .v-text-field > .v-input__control > .v-input__slot:before
   display: none

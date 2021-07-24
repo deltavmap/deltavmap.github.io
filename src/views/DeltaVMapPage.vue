@@ -833,7 +833,7 @@ export default {
   }
 }
 </script>
-<style lang="sass" scoped>
+<style lang="sass">
 @import '../sass/variables'
 @import '../sass/utils/shadow-box'
 @import '../sass/utils/page'
@@ -893,20 +893,4 @@ export default {
   .v-toolbar__content
     padding: 0
 
-.theme--dark.v-app-bar.v-toolbar.v-sheet
-  background-color: $color-panel-background
-  .v-toolbar__content
-    background-color: $color-panel-background
-.v-navigation-drawer.theme--dark
-  // $background-color: darken($color-purpley, 12%)
-  $background-color: $color-map-background-darker
-  .v-navigation-drawer__content
-    background-color: $background-color
-  .v-sheet
-    background-color: $background-color
-    color: $color-white
-  .v-btn
-    color: $color-white
-.theme--dark.v-navigation-drawer:not(.v-navigation-drawer--floating) .v-navigation-drawer__border
-  background-color: rgba(0,0,0,.1) !important
 </style>

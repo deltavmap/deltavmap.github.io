@@ -18,3 +18,28 @@ h2,h3,h4,h5,h6
   font-size: smaller
   text-transform: uppercase
   letter-spacing: 1px
+
+.theme--dark.v-app-bar.v-toolbar.v-sheet
+  background-color: $color-panel-background
+  .v-toolbar__content
+    background-color: $color-panel-background
+.theme--dark
+  &.v-select-list.v-list
+    background-color: darken($color-map-background-darker, 7%)
+    // background-color: hotpink
+.theme--dark.v-sheet,
+.v-navigation-drawer.theme--dark
+  $background-color: $color-map-background-darker
+  .v-navigation-drawer__content
+    background-color: $background-color
+  .v-sheet
+    background-color: $background-color
+    color: $color-white
+  .v-btn
+    color: $color-white
+.theme--dark.v-navigation-drawer:not(.v-navigation-drawer--floating) .v-navigation-drawer__border
+  background-color: rgba(0,0,0,.1) !important
+
+.theme--dark.v-list-item--active:hover::before,
+.theme--dark.v-list-item--active::before
+  opacity: 0.02

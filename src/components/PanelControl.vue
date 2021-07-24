@@ -108,7 +108,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
         display: inline-block
 
     .control--active &
-      background-color: $color-dark
+      background-color: darken($color-map-background-darker, 7%)
       color: $color-light
       overflow: hidden
       position: relative

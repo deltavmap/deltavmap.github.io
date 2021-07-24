@@ -217,7 +217,7 @@ $color-controls-light: lighten($color-purpley-red, 60%)
     align-items: center
     display: flex
     flex-direction: row
-    margin-top: .5rem
+    margin-top: 1rem
     padding: 0
 
     @media #{map-get($display-breakpoints, 'sm-and-down')}
@@ -264,5 +264,8 @@ $color-controls-light: lighten($color-purpley-red, 60%)
   .v-sheet
     &.theme--dark
       background-color: darken($color-map-background-darker, 10%)
+.theme--dark.v-list-item--active:hover::before,
+.theme--dark.v-list-item--active::before
+  opacity: 0.02
 
 </style>
