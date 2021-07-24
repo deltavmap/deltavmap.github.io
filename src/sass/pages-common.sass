@@ -3,13 +3,16 @@
   letter-spacing: .1em
 
 .u-bg-color-main
-  background-color: $color-map-background
+  background-color: $color-map-background-darker
 
 .u-bg-color-warn
   background-color: lighten($color-purpley-red, 0%)
 
 html, html > body, div.v-application.theme--dark
   @extend .u-bg-color-main
+
+.container
+  max-width: 960px !important
 
 h2,h3,h4,h5,h6
   color: lighten($color-purpley, 20%)
