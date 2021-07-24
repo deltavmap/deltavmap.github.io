@@ -134,7 +134,7 @@ export default {
   h2,h3,h4,h5,h6
     margin-top: .5em
   .u-highlight
-    background-color: darken($color-black, 1%)
+    background-color: darken($color-map-background-darker, 2%)
   .u-button
     background-color: #888
     color: darken($color-black, 50%)

@@ -11,46 +11,11 @@
               v-on:controls-clear-path="clearPath()"
               v-on:refresh-button-click="hardRefresh()"
     ></controls>
-    <banner class="fade-in"
-            :display-banner="displayBanner()"
-            v-on:close-banner="handleBannerClose()"
-    >
-      <div class="px-4 mb-4 py-4 rounded u-bg-color-main">
-        <div class="d-flex justify-start align-center">
-          <div class="mr-1 banner__icon banner__icon--warn"><div>⚠</div></div>
-          <span class="text-center">
-            This is app is still in active development.
-          </span>
-          <div class="ml-1 banner__icon banner__icon--warn"><div>⚠</div></div>
-        </div>
-      </div>
-      <div v-if="updateExists"
-           class="mb-4 pa-4 rounded u-bg-color-warn"
-           style="letter-spacing: .05em"
-      >
-        <div class="d-flex justify-center align-center">
-
-          <div class="text-left d-flex flex-column justify-center text-center">
-            <p>UPDATE AVAILABLE, PLEASE:</p>
-            <button type="button"
-                    @click="hardRefresh()"
-                    class="d-flex align-center justify-space-between px-3"
-            >
-              <span class="mr-4 banner__icon banner__icon--refresh"><div>↺</div></span>
-              HARD REFRESH
-              <span class="ml-4 banner__icon banner__icon--refresh"><div>↺</div></span>
-            </button>
-            <div class="mt-4" style="font-size: .8em">
-              <a href="https://www.documate.org/automation/what-is-a-hard-refresh-how-to-do-a-hard-refresh-in-any-browser/"
-              >learn more</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p>
-        Please view the ABOUT page for more information.
-      </p>
-    </banner>
+    <first-use-and-refresh-banner :display-banner="displayBanner"
+                                  :handle-banner-close="handleBannerClose"
+                                  :update-exists="updateExists"
+                                  :hard-refesh="hardRefresh"
+    ></first-use-and-refresh-banner>
     <delta-v-map :system="system"
                  :map="map"
                  :path="path"
@@ -88,12 +53,12 @@ import KerbolSystem from '../data/systems/kerbol-system'
 import Controls from '../components/Controls'
 import DeltaVMap from '../components/map/DeltaVMap'
 import SiteTitle from '../components/SiteTitle'
-import Banner from '../components/Banner'
+import FirstUseAndRefreshBanner from '../components/FirstUseAndRefreshBanner'
 import UserSettings from '../components/UserSettings'
 
 export default {
   components: {
-    Banner,
+    FirstUseAndRefreshBanner,
     Controls,
     DeltaVMap,
     SiteTitle,
@@ -128,6 +93,7 @@ export default {
       pageLoaded: false,
       navDrawerOpen: false,
       bannerTitle: 'banner-intro-hide',
+      displayBanner: false,
       mapSVG: null,
       panzoom: null,
       userSettings: {
@@ -174,7 +140,6 @@ export default {
         nodes: {}
       }
     }
-
     return dataObject
   },
   watch: {
@@ -200,6 +165,9 @@ export default {
     }
   },
   methods: {
+    shouldBannerDisplay: function () {
+      return (this.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
+    },
     handleSettingButtonClick: function () {
       this.navDrawerOpen = !this.navDrawerOpen
     },
@@ -243,9 +211,7 @@ export default {
       localStorage.setItem('system-name', systemBuilder.systemName.toLowerCase())
       return system
     },
-    displayBanner: function () {
-      return (this.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
-    },
+
     handleOriginClick: function () {
       if (this.path.origin) { // TODO necessary?
         this.clearSelectedOrigin()
@@ -770,7 +736,9 @@ export default {
       }, 1000)
     },
     handleBannerClose: function () {
+      debugger
       localStorage.setItem(this.bannerTitle, 'true')
+      this.displayBanner = false
       setTimeout(_ => {
         this.$forceUpdate()
       }, 250)
@@ -805,6 +773,7 @@ export default {
     }
   },
   mounted () {
+    this.displayBanner = this.shouldBannerDisplay()
     const self = this
     self.createData(this.system.name)
     self.mapSVG = document.getElementById('map')
