@@ -7,7 +7,7 @@
         </span>
       </a>
     </h1>
-    <v-app-bar-nav-icon @click.stop="$parent.handleSettingButtonClick"></v-app-bar-nav-icon>
+    <v-app-bar-nav-icon @click.stop="$parent.handleSettingsButtonClick"></v-app-bar-nav-icon>
   </div>
 </template>
 <script>

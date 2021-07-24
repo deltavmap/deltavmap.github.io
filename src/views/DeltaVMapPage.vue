@@ -25,21 +25,10 @@
                  :getLocationById="getLocationObject"
                  :user-settings="userSettings"
     ></delta-v-map>
-    <v-navigation-drawer v-model="navDrawerOpen"
-                         right temporary absolute
-                         :width="325"
-    >
-      <user-settings :user-settings="userSettings"></user-settings>
-      <v-btn style="position: absolute; top: 1rem; right: 1rem;"
-             class=""
-             small fab depressed plain
-             @click.stop="handleSettingButtonClick"
-      >
-        <v-icon>
-          mdi-close
-        </v-icon>
-      </v-btn>
-    </v-navigation-drawer>
+    <settings-drawer :user-settings="userSettings"
+                     :nav-drawer-open="navDrawerOpen"
+                     :handle-settings-button-click="handleSettingsButtonClick"
+    ></settings-drawer>
     <div id="bottom-scroll-marker"></div>
   </div>
 </template>
@@ -54,7 +43,8 @@ import Controls from '../components/Controls'
 import DeltaVMap from '../components/map/DeltaVMap'
 import SiteTitle from '../components/SiteTitle'
 import FirstUseAndRefreshBanner from '../components/FirstUseAndRefreshBanner'
-import UserSettings from '../components/UserSettings'
+// import UserSettings from '../components/UserSettings'
+import SettingsDrawer from '../components/SettingsDrawer'
 
 export default {
   components: {
@@ -62,7 +52,7 @@ export default {
     Controls,
     DeltaVMap,
     SiteTitle,
-    UserSettings
+    SettingsDrawer
   },
   data () {
     const systemBuilders = this.getSystemBuilders()
@@ -168,7 +158,7 @@ export default {
     shouldBannerDisplay: function () {
       return (this.updateExists || localStorage.getItem(this.bannerTitle) !== 'true')
     },
-    handleSettingButtonClick: function () {
+    handleSettingsButtonClick: function () {
       this.navDrawerOpen = !this.navDrawerOpen
     },
     getSystemBuilders: function () {
